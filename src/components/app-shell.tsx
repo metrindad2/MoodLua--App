@@ -11,7 +11,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Home, CalendarDays, BrainCircuit, Settings, HeartPulse } from 'lucide-react';
+import { Home, CalendarDays, BrainCircuit, Settings, Sparkles } from 'lucide-react';
 import SOSButton from './sos-button';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -31,7 +31,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="relative mx-auto flex h-screen max-w-md flex-col border-x bg-card">
       <header className="flex items-center justify-between border-b p-4">
         <Link href="/" className="flex items-center gap-2">
-          <HeartPulse className="text-primary" />
+          <Sparkles className="text-primary" />
           <h1 className="font-bold text-lg text-primary">CycleGuard</h1>
         </Link>
         <div className="flex items-center gap-1">

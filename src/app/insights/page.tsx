@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useCycleData } from '@/context/cycle-data-context';
 import { personalizedCycleInsights, PersonalizedCycleInsightsOutput } from '@/ai/flows/personalized-cycle-insights';
-import { BrainCircuit, Lightbulb, Zap, Leaf } from 'lucide-react';
+import { BrainCircuit, Star, Orbit, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { calculateCycleInfo, prepareDataForAI } from '@/lib/cycle-utils';
 import { Mood } from '@/lib/types';
@@ -120,7 +120,7 @@ export default function InsightsPage() {
         <div className="space-y-4 animate-in fade-in-50">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Lightbulb className="text-yellow-500"/> Insights Personalizados</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Star className="text-primary"/> Insights Personalizados</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="list-disc list-inside space-y-2">
@@ -151,7 +151,7 @@ export default function InsightsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Zap className="text-blue-500" /> Possíveis Correlações</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Orbit className="text-secondary" /> Possíveis Correlações</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="list-disc list-inside space-y-2">
@@ -162,7 +162,7 @@ export default function InsightsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Leaf className="text-green-500" /> Sugestões de Bem-Estar</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Sparkles className="text-accent" /> Sugestões de Bem-Estar</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="list-disc list-inside space-y-2">
