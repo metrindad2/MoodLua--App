@@ -52,7 +52,7 @@ const PersonalizedCycleInsightsInputSchema = z.object({
             'Lista de sintomas experientes neste dia (ex: "dor de cabeça", "cólicas").'
           ),
         mood: z
-          .enum(["feliz", "neutra", "triste", "irritada", "ansiosa", "energizada", "cansada", "outros"])
+          .enum(["feliz", "neutra", "triste", "irritada", "ansiosa", "energizada", "cansada"])
           .optional()
           .describe(
             'Humor neste dia (ex: "feliz", "neutra", "triste", "irritada").'
@@ -155,15 +155,15 @@ const personalizedCycleInsightsFlow = ai.defineFlow(
  *
  * Como este arquivo é chamado por outro:
  * No frontend (componente React, por exemplo), você importaria esta função:
- * `import { personalizedCycleInsights } from '@/ai/flows/personalized-cycle-insights';`
+ * \`import { personalizedCycleInsights } from '@/ai/flows/personalized-cycle-insights';\`
  * E então a chamaria:
- * `const insights = await personalizedCycleInsights({ /* seus dados aqui */ });`
+ * \`const insights = await personalizedCycleInsights({ ... });\`
  *
  * Onde modificar funções e textos:
- * - Para alterar a lógica de como os insights são gerados, modifique o texto do `prompt`
- *   na definição de `personalizedCycleInsightsPrompt` acima.
- * - Para alterar o formato dos dados de entrada ou saída, modifique `PersonalizedCycleInsightsInputSchema`
- *   e `PersonalizedCycleInsightsOutputSchema` respectivamente.
+ * - Para alterar a lógica de como os insights são gerados, modifique o texto do \`prompt\`
+ *   na definição de \`personalizedCycleInsightsPrompt\` acima.
+ * - Para alterar o formato dos dados de entrada ou saída, modifique \`PersonalizedCycleInsightsInputSchema\`
+ *   e \`PersonalizedCycleInsightsOutputSchema\` respectivamente.
  */
 export async function personalizedCycleInsights(
   input: PersonalizedCycleInsightsInput

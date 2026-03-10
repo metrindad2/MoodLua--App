@@ -50,7 +50,7 @@ export type SosSettings = {
 /**
  * Agrupa todos os dados do aplicativo em uma única estrutura.
  * Isso é útil para salvar e carregar todo o estado do app de uma só vez,
- * por exemplo, no `localStorage`.
+ * por exemplo, no \`localStorage\`.
  */
 export type CycleGuardData = {
   userProfile: UserProfile | null;
