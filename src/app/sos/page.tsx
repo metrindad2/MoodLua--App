@@ -1,141 +1,178 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Heart, Phone, Share2 } from 'lucide-react';
+import { Heart, Phone, Share2, ShieldAlert } from 'lucide-react';
 import { useCycleData } from '@/context/cycle-data-context';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+
+const COUNTDOWN_SECONDS = 5;
 
 export default function SOSPage() {
   const { sosSettings } = useCycleData();
   const { toast } = useToast();
-  const [confirming, setConfirming] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'activating' | 'error' | 'shared'>('idle');
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS);
 
-  // Timer para resetar o estado de confirmação
+  // Countdown timer effect to automatically cancel confirmation
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (confirming) {
-      timer = setTimeout(() => {
-        setConfirming(false);
-        setStatus('idle');
-      }, 5000);
-    }
-    return () => clearTimeout(timer);
-  }, [confirming]);
-
-  const handleSOS = async () => {
-    if (!confirming) {
-      setConfirming(true);
-      setStatus('activating');
-      toast({
-        title: 'Confirme a Emergência',
-        description: 'Pressione o coração novamente para confirmar o envio do alerta.',
-        variant: 'destructive',
-        duration: 5000,
-      });
+    if (!isConfirming) {
+      setCountdown(COUNTDOWN_SECONDS);
       return;
     }
 
-    setConfirming(false);
-    setStatus('activating');
-    toast({ title: 'SOS Ativado!', description: 'Acionando contatos de emergência.' });
+    if (countdown === 0) {
+      setIsConfirming(false);
+      toast({
+        title: 'SOS Cancelado',
+        description: 'A ação de emergência foi cancelada.',
+      })
+      return;
+    }
 
-    // 1. Obter localização
+    const timerId = setTimeout(() => {
+      setCountdown(c => c - 1);
+    }, 1000);
+
+    return () => clearTimeout(timerId);
+  }, [isConfirming, countdown, toast]);
+  
+  const triggerShare = useCallback(async () => {
+    setIsConfirming(false);
+    toast({ title: 'Acionando Contatos', description: 'Preparando mensagem para compartilhar...' });
+    
+    // Check for geolocation permission first
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
         const locationUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
         const message = `${sosSettings.emergencyMessage}\nMinha localização: ${locationUrl}`;
 
-        // 2. Tentar compartilhar via Web Share API
-        if (navigator.share && sosSettings.emergencyContacts.length > 0) {
+        // Try to share via Web Share API
+        if (navigator.share) {
           try {
             await navigator.share({
               title: 'Pedido de Ajuda Urgente!',
               text: message,
             });
-            setStatus('shared');
-            toast({ title: 'Alerta Enviado', description: 'Sua mensagem e localização foram compartilhadas.' });
+            toast({ title: 'Alerta Compartilhado', description: 'Sua mensagem e localização foram enviadas.' });
           } catch (error) {
-            console.error('Erro ao compartilhar:', error);
-            if ((error as DOMException).name !== 'AbortError') {
-              setStatus('error');
-              callPolice();
-            } else {
-              setStatus('idle');
-            }
+             if ((error as DOMException).name !== 'AbortError') {
+                toast({ title: 'Falha no Envio', description: 'Não foi possível compartilhar a mensagem.', variant: 'destructive'});
+             } else {
+                toast({ title: 'Envio Cancelado', description: 'Você cancelou o compartilhamento.' });
+             }
           }
         } else {
-          // 3. Fallback: ligar para a polícia
-          callPolice();
+            toast({ title: 'Função não suportada', description: 'Seu navegador não suporta o compartilhamento automático.', variant: 'destructive'});
         }
       },
-      (error) => {
-        console.error('Erro ao obter localização:', error);
+      () => {
+        // Geolocation failed
         toast({
           title: 'Erro de Localização',
-          description: 'Não foi possível obter sua localização. Ligando para a polícia...',
+          description: 'Não foi possível obter sua localização. Tente acionar os contatos manualmente.',
           variant: 'destructive',
         });
-        setStatus('error');
-        callPolice();
-      }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
-  };
-  
-  const callPolice = () => {
+  }, [sosSettings, toast]);
+
+
+  const callPolice = useCallback(() => {
+    setIsConfirming(false);
     toast({ title: 'Ligando para Emergência', description: `Iniciando chamada para ${sosSettings.policeNumber}`});
     window.location.href = `tel:${sosSettings.policeNumber}`;
+  }, [sosSettings, toast]);
+
+  const handleHeartClick = () => {
+    if (!isConfirming) {
+      setIsConfirming(true);
+    } else {
+      // This is the second tap, triggers the sharing action
+      triggerShare();
+    }
   };
 
+  // Confirmation Screen UI
+  if (isConfirming) {
+    const circumference = 2 * Math.PI * 88; // 2 * pi * r
+    const strokeDashoffset = circumference * (1 - (countdown / COUNTDOWN_SECONDS));
+
+    return (
+      <div className="p-4 flex flex-col items-center justify-center h-full text-center space-y-6 animate-in fade-in-25">
+        <div className="relative flex items-center justify-center">
+            <svg className="transform -rotate-90 w-48 h-48" viewBox="0 0 192 192">
+              <circle cx="96" cy="96" r="88" stroke="hsl(var(--muted))" strokeWidth="8" fill="transparent" />
+              <circle
+                cx="96"
+                cy="96"
+                r="88"
+                stroke="hsl(var(--primary))"
+                strokeWidth="8"
+                fill="transparent"
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                style={{ transition: 'stroke-dashoffset 1s linear' }}
+              />
+            </svg>
+            <div className="absolute flex flex-col items-center justify-center">
+                <Button
+                    onClick={handleHeartClick}
+                    className="rounded-full h-28 w-28 bg-primary/20 hover:bg-primary/30"
+                    aria-label="Confirmar SOS"
+                    >
+                    <Heart className="h-20 w-20 text-primary fill-primary" />
+                </Button>
+            </div>
+        </div>
+
+        <div className="text-center">
+            <p className="font-semibold text-lg text-primary">Toque no coração para confirmar</p>
+            <p className="text-muted-foreground">Ação será cancelada em <span className="font-bold text-foreground">{countdown}</span>s</p>
+        </div>
+
+        <div className="w-full grid grid-cols-2 gap-4 pt-4">
+            <Button onClick={callPolice} variant="destructive" className="w-full text-md py-6">
+                <Phone className="mr-2" />
+                Ligar {sosSettings.policeNumber}
+            </Button>
+            <Button onClick={triggerShare} variant="secondary" className="w-full text-md py-6">
+                <Share2 className="mr-2" />
+                Contatos
+            </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Initial Screen UI
   return (
     <div className="p-4 flex flex-col items-center justify-center h-full text-center space-y-6">
-      <Card className="w-full bg-card/50">
+      <Card className="w-full bg-transparent border-0 shadow-none">
         <CardHeader>
-          <CardTitle className="text-destructive text-3xl font-bold">Emergência SOS</CardTitle>
-          <CardDescription>
-            Pressione o coração duas vezes para enviar um alerta de emergência.
+          <div className="flex justify-center items-center flex-col gap-2">
+            <ShieldAlert className="h-10 w-10 text-primary" />
+            <CardTitle className="text-primary text-3xl font-bold">Emergência SOS</CardTitle>
+          </div>
+          <CardDescription className="pt-2">
+            Pressione o coração para ativar o modo de emergência.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center">
             <Button
-              onClick={handleSOS}
-              className={cn(
-                'rounded-full h-40 w-40 shadow-lg transform transition-all duration-300 ease-in-out',
-                'bg-secondary/50 text-secondary-foreground hover:bg-secondary/70',
-                confirming && 'animate-pulse scale-110 bg-red-500 hover:bg-red-600 text-white'
-              )}
-              aria-label={confirming ? 'Confirmar SOS' : 'Botão de Emergência SOS'}
+              onClick={handleHeartClick}
+              className="rounded-full h-48 w-48 shadow-lg shadow-primary/10 transform transition-all duration-300 ease-in-out hover:scale-105 bg-primary/10 text-primary hover:bg-primary/20"
+              aria-label={'Botão de Emergência SOS'}
             >
-              <Heart className={cn('h-24 w-24', confirming && 'fill-white')} />
+              <Heart className="h-32 w-32 fill-primary/20" />
             </Button>
-            {status === 'activating' && confirming && <p className="mt-4 text-destructive font-semibold">Pressione novamente para confirmar!</p>}
+            <p className="mt-6 text-muted-foreground font-semibold">Pressione para ativar</p>
         </CardContent>
-      </Card>
-      
-      <Card className="w-full bg-card/50">
-          <CardHeader>
-            <CardTitle className="text-xl">O que acontece ao ativar?</CardTitle>
-          </CardHeader>
-          <CardContent className="text-left space-y-4">
-            <div className="flex items-start gap-4">
-                <Share2 className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
-                <div>
-                    <h3 className="font-semibold">Envio de Mensagem</h3>
-                    <p className="text-muted-foreground text-sm">Sua mensagem de emergência e localização atual serão enviadas para seus contatos cadastrados.</p>
-                </div>
-            </div>
-             <div className="flex items-start gap-4">
-                <Phone className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
-                <div>
-                    <h3 className="font-semibold">Ligação de Emergência</h3>
-                    <p className="text-muted-foreground text-sm">Caso o envio da mensagem não seja possível, o aplicativo tentará ligar para o número de emergência ({sosSettings.policeNumber}).</p>
-                </div>
-            </div>
-          </CardContent>
       </Card>
     </div>
   );

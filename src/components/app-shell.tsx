@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link';
-import { Home, CalendarDays, BrainCircuit, Settings, Moon, ShieldAlert } from 'lucide-react';
+import { Home, CalendarDays, BrainCircuit, Settings, MoonStar, ShieldAlert } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
@@ -18,11 +18,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     // Container principal com altura dinâmica para melhor suporte em celulares
-    <div className="relative mx-auto flex h-dvh max-w-md flex-col border-x bg-background">
+    <div className="relative mx-auto flex h-dvh max-w-md flex-col border-x border-border bg-background">
       {/* Cabeçalho centralizado com a logo */}
-      <header className="flex shrink-0 items-center justify-center border-b p-4">
+      <header className="flex shrink-0 items-center justify-center border-b border-border p-4">
         <Link href="/" className="flex items-center gap-2">
-          <Moon className="h-7 w-7 text-primary" />
+          <MoonStar className="h-7 w-7 text-primary" />
           <h1 className="font-bold text-2xl text-primary">MoodLua</h1>
         </Link>
       </header>
@@ -33,7 +33,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </main>
       
       {/* Navegação Inferior Fixa */}
-      <footer className="fixed bottom-0 left-1/2 w-full max-w-md -translate-x-1/2 shrink-0 border-t bg-background/90 backdrop-blur-sm">
+      <footer className="fixed bottom-0 left-1/2 w-full max-w-md -translate-x-1/2 shrink-0 border-t border-border bg-background/90 backdrop-blur-sm">
         <nav className="flex items-center justify-around p-1">
           {navItems.map(item => (
             <Link
