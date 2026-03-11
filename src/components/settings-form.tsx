@@ -18,6 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useCycleData } from '@/context/cycle-data-context';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
+import type { SosSettings } from '@/lib/types';
 
 /**
  * Esquema de validação para o formulário de configurações.
@@ -25,8 +26,7 @@ import { useEffect } from 'react';
  */
 const formSchema = z.object({
   policeNumber: z.string().min(2, 'O número deve ter pelo menos 2 dígitos.'),
-  // Transforma a string de contatos (separada por vírgula) em um array de strings.
-  emergencyContacts: z.string().transform((val) => val.split(',').map(s => s.trim()).filter(Boolean)),
+  emergencyContacts: z.string(), // Recebe uma string com múltiplos contatos, um por linha
   emergencyMessage: z.string().min(10, 'A mensagem deve ter pelo menos 10 caracteres.'),
 });
 
@@ -42,11 +42,10 @@ export function SettingsForm() {
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(formSchema),
-    // O valor inicial dos contatos é um array, mas o campo do formulário é uma string.
-    // `join(', ')` converte o array em uma string separada por vírgulas.
+    // Converte o array de objetos de contatos em uma string de múltiplas linhas para o textarea.
     defaultValues: {
       ...sosSettings,
-      emergencyContacts: sosSettings.emergencyContacts.join(', '),
+      emergencyContacts: sosSettings.emergencyContacts.map(c => `${c.name}: ${c.number}`).join('\n'),
     },
   });
 
@@ -54,13 +53,32 @@ export function SettingsForm() {
   useEffect(() => {
     form.reset({
       ...sosSettings,
-      emergencyContacts: sosSettings.emergencyContacts.join(', '),
+      emergencyContacts: sosSettings.emergencyContacts.map(c => `${c.name}: ${c.number}`).join('\n'),
     });
   }, [sosSettings, form]);
 
   function onSubmit(values: SettingsFormValues) {
-    // `zod` já transformou `emergencyContacts` em um array.
-    updateSosSettings(values);
+    // Converte a string do textarea de volta para um array de objetos de contato.
+    const contacts = values.emergencyContacts
+      .split('\n')
+      .map(line => {
+        const parts = line.split(':');
+        const name = parts[0]?.trim();
+        const number = parts.slice(1).join(':').trim(); // Garante que números com ":" funcionem
+        if (name && number) {
+          return { name, number };
+        }
+        return null;
+      })
+      .filter((c): c is { name: string; number: string } => c !== null);
+      
+    const newSettings: SosSettings = {
+        policeNumber: values.policeNumber,
+        emergencyMessage: values.emergencyMessage,
+        emergencyContacts: contacts,
+    };
+
+    updateSosSettings(newSettings);
     toast({
       title: 'Configurações Salvas!',
       description: 'Suas informações de emergência foram atualizadas.',
@@ -93,10 +111,14 @@ export function SettingsForm() {
             <FormItem>
               <FormLabel>Contatos de Emergência</FormLabel>
               <FormControl>
-                <Input placeholder="Separe os números por vírgula" {...field} />
+                <Textarea
+                  placeholder="Um por linha. Ex: Gaby: 11987654321"
+                  className="resize-none min-h-[100px]"
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
-                Números de telefone que receberão sua mensagem de alerta.
+                Adicione um contato por linha no formato "Nome: Número".
               </FormDescription>
               <FormMessage />
             </FormItem>

@@ -43,7 +43,7 @@ export type DailyLog = {
  */
 export type SosSettings = {
   policeNumber: string;
-  emergencyContacts: string[]; // Uma lista de números de telefone
+  emergencyContacts: { name: string; number: string }[]; // Uma lista de contatos com nome e número
   emergencyMessage: string;
 };
 
