@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { ShieldAlert } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { useCycleData } from '@/context/cycle-data-context';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -40,7 +40,7 @@ export default function SOSButton() {
       setConfirming(true);
       toast({
         title: 'Confirme a Emergência',
-        description: 'Toque no botão SOS novamente para confirmar.',
+        description: 'Toque no coração novamente para confirmar.',
         variant: 'destructive',
         duration: 5000,
       });
@@ -96,14 +96,14 @@ export default function SOSButton() {
     <div className="fixed bottom-4 right-4 z-50">
       <Button
         onClick={handleSOS}
-        variant="destructive"
         className={cn(
           'rounded-full h-16 w-16 shadow-lg transform transition-transform duration-200 ease-in-out',
-          confirming ? 'animate-pulse scale-110' : 'scale-100'
+          'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+          confirming ? 'animate-pulse scale-110 bg-red-500 hover:bg-red-600 text-white' : 'scale-100'
         )}
         aria-label={confirming ? 'Confirmar SOS' : 'Botão de Emergência SOS'}
       >
-        <ShieldAlert className="h-8 w-8" />
+        <Heart className={cn('h-8 w-8', confirming && 'fill-white')} />
       </Button>
     </div>
   );

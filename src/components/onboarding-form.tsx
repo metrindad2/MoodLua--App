@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCycleData } from '@/context/cycle-data-context';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { CalendarIcon, Sparkles } from 'lucide-react';
+import { CalendarIcon, Moon } from 'lucide-react';
 import { Calendar } from './ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -69,9 +69,9 @@ export default function OnboardingForm() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <Sparkles className="w-12 h-12 text-primary" />
+            <Moon className="w-12 h-12 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold text-primary">Bem-vinda ao CycleGuard!</CardTitle>
+          <CardTitle className="text-2xl font-bold text-primary">Bem-vinda ao MoodLua!</CardTitle>
           <CardDescription>Vamos configurar seu perfil para começar.</CardDescription>
         </CardHeader>
         <CardContent>

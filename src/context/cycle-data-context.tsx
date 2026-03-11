@@ -3,12 +3,12 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { UserProfile, DailyLog, SosSettings, CycleGuardData, Mood } from '@/lib/types';
+import { UserProfile, DailyLog, SosSettings, MoodLuaData } from '@/lib/types';
 import { DEFAULT_SOS_SETTINGS } from '@/lib/config';
 import { format } from 'date-fns';
 
 // Define a chave que será usada para salvar os dados no localStorage do navegador.
-const LOCAL_STORAGE_KEY = 'cycleGuardData';
+const LOCAL_STORAGE_KEY = 'moodLuaData';
 
 // Define a "forma" do nosso contexto.
 // Isso descreve quais dados e funções estarão disponíveis para os componentes
@@ -47,7 +47,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     try {
       const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (storedData) {
-        const data: CycleGuardData = JSON.parse(storedData);
+        const data: MoodLuaData = JSON.parse(storedData);
         if (data.userProfile) setUserProfile(data.userProfile);
         if (data.dailyLogs) setDailyLogs(data.dailyLogs);
         if (data.sosSettings) setSosSettings(data.sosSettings);
@@ -60,7 +60,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Função para salvar os dados no localStorage sempre que eles mudarem.
-  const saveDataToLocalStorage = useCallback((data: CycleGuardData) => {
+  const saveDataToLocalStorage = useCallback((data: MoodLuaData) => {
     try {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
     } catch (error) {

@@ -1,17 +1,8 @@
-/**
- * @fileoverview Este componente define o "esqueleto" ou a estrutura principal da interface do aplicativo.
- *
- * O AppShell é responsável por manter um layout consistente em todas as telas.
- * Ele inclui um cabeçalho com o nome do app e links de navegação,
- * a área principal onde o conteúdo de cada página será renderizado, e o botão de SOS fixo.
- * Usar um "shell" como este é uma ótima prática para garantir que elementos comuns,
- * como a navegação, não precisem ser repetidos em cada página.
- */
 'use client'
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Home, CalendarDays, BrainCircuit, Settings, Sparkles } from 'lucide-react';
+import { Home, CalendarDays, BrainCircuit, Settings, Moon } from 'lucide-react';
 import SOSButton from './sos-button';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -31,8 +22,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="relative mx-auto flex h-screen max-w-md flex-col border-x bg-card">
       <header className="flex items-center justify-between border-b p-4">
         <Link href="/" className="flex items-center gap-2">
-          <Sparkles className="text-primary" />
-          <h1 className="font-bold text-lg text-primary">CycleGuard</h1>
+          <Moon className="text-primary" />
+          <h1 className="font-bold text-lg text-primary">MoodLua</h1>
         </Link>
         <div className="flex items-center gap-1">
           {navItems.map(item => (

@@ -1,4 +1,4 @@
-# CycleGuard: Monitoramento de Ciclo e Segurança
+# MoodLua: Seu ciclo, seu astral.
 
 Este é um aplicativo Next.js para monitoramento do ciclo menstrual com uma função de segurança SOS, criado pelo Firebase Studio.
 

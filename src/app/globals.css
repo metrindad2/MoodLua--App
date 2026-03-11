@@ -1,41 +1,26 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/**
- * ONDE MODIFICAR AS CORES DO APLICATIVO
- *
- * Este arquivo, `globals.css`, é como a paleta de cores central do seu aplicativo.
- * As cores são definidas como variáveis CSS usando o formato HSL (Hue, Saturation, Lightness).
- * Para alterar o tema, basta modificar os valores HSL abaixo.
- *
- * - `--background`: Cor de fundo principal do app.
- * - `--foreground`: Cor do texto principal.
- * - `--primary`: Cor principal, usada em títulos e elementos de destaque.
- * - `--secondary`: Cor secundária, usada para informações de apoio e ícones.
- * - `--accent`: Cor de destaque, usada para botões de ação principais (Call-to-Action).
- *
- * Você pode usar um seletor de cores online (pesquise por "hex to hsl") para converter
- * suas cores preferidas para o formato HSL.
- */
+
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
 @layer base {
   :root {
-    --background: 300 100% 98%;
-    --foreground: 282 35% 25%;
-    --card: 300 80% 100%;
-    --card-foreground: 282 35% 25%;
-    --popover: 300 80% 100%;
-    --popover-foreground: 282 35% 25%;
-    --primary: 274 79% 51%;
+    --background: 320 100% 98%;
+    --foreground: 275 40% 20%;
+    --card: 310 100% 99%;
+    --card-foreground: 275 40% 20%;
+    --popover: 310 100% 99%;
+    --popover-foreground: 275 40% 20%;
+    --primary: 270 60% 55%;
     --primary-foreground: 270 100% 98%;
-    --secondary: 317 80% 80%;
-    --secondary-foreground: 317 50% 20%;
+    --secondary: 300 80% 90%;
+    --secondary-foreground: 300 50% 25%;
     --muted: 282 20% 93%;
     --muted-foreground: 282 10% 50%;
-    --accent: 328 100% 74%;
+    --accent: 328 90% 68%;
     --accent-foreground: 328 50% 15%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -50,19 +35,19 @@ body {
     --radius: 0.5rem;
   }
   .dark {
-    --background: 283 15% 12%;
+    --background: 275 15% 10%;
     --foreground: 280 25% 96%;
-    --card: 283 15% 15%;
+    --card: 275 15% 13%;
     --card-foreground: 280 25% 96%;
-    --popover: 283 15% 12%;
+    --popover: 275 15% 10%;
     --popover-foreground: 280 25% 96%;
-    --primary: 274 79% 65%;
+    --primary: 270 70% 70%;
     --primary-foreground: 270 100% 98%;
-    --secondary: 317 70% 50%;
+    --secondary: 300 50% 40%;
     --secondary-foreground: 0 0% 98%;
     --muted: 283 10% 20%;
     --muted-foreground: 280 10% 60%;
-    --accent: 328 90% 65%;
+    --accent: 328 90% 75%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;

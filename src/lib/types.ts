@@ -1,5 +1,5 @@
 /**
- * @fileoverview Este arquivo define os tipos de dados centrais para o aplicativo CycleGuard.
+ * @fileoverview Este arquivo define os tipos de dados centrais para o aplicativo MoodLua.
  * Usar tipos centralizados ajuda a manter a consistência e a prevenir erros em todo o código.
  * É uma boa prática em TypeScript para garantir que todos os componentes "falem a mesma língua"
  * quando se trata da estrutura dos dados.
@@ -52,7 +52,7 @@ export type SosSettings = {
  * Isso é útil para salvar e carregar todo o estado do app de uma só vez,
  * por exemplo, no \`localStorage\`.
  */
-export type CycleGuardData = {
+export type MoodLuaData = {
   userProfile: UserProfile | null;
   dailyLogs: DailyLog[];
   sosSettings: SosSettings;
