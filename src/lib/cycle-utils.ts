@@ -25,10 +25,9 @@ export interface CycleInfo {
   isFertile: boolean;
   ovulationDate: Date;
   isOvulating: boolean;
+  menstruationStartDate: Date;
   menstruationEndDate: Date;
   isMenstruating: boolean;
-  lastMenstruationDate: string;
-  flowDurationDays: number;
 }
 
 /**
@@ -79,10 +78,9 @@ export function calculateCycleInfo(userProfile: UserProfile): CycleInfo | null {
     isFertile,
     ovulationDate,
     isOvulating,
+    menstruationStartDate: lastPeriod,
     menstruationEndDate,
     isMenstruating,
-    lastMenstruationDate: userProfile.lastMenstruationDate,
-    flowDurationDays: userProfile.flowDurationDays,
   };
 }
 

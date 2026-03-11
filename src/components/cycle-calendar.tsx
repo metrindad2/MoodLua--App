@@ -3,7 +3,7 @@
 import { Calendar } from '@/components/ui/calendar';
 import type { DailyLog } from '@/lib/types';
 import type { CycleInfo } from '@/lib/cycle-utils';
-import { addDays, startOfDay } from 'date-fns';
+import { subDays, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface CycleCalendarProps {
@@ -29,13 +29,6 @@ interface CycleCalendarProps {
 export default function CycleCalendar({ cycleInfo, dailyLogs }: CycleCalendarProps) {
   if (!cycleInfo) return null;
 
-  const lastPeriodStartDate = startOfDay(new Date(cycleInfo.lastMenstruationDate));
-
-  // Cria um array de datas de menstruação com base na duração do fluxo.
-  const menstruationDates = Array.from({ length: cycleInfo.flowDurationDays }).map((_, i) =>
-    addDays(lastPeriodStartDate, i)
-  );
-  
   // O objeto `modifiers` define as regras lógicas para colorir os dias.
   const modifiers = {
     fertile: {
@@ -43,7 +36,10 @@ export default function CycleCalendar({ cycleInfo, dailyLogs }: CycleCalendarPro
       to: cycleInfo.fertileWindowEndDate,
     },
     ovulation: cycleInfo.ovulationDate,
-    menstruation: menstruationDates,
+    menstruation: {
+      from: cycleInfo.menstruationStartDate,
+      to: subDays(cycleInfo.menstruationEndDate, 1), // react-day-picker `to` is inclusive
+    },
     // Adicione aqui outros modificadores se necessário (ex: dias com logs)
   };
 
@@ -58,7 +54,7 @@ export default function CycleCalendar({ cycleInfo, dailyLogs }: CycleCalendarPro
   return (
     <Calendar
       mode="single"
-      selected={new Date()}
+      selected={startOfDay(new Date())}
       modifiers={modifiers}
       modifiersClassNames={modifiersClassNames}
       className="rounded-md border"
