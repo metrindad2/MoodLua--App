@@ -27,6 +27,8 @@ export interface CycleInfo {
   isOvulating: boolean;
   menstruationEndDate: Date;
   isMenstruating: boolean;
+  lastMenstruationDate: string;
+  flowDurationDays: number;
 }
 
 /**
@@ -79,6 +81,8 @@ export function calculateCycleInfo(userProfile: UserProfile): CycleInfo | null {
     isOvulating,
     menstruationEndDate,
     isMenstruating,
+    lastMenstruationDate: userProfile.lastMenstruationDate,
+    flowDurationDays: userProfile.flowDurationDays,
   };
 }
 

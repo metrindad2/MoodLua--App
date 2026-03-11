@@ -29,14 +29,12 @@ interface CycleCalendarProps {
 export default function CycleCalendar({ cycleInfo, dailyLogs }: CycleCalendarProps) {
   if (!cycleInfo) return null;
 
+  const lastPeriodStartDate = startOfDay(new Date(cycleInfo.lastMenstruationDate));
+
   // Cria um array de datas de menstruação com base na duração do fluxo.
-  const menstruationDates: Date[] = [];
-  const lastPeriodDate = new Date(cycleInfo.menstruationEndDate);
-  lastPeriodDate.setDate(lastPeriodDate.getDate() - cycleInfo.isMenstruating ? 0 : 1);
-  
-  for (let i = 0; i < (new Date().getTime() - lastPeriodDate.getTime() > 0 ? new Date(cycleInfo.menstruationEndDate).getDate() - new Date(cycleInfo.menstruationEndDate).getDate() + 7: new Date(cycleInfo.menstruationEndDate).getDate() - lastPeriodDate.getDate()) ; i++) {
-    menstruationDates.push(addDays(lastPeriodDate, i));
-  }
+  const menstruationDates = Array.from({ length: cycleInfo.flowDurationDays }).map((_, i) =>
+    addDays(lastPeriodStartDate, i)
+  );
   
   // O objeto `modifiers` define as regras lógicas para colorir os dias.
   const modifiers = {
