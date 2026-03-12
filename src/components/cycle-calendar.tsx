@@ -24,42 +24,47 @@ interface CycleCalendarProps {
  * - Por exemplo, o modificador `fertile` verifica se uma data está dentro da janela fértil
  *   prevista.
  * - O `modifiersClassNames` associa cada modificador a uma classe CSS para aplicar a cor.
- *   As classes (ex: `bg-green-500/20`) usam Tailwind CSS para estilizar os dias.
+ *   As classes usam Tailwind CSS para estilizar os dias.
  */
 export default function CycleCalendar({ cycleInfo, dailyLogs }: CycleCalendarProps) {
   if (!cycleInfo) return null;
 
   // O objeto `modifiers` define as regras lógicas para colorir os dias.
+  // A imagem de referência mostra "Previsão" que corresponderá à janela fértil.
   const modifiers = {
+    // "Previsão" na imagem
     fertile: {
       from: cycleInfo.fertileWindowStartDate,
       to: cycleInfo.fertileWindowEndDate,
     },
-    ovulation: cycleInfo.ovulationDate,
+    // "Período" na imagem
     menstruation: {
       from: cycleInfo.menstruationStartDate,
       to: subDays(cycleInfo.menstruationEndDate, 1), // react-day-picker `to` is inclusive
     },
-    // Adicione aqui outros modificadores se necessário (ex: dias com logs)
+    // O dia de hoje é destacado de forma especial
+    today: startOfDay(new Date()),
   };
 
-  // `modifiersClassNames` associa os modificadores a classes de estilo.
+  // `modifiersClassNames` associa os modificadores a classes de estilo para corresponder à imagem.
   const modifiersClassNames = {
-    fertile: 'bg-green-500/20 text-green-800',
-    ovulation: 'bg-green-500/80 !text-white rounded-full',
-    menstruation: 'bg-red-500/20 text-red-800',
-    today: 'bg-secondary text-secondary-foreground rounded-full',
+    fertile: 'bg-secondary text-secondary-foreground rounded-full',
+    menstruation: 'bg-primary text-primary-foreground rounded-full',
+    // Estilo para hoje: um círculo com borda, sem preenchimento de fundo.
+    today: 'bg-transparent text-foreground border border-primary rounded-full',
   };
 
   return (
     <Calendar
       mode="single"
-      selected={startOfDay(new Date())}
+      // Não queremos um dia "selecionado" com fundo sólido, o modificador `today` cuida do estilo.
+      selected={undefined} 
       modifiers={modifiers}
       modifiersClassNames={modifiersClassNames}
       className="rounded-md border"
       locale={ptBR}
-      weekStartsOn={1}
+      // A semana começa no Domingo, como na imagem de referência.
+      weekStartsOn={0}
       showOutsideDays
     />
   );

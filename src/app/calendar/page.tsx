@@ -39,20 +39,17 @@ export default function CalendarPage() {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4 text-primary">Calendário do Ciclo</h2>
+      <h2 className="text-2xl font-bold mb-4 text-primary">Calendário</h2>
       <CycleCalendar cycleInfo={cycleInfo} dailyLogs={dailyLogs} />
-      <div className="mt-6 space-y-2">
+      {/* Legenda atualizada para corresponder ao design da imagem */}
+      <div className="mt-6 flex items-center gap-6">
         <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-red-500/80"></div>
-            <span>Menstruação</span>
+            <div className="w-3 h-3 rounded-full bg-primary"></div>
+            <span>Período</span>
         </div>
         <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-green-500/80"></div>
-            <span>Período Fértil</span>
-        </div>
-        <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full border-2 border-green-500 bg-green-500/80"></div>
-            <span>Dia da Ovulação</span>
+            <div className="w-3 h-3 rounded-full bg-secondary"></div>
+            <span>Previsão</span>
         </div>
       </div>
     </div>
