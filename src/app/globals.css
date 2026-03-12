@@ -67,6 +67,9 @@ body {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background-image: linear-gradient(to bottom, hsl(275, 40%, 15%), hsl(310, 60%, 50%));
+    background-repeat: no-repeat;
+    background-attachment: fixed;
   }
 }

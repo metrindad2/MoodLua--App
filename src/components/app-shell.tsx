@@ -19,7 +19,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     // Container principal com altura dinâmica para melhor suporte em celulares
-    <div className="relative mx-auto flex h-dvh max-w-md flex-col border-x border-border bg-background">
+    <div className="relative mx-auto flex h-dvh max-w-md flex-col border-x border-border bg-transparent">
       {/* Cabeçalho centralizado com a logo */}
       <header className="flex shrink-0 items-center justify-center border-b border-border p-4">
         <Link href="/" className="flex items-center gap-2">

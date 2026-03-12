@@ -65,7 +65,7 @@ export default function OnboardingForm() {
   }
 
   return (
-    <div className="p-4 pt-8 h-full flex flex-col items-center justify-center bg-background">
+    <div className="p-4 pt-8 h-full flex flex-col items-center justify-center bg-transparent">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">

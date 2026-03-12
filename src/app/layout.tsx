@@ -30,7 +30,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
         <meta name="theme-color" content="#1A181C" />
       </head>
-      <body className={cn('min-h-screen bg-background font-body antialiased', fontSans.variable)}>
+      <body className={cn('min-h-screen font-body antialiased', fontSans.variable)}>
         <CycleDataProvider>
           <AppShell>
             {children}
