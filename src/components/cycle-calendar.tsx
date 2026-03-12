@@ -59,7 +59,7 @@ export default function CycleCalendar({ cycleInfo, dailyLogs }: CycleCalendarPro
       modifiersClassNames={modifiersClassNames}
       className="rounded-md border"
       locale={ptBR}
-      weekStartsOn={0}
+      weekStartsOn={1}
       showOutsideDays
     />
   );
