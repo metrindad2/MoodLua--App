@@ -122,7 +122,6 @@ export default function OnboardingForm() {
                           }
                           initialFocus
                           locale={ptBR}
-                          weekStartsOn={1}
                         />
                       </PopoverContent>
                     </Popover>
