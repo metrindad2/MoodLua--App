@@ -38,6 +38,7 @@ export default function CycleCalendar({ cycleInfo, dailyLogs }: CycleCalendarPro
       // então não precisamos de modifiersClassNames aqui.
       className="rounded-md border bg-card"
       locale={ptBR}
+      weekStartsOn={0} // Força o início da semana no Domingo
       showOutsideDays
     />
   );
