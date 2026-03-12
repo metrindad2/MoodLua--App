@@ -11,6 +11,12 @@ interface CycleCalendarProps {
   dailyLogs: DailyLog[];
 }
 
+const formatWeekdayName = (day: Date) => {
+    const weekdays = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
+    return weekdays[day.getDay()];
+};
+
+
 /**
  * Calendário do Ciclo.
  *
@@ -66,6 +72,7 @@ export default function CycleCalendar({ cycleInfo, dailyLogs }: CycleCalendarPro
       // A semana começa no Domingo, como na imagem de referência.
       weekStartsOn={0}
       showOutsideDays
+      formatters={{ formatWeekdayName }}
     />
   );
 }
