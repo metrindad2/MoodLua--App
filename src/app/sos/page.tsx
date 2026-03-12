@@ -1,40 +1,42 @@
 'use client';
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Heart, ShieldAlert } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { SosSheet } from '@/components/sos-sheet';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
+import { Heart, HelpCircle } from 'lucide-react';
 
 export default function SOSPage() {
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-
   return (
-    <>
-      <div className="p-4 flex flex-col items-center justify-center h-full text-center space-y-6">
-        <Card className="w-full bg-transparent border-0 shadow-none">
-          <CardHeader>
-            <div className="flex justify-center items-center flex-col gap-2">
-              <ShieldAlert className="h-10 w-10 text-primary" />
-              <CardTitle className="text-primary text-3xl font-bold">Emergência SOS</CardTitle>
-            </div>
-            <CardDescription className="pt-2">
-              Pressione o coração para abrir as opções de emergência.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center justify-center">
-              <Button
-                onClick={() => setIsSheetOpen(true)}
-                className="rounded-full h-48 w-48 shadow-lg shadow-primary/10 transform transition-all duration-300 ease-in-out hover:scale-105 bg-primary/10 text-primary hover:bg-primary/20"
-                aria-label={'Abrir opções de Emergência SOS'}
-              >
-                <Heart className="h-32 w-32 fill-primary/20" />
-              </Button>
-              <p className="mt-6 text-muted-foreground font-semibold">Pressione para ver as opções</p>
-          </CardContent>
-        </Card>
-      </div>
-      <SosSheet open={isSheetOpen} onOpenChange={setIsSheetOpen} />
-    </>
+    <div className="p-4 flex flex-col items-center justify-center h-full text-center space-y-6">
+      <Card className="w-full max-w-md bg-card/80">
+        <CardHeader>
+          <div className="flex justify-center mb-4">
+            <HelpCircle className="w-12 h-12 text-primary" />
+          </div>
+          <CardTitle className="text-2xl font-bold text-primary">
+            Botão de Emergência SOS
+          </CardTitle>
+          <CardDescription className="pt-2">
+            Para sua segurança, um botão de emergência em formato de coração{' '}
+            <Heart className="inline h-4 w-4" /> está sempre visível no canto
+            inferior direito da tela.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center justify-center gap-4">
+          <p className="text-muted-foreground">
+            Dê **dois toques rápidos** no botão de coração para abrir as opções
+            de emergência a qualquer momento, em qualquer tela do aplicativo.
+          </p>
+          <p className="text-sm text-muted-foreground/80">
+            Você pode configurar seus contatos de emergência e a mensagem na
+            página de Ajustes.
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

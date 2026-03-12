@@ -1,10 +1,17 @@
-'use client'
+'use client';
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Home, CalendarDays, BrainCircuit, Settings, ShieldAlert } from 'lucide-react';
+import {
+  Home,
+  CalendarDays,
+  BrainCircuit,
+  Settings,
+  ShieldAlert,
+} from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { FloatingSosButton } from './floating-sos-button';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -29,14 +36,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Área de conteúdo principal com rolagem e padding para não ficar sob a navegação */}
-      <main className="flex-1 overflow-y-auto pb-24">
-        {children}
-      </main>
-      
+      <main className="flex-1 overflow-y-auto pb-24">{children}</main>
+
+      {/* Botão SOS Flutuante */}
+      <FloatingSosButton />
+
       {/* Navegação Inferior Fixa */}
       <footer className="fixed bottom-0 left-1/2 w-full max-w-md -translate-x-1/2 shrink-0 border-t border-border bg-background/90 backdrop-blur-sm">
         <nav className="flex items-center justify-around p-1">
-          {navItems.map(item => (
+          {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
