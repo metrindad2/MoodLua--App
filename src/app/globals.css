@@ -34,31 +34,34 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
-  .dark {
-    --background: 275 15% 10%;
-    --foreground: 280 25% 96%;
-    --card: 275 15% 13%;
-    --card-foreground: 280 25% 96%;
-    --popover: 275 15% 10%;
-    --popover-foreground: 280 25% 96%;
-    --primary: 270 70% 70%;
-    --primary-foreground: 270 100% 98%;
-    --secondary: 300 50% 40%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 283 10% 20%;
-    --muted-foreground: 280 10% 60%;
-    --accent: 328 90% 75%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 283 10% 25%;
-    --input: 283 10% 25%;
-    --ring: 274 80% 70%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+  
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: 275 15% 10%;
+      --foreground: 280 25% 96%;
+      --card: 275 15% 13%;
+      --card-foreground: 280 25% 96%;
+      --popover: 275 15% 10%;
+      --popover-foreground: 280 25% 96%;
+      --primary: 270 70% 70%;
+      --primary-foreground: 270 100% 98%;
+      --secondary: 300 50% 40%;
+      --secondary-foreground: 0 0% 98%;
+      --muted: 283 10% 20%;
+      --muted-foreground: 280 10% 60%;
+      --accent: 328 90% 75%;
+      --accent-foreground: 0 0% 98%;
+      --destructive: 0 62.8% 30.6%;
+      --destructive-foreground: 0 0% 98%;
+      --border: 283 10% 25%;
+      --input: 283 10% 25%;
+      --ring: 274 80% 70%;
+      --chart-1: 220 70% 50%;
+      --chart-2: 160 60% 45%;
+      --chart-3: 30 80% 55%;
+      --chart-4: 280 65% 60%;
+      --chart-5: 340 75% 55%;
+    }
   }
 }
 
@@ -68,8 +71,16 @@ body {
   }
   body {
     @apply text-foreground;
-    background-image: linear-gradient(to bottom, hsl(275, 40%, 15%), hsl(310, 60%, 50%));
+    /* Light mode gradient */
+    background-image: linear-gradient(to bottom, hsl(var(--secondary)), hsl(var(--background)));
     background-repeat: no-repeat;
     background-attachment: fixed;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      /* Dark mode gradient */
+      background-image: linear-gradient(to bottom, hsl(275, 40%, 15%), hsl(310, 60%, 50%));
+    }
   }
 }

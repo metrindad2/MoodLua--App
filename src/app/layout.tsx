@@ -23,12 +23,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className="dark">
+    <html lang="pt-BR">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
-        <meta name="theme-color" content="#1A181C" />
+        <meta name="theme-color" content="#fffaff" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#1A181C" media="(prefers-color-scheme: dark)" />
       </head>
       <body className={cn('min-h-screen font-body antialiased', fontSans.variable)}>
         <CycleDataProvider>
