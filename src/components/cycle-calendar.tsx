@@ -34,9 +34,6 @@ export default function CycleCalendar({ cycleInfo, dailyLogs }: CycleCalendarPro
       selected={undefined} // Desativa a seleção interativa
       defaultMonth={cycleInfo.menstruationStartDate}
       modifiers={modifiers}
-      formatters={{
-        formatWeekdayName: (day) => format(day, 'ccccc', { locale: ptBR }),
-      }}
       // A classe para 'selected' já é definida globalmente em ui/calendar.tsx
       // então não precisamos de modifiersClassNames aqui.
       className="rounded-md border bg-card"
