@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário Mensal</title>
+    <!-- Link para o arquivo de estilos CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- 
+        Este é o container principal do calendário. 
+        Ele age como um "cartão" centralizado na tela.
+    -->
+    <div class="calendar-container">
+        
+        <!-- Cabeçalho do calendário, com o mês/ano e os botões de navegação -->
+        <div class="calendar-header">
+            <!-- Botão para ir para o mês anterior -->
+            <button id="prev-month-btn">&lt;</button>
+            <!-- Onde o nome do mês e o ano serão exibidos. Ex: "Março 2026" -->
+            <h2 id="month-year"></h2>
+            <!-- Botão para ir para o próximo mês -->
+            <button id="next-month-btn">&gt;</button>
+        </div>
+
+        <!-- 
+            Grid para os nomes dos dias da semana.
+            Ele usa CSS Grid para se alinhar corretamente em 7 colunas.
+        -->
+        <div class="weekdays">
+            <div>dom</div>
+            <div>seg</div>
+            <div>ter</div>
+            <div>qua</div>
+            <div>qui</div>
+            <div>sex</div>
+            <div>sáb</div>
+        </div>
+
+        <!-- 
+            Grid principal onde os dias do mês serão inseridos pelo JavaScript.
+            É aqui que a "mágica" acontece.
+        -->
+        <div class="days" id="calendar-days"></div>
+
+    </div>
+
+    <!-- 
+        Link para o arquivo JavaScript. 
+        É colocado no final do <body> para garantir que todo o HTML 
+        seja carregado antes que o script tente manipular os elementos.
+    -->
+    <script src="script.js"></script>
+</body>
+</html>

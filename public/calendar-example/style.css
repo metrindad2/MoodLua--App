@@ -1,0 +1,122 @@
+/*
+ * style.css
+ * Este arquivo contém todos os estilos para o nosso calendário.
+ * Ele define as cores, o layout e a aparência geral.
+ */
+
+/* Estilo base para a página inteira */
+body {
+    /* Define a fonte padrão para todo o texto */
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    /* Fundo escuro moderno */
+    background-color: #1a181c;
+    /* Cor do texto principal */
+    color: #e3e3e3;
+    /* Centraliza o conteúdo (o nosso calendário) na tela */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Garante que a página ocupe a altura toda da tela */
+    min-height: 100vh;
+    /* Remove margens padrão do navegador */
+    margin: 0;
+}
+
+/* O "cartão" que envolve todo o calendário */
+.calendar-container {
+    background-color: #2c2a2e; /* Cor de fundo do cartão */
+    padding: 20px; /* Espaçamento interno */
+    border-radius: 15px; /* Bordas arredondadas */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Sombra para dar profundidade */
+    width: 90%; /* Largura relativa para se adaptar a telas de celular */
+    max-width: 350px; /* Largura máxima para não ficar muito grande em telas maiores */
+}
+
+/* Estilo para o cabeçalho (mês/ano e botões) */
+.calendar-header {
+    display: flex; /* Alinha os itens em uma linha */
+    justify-content: space-between; /* Espaça os itens (botão <, texto, botão >) */
+    align-items: center; /* Centraliza verticalmente */
+    margin-bottom: 20px; /* Espaço abaixo do cabeçalho */
+}
+
+.calendar-header h2 {
+    margin: 0; /* Remove margem do título */
+    font-size: 1.2rem; /* Tamanho da fonte do mês/ano */
+    font-weight: 600; /* Peso da fonte */
+}
+
+.calendar-header button {
+    background: none; /* Remove fundo dos botões */
+    border: none; /* Remove borda */
+    color: #e3e3e3; /* Cor do ícone (texto) */
+    font-size: 1.5rem; /* Tamanho dos botões de seta */
+    cursor: pointer; /* Muda o cursor para indicar que é clicável */
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.calendar-header button:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Efeito ao passar o mouse */
+}
+
+/*
+ * Container dos dias da semana (dom, seg, ter...).
+ * Usamos CSS Grid para criar 7 colunas de tamanho igual.
+ */
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* Cria 7 colunas de fração igual */
+    text-align: center; /* Centraliza o texto */
+    margin-bottom: 10px;
+    color: #9e9e9e; /* Cor mais suave para os dias da semana */
+    font-size: 0.8rem;
+    text-transform: capitalize; /* Deixa a primeira letra maiúscula */
+}
+
+/*
+ * Container dos dias do mês.
+ * Também usa CSS Grid com 7 colunas.
+ */
+.days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 colunas, uma para cada dia da semana */
+    gap: 5px; /* Espaço entre os dias */
+    text-align: center;
+}
+
+/* Estilo para cada "célula" de dia no calendário */
+.days div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px; /* Altura de cada dia */
+    cursor: pointer;
+    border-radius: 50%; /* Deixa o fundo do dia redondo */
+    transition: background-color 0.2s ease; /* Animação suave na troca de cor */
+}
+
+/* Estilo para os dias que não pertencem ao mês atual (dias "cinzas") */
+.prev-month-day,
+.next-month-day {
+    color: #555; /* Cor cinza para indicar que é de outro mês */
+    cursor: default;
+}
+
+/* Efeito ao passar o mouse sobre um dia válido */
+.days div:not(.prev-month-day):not(.next-month-day):hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Estilo para destacar o dia atual */
+.current-day {
+    background-color: rgba(255, 105, 180, 0.3); /* Um rosa bem suave */
+    border: 1px solid hotpink;
+}
+
+/* Estilo para o dia que foi selecionado com um clique */
+.selected-day {
+    background-color: hotpink; /* Cor de destaque rosa */
+    color: #1a181c; /* Texto escuro para contrastar com o fundo rosa */
+    font-weight: bold;
+}
