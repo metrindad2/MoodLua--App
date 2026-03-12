@@ -36,7 +36,7 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
         window.location.href = `tel:${number}`;
     };
 
-    const triggerSos = useCallback(async (contact: { name: string; number: string }) => {
+    const triggerSos = useCallback((contact: { name: string; number: string }) => {
         toast({ title: 'Acionando Contato de Emergência', description: `Preparando mensagem para ${contact.name}` });
 
         if (!navigator.geolocation) {
@@ -49,31 +49,25 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
         }
 
         navigator.geolocation.getCurrentPosition(
-            async (position) => {
+            (position) => {
                 const { latitude, longitude } = position.coords;
                 const locationUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
                 const message = `${sosSettings.emergencyMessage}\nMinha localização: ${locationUrl}`;
+                
+                // Limpa caracteres comuns de formatação do número
+                const cleanNumber = contact.number.replace(/[\s()-]/g, '');
+                
+                // Cria o link SMS para abrir o app de mensagens com tudo preenchido
+                const smsUri = `sms:${cleanNumber}?body=${encodeURIComponent(message)}`;
 
-                const shareData = {
-                    title: 'Pedido de Ajuda Urgente!',
-                    text: message,
-                };
+                toast({
+                    title: 'Abrindo app de Mensagens...',
+                    description: `Sua mensagem para ${contact.name} está pronta.`,
+                    duration: 4000,
+                });
 
-                if (navigator.share) {
-                    try {
-                        await navigator.share(shareData);
-                        toast({ title: 'Alerta Compartilhado', description: 'Sua mensagem e localização foram enviadas.' });
-                    } catch (error) {
-                        if ((error as DOMException).name !== 'AbortError') {
-                            toast({ title: 'Falha no Envio', description: 'Não foi possível compartilhar a mensagem.', variant: 'destructive'});
-                        } else {
-                            toast({ title: 'Envio Cancelado', description: 'Você cancelou o compartilhamento.' });
-                        }
-                    }
-                } else {
-                    await navigator.clipboard.writeText(message);
-                    toast({ title: 'Mensagem Copiada', description: 'A mensagem de emergência foi copiada. Cole-a no seu app de mensagens.', duration: 5000 });
-                }
+                // Redireciona para o app de SMS
+                window.location.href = smsUri;
             },
             (error: GeolocationPositionError) => {
                 let description = 'Não foi possível obter sua localização. Tente acionar os contatos manualmente.';
