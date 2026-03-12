@@ -3,7 +3,7 @@
 import { Calendar } from '@/components/ui/calendar';
 import type { DailyLog } from '@/lib/types';
 import type { CycleInfo } from '@/lib/cycle-utils';
-import { subDays } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface CycleCalendarProps {
@@ -34,12 +34,15 @@ export default function CycleCalendar({ cycleInfo, dailyLogs }: CycleCalendarPro
       selected={undefined} // Desativa a seleção interativa
       defaultMonth={cycleInfo.menstruationStartDate}
       modifiers={modifiers}
+      formatters={{
+        formatWeekdayName: (day) => format(day, 'ccccc', { locale: ptBR }),
+      }}
       // A classe para 'selected' já é definida globalmente em ui/calendar.tsx
       // então não precisamos de modifiersClassNames aqui.
       className="rounded-md border bg-card"
       locale={ptBR}
-      // A semana começa na Segunda-feira, como é padrão no Brasil.
-      weekStartsOn={1}
+      // A semana começa no Domingo para corresponder à imagem de referência.
+      weekStartsOn={0}
       showOutsideDays
     />
   );
