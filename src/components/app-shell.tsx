@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link';
-import { Home, CalendarDays, BrainCircuit, Settings, MoonStar, ShieldAlert } from 'lucide-react';
+import Image from 'next/image';
+import { Home, CalendarDays, BrainCircuit, Settings, ShieldAlert } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
@@ -22,7 +23,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Cabeçalho centralizado com a logo */}
       <header className="flex shrink-0 items-center justify-center border-b border-border p-4">
         <Link href="/" className="flex items-center gap-2">
-          <MoonStar className="h-7 w-7 text-primary" />
+          <Image src="/logo.png" alt="MoodLua Logo" width={32} height={32} />
           <h1 className="font-bold text-2xl text-primary">MoodLua</h1>
         </Link>
       </header>
