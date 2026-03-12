@@ -9,20 +9,20 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useCycleData } from '@/context/cycle-data-context';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { CalendarIcon } from 'lucide-react';
-import { Calendar } from './ui/calendar';
+import { SimpleCalendar } from './simple-calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { UserProfile } from '@/lib/types';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
 
 // Esquema atualizado para o novo formulário de criação de conta
 const formSchema = z.object({
@@ -38,6 +38,7 @@ const formSchema = z.object({
 
 export default function OnboardingForm() {
   const { updateUserProfile } = useCycleData();
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -93,7 +94,7 @@ export default function OnboardingForm() {
                 name="lastMenstruationDate"
                 render={({ field }) => (
                   <FormItem>
-                    <Popover>
+                    <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -113,16 +114,13 @@ export default function OnboardingForm() {
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) =>
-                            date > new Date() || date < new Date('1900-01-01')
-                          }
-                          initialFocus
-                          locale={ptBR}
-                          weekStartsOn={0}
+                        <SimpleCalendar
+                          initialDate={field.value || new Date()}
+                          selectedDate={field.value}
+                          onDateClick={(date) => {
+                            field.onChange(date);
+                            setIsCalendarOpen(false);
+                          }}
                         />
                       </PopoverContent>
                     </Popover>
