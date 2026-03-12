@@ -67,16 +67,16 @@
   }
   body {
     @apply text-foreground;
-    /* Light mode gradient */
-    background-image: linear-gradient(to bottom, hsl(var(--secondary)), hsl(var(--background)));
+    /* Light mode gradient inspired by the image */
+    background-image: linear-gradient(to bottom, hsl(300, 80%, 90%), hsl(320, 100%, 98%));
     background-repeat: no-repeat;
     background-attachment: fixed;
   }
 
   @media (prefers-color-scheme: dark) {
     body {
-      /* Dark mode gradient */
-      background-image: linear-gradient(to bottom, hsl(275, 40%, 15%), hsl(310, 60%, 50%));
+      /* Dark mode gradient from the image */
+      background-image: linear-gradient(to bottom, hsl(270, 39%, 21%), hsl(277, 51%, 52%));
     }
   }
 }

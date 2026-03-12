@@ -12,9 +12,12 @@ import {
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { FloatingSosButton } from './floating-sos-button';
+import { useCycleData } from '@/context/cycle-data-context';
+import { Skeleton } from './ui/skeleton';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { userProfile, loading } = useCycleData();
 
   const navItems = [
     { href: '/', label: 'Início', icon: Home },
@@ -24,8 +27,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
 
+  if (loading) {
+    return (
+      <div className="relative mx-auto flex h-dvh max-w-md flex-col items-center justify-center border-x border-border bg-transparent p-4">
+        <div className="space-y-4 p-4 w-full">
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-20 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  // If there's no profile, it's the onboarding/login view. Don't show the main app shell.
+  // This provides a container so the background gradient is visible.
+  if (!userProfile) {
+    return (
+      <div className="relative mx-auto h-dvh max-w-md">
+        <main>{children}</main>
+      </div>
+    );
+  }
+
+  // If there IS a profile, show the full app shell.
   return (
-    // Container principal com altura dinâmica para melhor suporte em celulares
     <div className="relative mx-auto flex h-dvh max-w-md flex-col border-x border-border bg-transparent">
       {/* Cabeçalho centralizado com a logo */}
       <header className="flex shrink-0 items-center justify-center border-b border-border p-4">

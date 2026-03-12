@@ -10,6 +10,8 @@
  * Estes são os dados coletados no primeiro acesso.
  */
 export type UserProfile = {
+  name: string;
+  email: string;
   lastMenstruationDate: string; // Armazenado como string no formato "YYYY-MM-DD"
   flowDurationDays: number;
   cycleLengthDays: number;
