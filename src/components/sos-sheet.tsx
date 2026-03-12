@@ -39,6 +39,15 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
     const triggerSos = useCallback(async (contact: { name: string; number: string }) => {
         toast({ title: 'Acionando Contato de Emergência', description: `Preparando mensagem para ${contact.name}` });
 
+        if (!navigator.geolocation) {
+            toast({
+                title: 'Erro de Localização',
+                description: 'Seu navegador não suporta geolocalização.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
         navigator.geolocation.getCurrentPosition(
             async (position) => {
                 const { latitude, longitude } = position.coords;
@@ -66,11 +75,24 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
                     toast({ title: 'Mensagem Copiada', description: 'A mensagem de emergência foi copiada. Cole-a no seu app de mensagens.', duration: 5000 });
                 }
             },
-            () => {
+            (error: GeolocationPositionError) => {
+                let description = 'Não foi possível obter sua localização. Tente acionar os contatos manualmente.';
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        description = 'Você negou o acesso à localização. Por favor, habilite nas configurações do seu navegador para usar esta função.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        description = 'Informações de localização não estão disponíveis no momento. Verifique seu sinal de GPS.';
+                        break;
+                    case error.TIMEOUT:
+                        description = 'A solicitação de localização demorou demais. Tente novamente em um local com melhor sinal.';
+                        break;
+                }
                 toast({
                     title: 'Erro de Localização',
-                    description: 'Não foi possível obter sua localização. Tente acionar os contatos manualmente.',
+                    description: description,
                     variant: 'destructive',
+                    duration: 7000
                 });
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
