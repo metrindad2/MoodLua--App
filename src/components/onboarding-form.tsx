@@ -36,11 +36,6 @@ const formSchema = z.object({
   flowDurationDays: z.coerce.number().int().min(1, 'A duração deve ser de pelo menos 1 dia.'),
 });
 
-const formatWeekdayName = (day: Date) => {
-    const weekdays = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
-    return weekdays[day.getDay()];
-};
-
 export default function OnboardingForm() {
   const { updateUserProfile } = useCycleData();
 
@@ -127,8 +122,7 @@ export default function OnboardingForm() {
                           }
                           initialFocus
                           locale={ptBR}
-                          weekStartsOn={0}
-                          formatters={{ formatWeekdayName }}
+                          weekStartsOn={1}
                         />
                       </PopoverContent>
                     </Popover>

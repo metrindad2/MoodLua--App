@@ -3,7 +3,7 @@
 import { Calendar } from '@/components/ui/calendar';
 import type { DailyLog } from '@/lib/types';
 import type { CycleInfo } from '@/lib/cycle-utils';
-import { subDays, startOfDay } from 'date-fns';
+import { subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface CycleCalendarProps {
@@ -11,68 +11,36 @@ interface CycleCalendarProps {
   dailyLogs: DailyLog[];
 }
 
-const formatWeekdayName = (day: Date) => {
-    const weekdays = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
-    return weekdays[day.getDay()];
-};
-
-
 /**
  * Calendário do Ciclo.
  *
- * Este componente é responsável por renderizar o calendário e destacar os dias
- * importantes com base nas previsões e nos dados registrados pela usuária.
- *
- * Como funciona:
- * - Ele recebe `cycleInfo` (as previsões) e `dailyLogs` (os registros) como propriedades.
- * - Usa o recurso `modifiers` do componente `Calendar` (que vem do `react-day-picker`)
- *   para definir quais dias devem ter um estilo especial.
- * - Por exemplo, o modificador `fertile` verifica se uma data está dentro da janela fértil
- *   prevista.
- * - O `modifiersClassNames` associa cada modificador a uma classe CSS para aplicar a cor.
- *   As classes usam Tailwind CSS para estilizar os dias.
+ * Este componente renderiza o calendário e destaca os dias do período menstrual
+ * usando o estilo padrão do aplicativo.
  */
 export default function CycleCalendar({ cycleInfo, dailyLogs }: CycleCalendarProps) {
   if (!cycleInfo) return null;
 
-  // O objeto `modifiers` define as regras lógicas para colorir os dias.
-  // A imagem de referência mostra "Previsão" que corresponderá à janela fértil.
+  // Define os dias da menstruação para serem estilizados como "selecionados".
   const modifiers = {
-    // "Previsão" na imagem
-    fertile: {
-      from: cycleInfo.fertileWindowStartDate,
-      to: cycleInfo.fertileWindowEndDate,
-    },
-    // "Período" na imagem
-    menstruation: {
+    selected: {
       from: cycleInfo.menstruationStartDate,
       to: subDays(cycleInfo.menstruationEndDate, 1), // react-day-picker `to` is inclusive
     },
-    // O dia de hoje é destacado de forma especial
-    today: startOfDay(new Date()),
-  };
-
-  // `modifiersClassNames` associa os modificadores a classes de estilo para corresponder à imagem.
-  const modifiersClassNames = {
-    fertile: 'bg-secondary text-secondary-foreground rounded-full',
-    menstruation: 'bg-primary text-primary-foreground rounded-full',
-    // Estilo para hoje: um círculo com borda, sem preenchimento de fundo.
-    today: 'bg-transparent text-foreground border border-primary rounded-full',
   };
 
   return (
     <Calendar
       mode="single"
-      // Não queremos um dia "selecionado" com fundo sólido, o modificador `today` cuida do estilo.
-      selected={undefined} 
+      selected={undefined} // Desativa a seleção interativa
+      defaultMonth={cycleInfo.menstruationStartDate}
       modifiers={modifiers}
-      modifiersClassNames={modifiersClassNames}
+      // A classe para 'selected' já é definida globalmente em ui/calendar.tsx
+      // então não precisamos de modifiersClassNames aqui.
       className="rounded-md border bg-card"
       locale={ptBR}
-      // A semana começa no Domingo, como na imagem de referência.
-      weekStartsOn={0}
+      // A semana começa na Segunda-feira, como é padrão no Brasil.
+      weekStartsOn={1}
       showOutsideDays
-      formatters={{ formatWeekdayName }}
     />
   );
 }
