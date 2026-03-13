@@ -20,7 +20,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Droplets } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Dashboard() {
@@ -140,16 +139,14 @@ export default function Dashboard() {
                 className="w-full"
                 onClick={() => setNewStartDate(new Date())}
               >
-                <Droplets className="mr-2" />
-                Registrar Início do Período
+                Registrar menstruação
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Quando seu período começou?</DialogTitle>
+                <DialogTitle>Registrar menstruação</DialogTitle>
                 <DialogDescription>
-                  Selecione a data de início da sua última menstruação para
-                  recalcular as previsões do ciclo.
+                  Selecione o dia em que seu período começou para registrar e recalcular as previsões.
                 </DialogDescription>
               </DialogHeader>
               <div className="py-4">
@@ -174,7 +171,7 @@ export default function Dashboard() {
                   disabled={!newStartDate}
                   className="bg-accent text-accent-foreground hover:bg-accent/90"
                 >
-                  Confirmar Data
+                  Salvar
                 </Button>
               </DialogFooter>
             </DialogContent>
