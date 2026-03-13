@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-  RotateCw,
+  Droplet,
   BrainCircuit,
   Settings,
   Baby,
@@ -20,7 +20,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { userProfile, loading } = useCycleData();
 
   const navItems = [
-    { href: '/', label: 'Ciclo', icon: RotateCw },
+    { href: '/', label: 'Ciclo', icon: Droplet },
     { href: '/history', label: 'Histórico', icon: History },
     { href: '/pregnancy', label: 'Gravidez', icon: Baby },
     { href: '/insights', label: 'Insights', icon: BrainCircuit },
