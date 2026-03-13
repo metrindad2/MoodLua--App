@@ -8,7 +8,7 @@ import { PhaseTips } from './phase-tips';
 import { DailyTracker } from './daily-tracker';
 import { CycleHistory } from './cycle-history';
 import { SimpleCalendar } from './simple-calendar';
-import { addDays, subDays, format } from 'date-fns';
+import { addDays, subDays, format, startOfDay, isAfter } from 'date-fns';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import {
@@ -24,7 +24,7 @@ import { Droplets } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Dashboard() {
-  const { userProfile, updateUserProfile } = useCycleData();
+  const { userProfile, updateUserProfile, dailyLogs } = useCycleData();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [newStartDate, setNewStartDate] = useState<Date | null>(null);
   const { toast } = useToast();
@@ -57,10 +57,38 @@ export default function Dashboard() {
     ? 'TPM / Lútea'
     : 'Folicular';
 
+  // --- Lógica de Destaque Dinâmico ---
+  // A data final prevista é baseada no que foi inserido no login.
+  const predictedEndDate = subDays(cycleInfo.menstruationEndDate, 1);
+
+  // Filtra os registros para pegar apenas os dias com fluxo menstrual desde o início do período atual.
+  const periodLogs = dailyLogs.filter(log => {
+      const logDate = startOfDay(new Date(log.date));
+      return logDate >= cycleInfo.menstruationStartDate && log.flowIntensity && log.flowIntensity !== 'nenhum';
+  });
+
+  let lastLoggedFlowDate = null;
+  if (periodLogs.length > 0) {
+      // Encontra a data mais recente entre os dias registrados com fluxo.
+      lastLoggedFlowDate = periodLogs.reduce((latest, current) => {
+          const latestDate = startOfDay(new Date(latest.date));
+          const currentDate = startOfDay(new Date(current.date));
+          return isAfter(currentDate, latestDate) ? current : latest;
+      }).date;
+  }
+  
+  // A data final do destaque será a data mais tardia entre a previsão e o último dia registrado.
+  // Isso garante que o destaque se estenda se o período for mais longo, mas não encurte se a usuária esquecer de registrar.
+  const highlightEndDate = lastLoggedFlowDate && isAfter(startOfDay(new Date(lastLoggedFlowDate)), predictedEndDate) 
+      ? startOfDay(new Date(lastLoggedFlowDate)) 
+      : predictedEndDate;
+
   const highlightedRange = {
     from: cycleInfo.menstruationStartDate,
-    to: subDays(cycleInfo.menstruationEndDate, 1),
+    to: highlightEndDate,
   };
+  // --- Fim da Lógica de Destaque Dinâmico ---
+
 
   const previsionRange = {
     from: cycleInfo.nextPeriodStartDate,
