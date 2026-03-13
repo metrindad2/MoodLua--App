@@ -1,15 +1,10 @@
-import { SettingsForm } from '@/components/settings-form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Settings as SettingsIcon } from 'lucide-react';
 
 /**
  * Página de Configurações.
  *
- * Esta página serve como um container para o formulário de configurações.
- * Ela apresenta um título e uma descrição e, em seguida, renderiza o
- * componente `SettingsForm`, que contém a lógica real do formulário.
- * Manter o formulário em um componente separado (`SettingsForm`) é uma boa prática
- * para organização do código.
+ * Espaço para futuras configurações do aplicativo.
  */
 export default function SettingsPage() {
   return (
@@ -21,11 +16,11 @@ export default function SettingsPage() {
             Configurações
           </CardTitle>
           <CardDescription>
-            Personalize as configurações de emergência (SOS) do aplicativo.
+            Gerencie as preferências do seu aplicativo.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <SettingsForm />
+          <p className="text-muted-foreground">Nenhuma configuração disponível no momento.</p>
         </CardContent>
       </Card>
     </div>

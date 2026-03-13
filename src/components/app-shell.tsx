@@ -7,12 +7,9 @@ import {
   CalendarDays,
   BrainCircuit,
   Settings,
-  ShieldAlert,
-  Heart,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { FloatingSosButton } from './floating-sos-button';
 import { useCycleData } from '@/context/cycle-data-context';
 import { Skeleton } from './ui/skeleton';
 
@@ -24,7 +21,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: '/', label: 'Início', icon: Home },
     { href: '/calendar', label: 'Calendário', icon: CalendarDays },
     { href: '/insights', label: 'Insights', icon: BrainCircuit },
-    { href: '/sos', label: 'SOS', icon: ShieldAlert },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
 
@@ -59,16 +55,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Image src="/logo.png" alt="MoodLua Logo" width={28} height={28} />
           <h1 className="font-bold text-xl text-primary">MoodLua</h1>
         </Link>
-        <div className="flex items-center gap-2">
-          <Heart className="w-6 h-6 text-primary" />
-        </div>
       </header>
 
       {/* Área de conteúdo principal com rolagem e padding para não ficar sob a navegação */}
       <main className="flex-1 overflow-y-auto pb-24 bg-background">{children}</main>
 
-      {/* Botão SOS Flutuante */}
-      <FloatingSosButton />
+      {/* Botão SOS Flutuante removido */}
 
       {/* Navegação Inferior Fixa */}
       <footer className="fixed bottom-0 left-1/2 w-full max-w-md -translate-x-1/2 shrink-0 border-t border-border bg-background/90 backdrop-blur-sm">
