@@ -21,9 +21,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { href: '/', label: 'Início', icon: Home },
-    { href: '/insights', label: 'Insights', icon: BrainCircuit },
     { href: '/history', label: 'Histórico', icon: History },
     { href: '/pregnancy', label: 'Gravidez', icon: Baby },
+    { href: '/insights', label: 'Insights', icon: BrainCircuit },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
 
