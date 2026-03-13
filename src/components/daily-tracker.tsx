@@ -1,12 +1,12 @@
 'use client';
 import { useCycleData } from '@/context/cycle-data-context';
-import { Mood } from '@/lib/types';
+import { DailyLog, Mood } from '@/lib/types';
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from './ui/card';
-import { Button } from './ui/button';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { Droplets } from 'lucide-react';
 
 const moodOptions: { value: Mood; label: string; icon: string }[] = [
   { value: 'feliz', label: 'Feliz', icon: '😊' },
@@ -32,31 +32,49 @@ const symptomsOptions = [
   { id: 'mais_apetite', label: 'Mais apetite', icon: '🍔' },
 ];
 
+const flowOptions: { value: DailyLog['flowIntensity']; label: string }[] = [
+    { value: 'nenhum', label: 'Nenhum' },
+    { value: 'leve', label: 'Leve' },
+    { value: 'médio', label: 'Médio' },
+    { value: 'intenso', label: 'Intenso' },
+];
+
+
 export function DailyTracker() {
   const { getLogForDate, addOrUpdateDailyLog } = useCycleData();
   
-  const [today, setToday] = useState(new Date());
+  const [today] = useState(new Date());
   const [selectedMood, setSelectedMood] = useState<Mood | undefined>();
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
+  const [selectedFlow, setSelectedFlow] = useState<DailyLog['flowIntensity']>();
   
   useEffect(() => {
     const log = getLogForDate(today);
     setSelectedMood(log?.mood);
     setSelectedSymptoms(log?.symptoms || []);
+    setSelectedFlow(log?.flowIntensity);
   }, [today, getLogForDate]);
 
-  const handleSave = useCallback((mood?: Mood, symptoms?: string[]) => {
+  const handleSave = useCallback((data: Partial<Omit<DailyLog, 'date'>>) => {
       addOrUpdateDailyLog({
           date: today,
-          mood: mood,
-          symptoms: symptoms,
+          flowIntensity: selectedFlow,
+          mood: selectedMood,
+          symptoms: selectedSymptoms,
+          ...data,
       });
-  }, [today, addOrUpdateDailyLog]);
+  }, [today, addOrUpdateDailyLog, selectedFlow, selectedMood, selectedSymptoms]);
+
+  const handleFlowSelect = (flow: DailyLog['flowIntensity']) => {
+    const newFlow = selectedFlow === flow ? undefined : flow;
+    setSelectedFlow(newFlow);
+    handleSave({ flowIntensity: newFlow });
+  };
 
   const handleMoodSelect = (mood: Mood) => {
     const newMood = selectedMood === mood ? undefined : mood;
     setSelectedMood(newMood);
-    handleSave(newMood, selectedSymptoms);
+    handleSave({ mood: newMood });
   };
 
   const handleSymptomSelect = (symptomId: string) => {
@@ -64,7 +82,7 @@ export function DailyTracker() {
       ? selectedSymptoms.filter((s) => s !== symptomId)
       : [...selectedSymptoms, symptomId];
     setSelectedSymptoms(newSymptoms);
-    handleSave(selectedMood, newSymptoms);
+    handleSave({ symptoms: newSymptoms });
   };
   
   return (
@@ -78,7 +96,27 @@ export function DailyTracker() {
         </div>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm font-medium mb-4">Humor</p>
+            <p className="text-sm font-medium mb-4 flex items-center gap-2">
+                <Droplets className="w-4 h-4 text-primary" /> Fluxo Menstrual
+            </p>
+            <div className="grid grid-cols-4 gap-2">
+                {flowOptions.map((option) => (
+                    <button
+                        key={option.value}
+                        onClick={() => handleFlowSelect(option.value)}
+                        className={cn(
+                            'flex items-center justify-center p-2 rounded-lg border-2 transition-colors text-sm h-12',
+                            selectedFlow === option.value
+                                ? 'bg-primary/20 border-primary font-semibold'
+                                : 'bg-transparent border-transparent hover:bg-primary/10'
+                        )}
+                    >
+                       {option.label}
+                    </button>
+                ))}
+            </div>
+
+            <p className="text-sm font-medium mt-6 mb-4">Humor</p>
             <div className="grid grid-cols-4 gap-2">
               {moodOptions.map((option) => (
                 <button
