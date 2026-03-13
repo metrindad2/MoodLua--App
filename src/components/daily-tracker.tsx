@@ -1,7 +1,7 @@
 'use client';
 import { useCycleData } from '@/context/cycle-data-context';
 import { DailyLog, Mood } from '@/lib/types';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from './ui/card';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -26,6 +26,10 @@ export function DailyTracker() {
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [selectedFlow, setSelectedFlow] = useState<DailyLog['flowIntensity']>();
   
+  // Ref para evitar que o useEffect de salvar seja executado na montagem inicial.
+  const isInitialMount = useRef(true);
+  
+  // Carrega o log do dia ao iniciar o componente.
   useEffect(() => {
     const log = getLogForDate(today);
     setSelectedMood(log?.mood);
@@ -33,26 +37,36 @@ export function DailyTracker() {
     setSelectedFlow(log?.flowIntensity);
   }, [today, getLogForDate]);
 
-  const handleSave = useCallback((data: Partial<Omit<DailyLog, 'date'>>) => {
-      addOrUpdateDailyLog({
-          date: today,
-          flowIntensity: selectedFlow,
-          mood: selectedMood,
-          symptoms: selectedSymptoms,
-          ...data,
-      });
-  }, [today, addOrUpdateDailyLog, selectedFlow, selectedMood, selectedSymptoms]);
+  // useEffect para salvar automaticamente as alterações.
+  // Ele é acionado sempre que um dos estados (fluxo, humor, sintomas) muda.
+  useEffect(() => {
+    // Se for a montagem inicial, não faz nada. Apenas marca que a montagem terminou.
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    
+    // Salva o log completo com os dados mais recentes do estado.
+    addOrUpdateDailyLog({
+        date: today,
+        flowIntensity: selectedFlow,
+        mood: selectedMood,
+        symptoms: selectedSymptoms,
+    });
+    // As dependências garantem que o efeito rode sempre que um dado for alterado.
+  }, [selectedFlow, selectedMood, selectedSymptoms, addOrUpdateDailyLog, today]);
+
 
   const handleFlowSelect = (flow: DailyLog['flowIntensity']) => {
     const newFlow = selectedFlow === flow ? undefined : flow;
     setSelectedFlow(newFlow);
-    handleSave({ flowIntensity: newFlow });
+    // Não chama mais handleSave aqui. O useEffect cuidará disso.
   };
 
   const handleMoodSelect = (mood: Mood) => {
     const newMood = selectedMood === mood ? undefined : mood;
     setSelectedMood(newMood);
-    handleSave({ mood: newMood });
+     // Não chama mais handleSave aqui. O useEffect cuidará disso.
   };
 
   const handleSymptomSelect = (symptomId: string) => {
@@ -60,7 +74,7 @@ export function DailyTracker() {
       ? selectedSymptoms.filter((s) => s !== symptomId)
       : [...selectedSymptoms, symptomId];
     setSelectedSymptoms(newSymptoms);
-    handleSave({ symptoms: newSymptoms });
+     // Não chama mais handleSave aqui. O useEffect cuidará disso.
   };
   
   return (
