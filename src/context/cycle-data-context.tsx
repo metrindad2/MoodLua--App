@@ -3,9 +3,9 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { UserProfile, DailyLog, SosSettings, MoodLuaData } from '@/lib/types';
+import { UserProfile, DailyLog, SosSettings, MoodLuaData, CycleLog } from '@/lib/types';
 import { DEFAULT_SOS_SETTINGS } from '@/lib/config';
-import { format } from 'date-fns';
+import { format, addDays, differenceInDays } from 'date-fns';
 
 // Define a chave que será usada para salvar os dados no localStorage do navegador.
 const LOCAL_STORAGE_KEY = 'moodLuaData';
@@ -17,11 +17,15 @@ interface CycleDataContextType {
   userProfile: UserProfile | null;
   dailyLogs: DailyLog[];
   sosSettings: SosSettings;
+  cycleHistory: CycleLog[];
+  pregnancyLmpDate: string | null;
   loading: boolean;
   updateUserProfile: (profile: UserProfile) => void;
   addOrUpdateDailyLog: (log: Omit<DailyLog, 'date'> & { date: Date }) => void;
   updateSosSettings: (settings: SosSettings) => void;
   getLogForDate: (date: Date) => DailyLog | undefined;
+  startNewCycle: (startDate: Date) => void;
+  updatePregnancyLmpDate: (date: string | null) => void;
 }
 
 // Cria o Contexto. O valor inicial é `undefined` porque ele só terá um valor
@@ -38,6 +42,8 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
   const [sosSettings, setSosSettings] = useState<SosSettings>(DEFAULT_SOS_SETTINGS);
+  const [cycleHistory, setCycleHistory] = useState<CycleLog[]>([]);
+  const [pregnancyLmpDate, setPregnancyLmpDate] = useState<string | null>(null);
   const [loading, setLoading] = useState(true); // Estado para saber se os dados já foram carregados do localStorage.
 
   // `useEffect` para carregar os dados do localStorage quando o app inicia.
@@ -51,6 +57,8 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         if (data.userProfile) setUserProfile(data.userProfile);
         if (data.dailyLogs) setDailyLogs(data.dailyLogs);
         if (data.sosSettings) setSosSettings(data.sosSettings);
+        if (data.cycleHistory) setCycleHistory(data.cycleHistory);
+        if (data.pregnancyLmpDate) setPregnancyLmpDate(data.pregnancyLmpDate);
       }
     } catch (error) {
       console.error("Failed to load data from localStorage", error);
@@ -59,22 +67,32 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Função para salvar os dados no localStorage sempre que eles mudarem.
-  const saveDataToLocalStorage = useCallback((data: MoodLuaData) => {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
-    } catch (error) {
-      console.error("Failed to save data to localStorage", error);
+  // `useEffect` para salvar os dados no localStorage sempre que qualquer um deles mudar.
+  // Esta abordagem garante que o estado do aplicativo seja sempre persistido.
+  useEffect(() => {
+    if (!loading) {
+      const dataToSave: MoodLuaData = {
+        userProfile,
+        dailyLogs,
+        sosSettings,
+        cycleHistory,
+        pregnancyLmpDate,
+      };
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
+      } catch (error) {
+        console.error("Failed to save data to localStorage", error);
+      }
     }
-  }, []);
+  }, [userProfile, dailyLogs, sosSettings, cycleHistory, pregnancyLmpDate, loading]);
 
-  // Função para atualizar o perfil e salvar.
-  const updateUserProfile = useCallback((profile: UserProfile) => {
+
+  // As funções abaixo agora apenas atualizam o estado. O `useEffect` acima cuida do salvamento.
+
+  const updateUserProfile = (profile: UserProfile) => {
     setUserProfile(profile);
-    saveDataToLocalStorage({ userProfile: profile, dailyLogs, sosSettings });
-  }, [dailyLogs, sosSettings, saveDataToLocalStorage]);
+  };
   
-  // Função para adicionar ou atualizar um log diário.
   const addOrUpdateDailyLog = useCallback((log: Omit<DailyLog, 'date'> & { date: Date }) => {
     const dateString = format(log.date, 'yyyy-MM-dd');
     const newLog = { ...log, date: dateString };
@@ -83,23 +101,52 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
       const existingLogIndex = prevLogs.findIndex(l => l.date === dateString);
       let updatedLogs;
       if (existingLogIndex > -1) {
-        // Atualiza o log existente
+        // Atualiza o log existente mesclando os dados
         updatedLogs = [...prevLogs];
         updatedLogs[existingLogIndex] = { ...updatedLogs[existingLogIndex], ...newLog };
       } else {
         // Adiciona um novo log
         updatedLogs = [...prevLogs, newLog];
       }
-      saveDataToLocalStorage({ userProfile, dailyLogs: updatedLogs, sosSettings });
       return updatedLogs;
     });
-  }, [userProfile, sosSettings, saveDataToLocalStorage]);
+  }, []);
 
-  // Função para atualizar as configurações de SOS e salvar.
-  const updateSosSettings = useCallback((settings: SosSettings) => {
+  const updateSosSettings = (settings: SosSettings) => {
     setSosSettings(settings);
-    saveDataToLocalStorage({ userProfile, dailyLogs, sosSettings: settings });
-  }, [userProfile, dailyLogs, saveDataToLocalStorage]);
+  };
+  
+  const startNewCycle = (newStartDate: Date) => {
+    if (!userProfile) return;
+
+    const oldStartDate = new Date(userProfile.lastMenstruationDate + 'T00:00:00');
+    
+    // Calcula o comprimento do ciclo que acabou de terminar
+    const cycleLength = differenceInDays(newStartDate, oldStartDate);
+
+    // Adiciona ao histórico apenas se for um ciclo válido (ex: maior que 10 dias)
+    if (cycleLength > 10) { 
+        const newHistoryEntry: CycleLog = {
+            startDate: userProfile.lastMenstruationDate,
+            cycleLength: cycleLength
+        };
+        setCycleHistory(prevHistory => [...prevHistory, newHistoryEntry]);
+    }
+
+    // Atualiza o perfil da usuária com a nova data de início
+    const newStartDateStr = format(newStartDate, 'yyyy-MM-dd');
+    setUserProfile(prevProfile => prevProfile ? { ...prevProfile, lastMenstruationDate: newStartDateStr } : null);
+
+    // Registra automaticamente o fluxo para a duração do período informada
+    for (let i = 0; i < userProfile.flowDurationDays; i++) {
+        const dateOfFlow = addDays(newStartDate, i);
+        addOrUpdateDailyLog({ date: dateOfFlow, flowIntensity: 'médio' });
+    }
+  };
+
+  const updatePregnancyLmpDate = (date: string | null) => {
+    setPregnancyLmpDate(date);
+  };
 
   // Função para buscar um log de uma data específica.
   const getLogForDate = useCallback((date: Date): DailyLog | undefined => {
@@ -112,11 +159,15 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     userProfile,
     dailyLogs,
     sosSettings,
+    cycleHistory,
+    pregnancyLmpDate,
     loading,
     updateUserProfile,
     addOrUpdateDailyLog,
     updateSosSettings,
     getLogForDate,
+    startNewCycle,
+    updatePregnancyLmpDate,
   };
 
   return (

@@ -2,19 +2,18 @@
 // O 'use client' é necessário porque usamos hooks do React (useState) e lidamos
 // com a interação do usuário no navegador, como cliques de botão e preenchimento de formulário.
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { addDays, differenceInDays, format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-// Importa o novo ícone 'Ruler' para a seção de tamanho
 import { Baby, HeartPulse, Stethoscope, Carrot, Ruler } from 'lucide-react';
+import { useCycleData } from '@/context/cycle-data-context';
 
 // --- LÓGICA DE DADOS (Equivalente ao "script.js" em parte) ---
 
 // BANCO DE DADOS 1: Dicas sobre o desenvolvimento do bebê por semana.
-// Foco no que está acontecendo (formação de órgãos, etc.), sem mencionar o tamanho.
 const weeklyDevelopment: Record<number, string> = {
   4: 'O coração do seu bebê começa a se formar e a bater. É um pequeno tubo que em breve se tornará um órgão complexo.',
   5: 'O cérebro, a medula espinhal e outros órgãos principais começam a se formar. O embrião parece um pequeno girino.',
@@ -32,7 +31,6 @@ const weeklyDevelopment: Record<number, string> = {
 };
 
 // BANCO DE DADOS 2: Comparações de tamanho do bebê por semana.
-// Foco apenas na comparação visual com frutas e objetos.
 const weeklySizeComparison: Record<number, string> = {
     4: 'um grão de papoula',
     6: 'um grão de lentilha',
@@ -68,22 +66,59 @@ const getSizeComparison = (week: number): string | null => {
   return closestWeek ? weeklySizeComparison[closestWeek] : null;
 };
 
+type PregnancyInfo = {
+  weeks: number;
+  days: number;
+  dueDate: string;
+  developmentTip: string;
+  sizeComparison: string | null;
+};
+
 // --- COMPONENTE REACT (Equivalente ao "HTML" e "JavaScript" juntos) ---
 
 export default function PregnancyPage() {
-  // --- ESTADO (State Management) ---
+  const { pregnancyLmpDate, updatePregnancyLmpDate } = useCycleData();
   const [lmpDate, setLmpDate] = useState<string>('');
+  const [pregnancyInfo, setPregnancyInfo] = useState<PregnancyInfo | null>(null);
 
-  // Atualiza o estado para incluir a nova informação de 'sizeComparison'.
-  const [pregnancyInfo, setPregnancyInfo] = useState<{
-    weeks: number;
-    days: number;
-    dueDate: string;
-    developmentTip: string;
-    sizeComparison: string | null;
-  } | null>(null);
+  // Função central para calcular e atualizar o estado da gravidez
+  const calculatePregnancy = (dateStr: string) => {
+    const date = new Date(`${dateStr}T00:00:00`);
+    if (!dateStr || !isValid(date)) {
+        setPregnancyInfo(null);
+        return;
+    }
 
-  // --- FUNÇÕES (Lógica de Eventos) ---
+    const today = new Date();
+    const totalDays = differenceInDays(today, date);
+    if (totalDays < 0) {
+        setPregnancyInfo(null);
+        return;
+    }
+
+    const weeks = Math.floor(totalDays / 7);
+    const days = totalDays % 7;
+    const dueDate = addDays(date, 280);
+
+    setPregnancyInfo({
+      weeks,
+      days,
+      dueDate: format(dueDate, "d 'de' MMMM 'de' yyyy", { locale: ptBR }),
+      developmentTip: getDevelopmentTip(weeks),
+      sizeComparison: getSizeComparison(weeks),
+    });
+  };
+
+  // Efeito que roda uma vez para carregar a data salva do contexto
+  useEffect(() => {
+    if (pregnancyLmpDate) {
+      setLmpDate(pregnancyLmpDate);
+      calculatePregnancy(pregnancyLmpDate);
+    }
+  }, [pregnancyLmpDate]);
+
+
+  // Função chamada pelo botão "Calcular"
   const handleCalculatePregnancy = () => {
     const date = new Date(`${lmpDate}T00:00:00`);
 
@@ -93,31 +128,21 @@ export default function PregnancyPage() {
     }
 
     const today = new Date();
-    const totalDays = differenceInDays(today, date);
-
-    if (totalDays < 0) {
+    if (differenceInDays(today, date) < 0) {
       alert('A data da última menstruação não pode ser no futuro.');
       return;
     }
-
-    const weeks = Math.floor(totalDays / 7);
-    const days = totalDays % 7;
-    const dueDate = addDays(date, 280);
-
-    // Atualiza o estado com todos os dados, incluindo a nova comparação de tamanho.
-    setPregnancyInfo({
-      weeks,
-      days,
-      dueDate: format(dueDate, "d 'de' MMMM 'de' yyyy", { locale: ptBR }),
-      developmentTip: getDevelopmentTip(weeks),
-      sizeComparison: getSizeComparison(weeks), // Adiciona o tamanho do bebê
-    });
+    
+    // Salva a data no contexto para persistência
+    updatePregnancyLmpDate(lmpDate);
+    // Roda o cálculo com a nova data
+    calculatePregnancy(lmpDate);
   };
 
-  // --- RENDERIZAÇÃO (O que aparece na tela - Equivalente ao "HTML") ---
+  // --- RENDERIZAÇÃO (O que aparece na tela) ---
   return (
     <div className="p-4 space-y-6">
-      {/* Card 1: Calculadora de Gravidez (sem alterações) */}
+      {/* Card 1: Calculadora de Gravidez */}
       <Card className="bg-card/80">
         <CardHeader>
           <div className="flex justify-center mb-2">
@@ -148,7 +173,7 @@ export default function PregnancyPage() {
       {/* --- Seção de Resultados --- */}
       {pregnancyInfo && (
         <div className="space-y-6 animate-in fade-in-50">
-          {/* Card 2: Resultados do Cálculo (sem alterações) */}
+          {/* Card 2: Resultados do Cálculo */}
           <Card>
             <CardHeader>
               <CardTitle className="text-xl text-center text-primary">Resumo da sua Gestação</CardTitle>
@@ -168,7 +193,6 @@ export default function PregnancyPage() {
           </Card>
           
           {/* --- NOVO CARD: Tamanho do Bebê --- */}
-          {/* Este card só aparece se existir uma comparação de tamanho para a semana atual */}
           {pregnancyInfo.sizeComparison && (
             <Card>
               <CardHeader>
@@ -186,7 +210,7 @@ export default function PregnancyPage() {
             </Card>
           )}
 
-          {/* Card 3: Desenvolvimento do Bebê (agora focado apenas no desenvolvimento) */}
+          {/* Card 3: Desenvolvimento do Bebê */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">
@@ -198,7 +222,7 @@ export default function PregnancyPage() {
             </CardContent>
           </Card>
 
-          {/* Card 4: Dicas de Saúde (sem alterações) */}
+          {/* Card 4: Dicas de Saúde */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Dicas de Saúde para a Gestante</CardTitle>
@@ -232,21 +256,3 @@ export default function PregnancyPage() {
     </div>
   );
 }
-
-/*
-COMO ESTE CÓDIGO SE INTEGRA AO RESTO DO APLICATIVO?
-
-1. Roteamento: O arquivo está em `src/app/pregnancy/page.tsx`. O sistema de roteamento do Next.js
-   automaticamente cria a página no endereço `/pregnancy`.
-
-2. Navegação: O componente `src/components/app-shell.tsx` já tem um link na barra de navegação
-   inferior que aponta para `/pregnancy`. É por isso que o botão "Gravidez" já funciona.
-
-3. Estilos: Os componentes como `<Card>`, `<Button>` e as classes como `p-4` vêm do sistema
-   de design (ShadCN e Tailwind CSS) do projeto. Isso garante que a nova aba tenha a mesma
-   aparência do restante do aplicativo.
-
-4. Lógica (JavaScript): Toda a lógica de cálculo e interação está contida neste mesmo arquivo,
-   usando os recursos do React (`useState`, `onClick`, etc.). Isso mantém o código organizado
-   e específico para esta funcionalidade.
-*/

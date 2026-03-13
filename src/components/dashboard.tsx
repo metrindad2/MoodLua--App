@@ -23,7 +23,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 
 export default function Dashboard() {
-  const { userProfile, updateUserProfile, dailyLogs, addOrUpdateDailyLog } = useCycleData();
+  const { userProfile, dailyLogs, startNewCycle } = useCycleData();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [newStartDate, setNewStartDate] = useState<Date | null>(null);
   const { toast } = useToast();
@@ -33,19 +33,10 @@ export default function Dashboard() {
   const cycleInfo = calculateCycleInfo(userProfile);
   if (!cycleInfo) return null;
 
-  const handleStartPeriod = (startDate: Date) => {
-    if (userProfile && addOrUpdateDailyLog) {
-      updateUserProfile({
-        ...userProfile,
-        lastMenstruationDate: format(startDate, 'yyyy-MM-dd'),
-      });
+  const handleConfirmNewPeriod = (startDate: Date) => {
+    if (userProfile && startNewCycle) {
+      startNewCycle(startDate);
       
-      // Registra automaticamente o fluxo como 'médio' para a duração do período informada.
-      for (let i = 0; i < userProfile.flowDurationDays; i++) {
-        const dateOfFlow = addDays(startDate, i);
-        addOrUpdateDailyLog({ date: dateOfFlow, flowIntensity: 'médio' });
-      }
-
       toast({
         title: 'Novo ciclo iniciado!',
         description: `Sua menstruação foi registrada automaticamente por ${userProfile.flowDurationDays} dias.`,
@@ -175,7 +166,7 @@ export default function Dashboard() {
                   Cancelar
                 </Button>
                 <Button
-                  onClick={() => newStartDate && handleStartPeriod(newStartDate)}
+                  onClick={() => newStartDate && handleConfirmNewPeriod(newStartDate)}
                   disabled={!newStartDate}
                   className="bg-accent text-accent-foreground hover:bg-accent/90"
                 >

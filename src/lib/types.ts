@@ -42,6 +42,14 @@ export type DailyLog = {
 };
 
 /**
+ * Define um registro no histórico de ciclos.
+ */
+export type CycleLog = {
+  startDate: string; // "YYYY-MM-DD"
+  cycleLength: number; // em dias
+};
+
+/**
  * Define a estrutura para as configurações da função de emergência (SOS).
  */
 export type SosSettings = {
@@ -59,4 +67,6 @@ export type MoodLuaData = {
   userProfile: UserProfile | null;
   dailyLogs: DailyLog[];
   sosSettings: SosSettings;
+  cycleHistory: CycleLog[];
+  pregnancyLmpDate: string | null;
 };
