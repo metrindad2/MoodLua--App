@@ -75,11 +75,13 @@ export default function InsightsPage() {
   
   const moodChartData = dailyLogs
     .filter(log => log.mood)
+    // Ordena os registros por data antes de formatá-los para o gráfico.
+    .sort((a, b) => new Date(a.date + 'T00:00:00').getTime() - new Date(b.date + 'T00:00:00').getTime())
     .map(log => ({
-      date: format(new Date(log.date), 'dd/MMM', { locale: ptBR }),
+      // Correção: Adiciona 'T00:00:00' para garantir que a data seja lida no fuso horário local.
+      date: format(new Date(log.date + 'T00:00:00'), 'dd/MMM', { locale: ptBR }),
       humor: moodToValue(log.mood),
-    }))
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    }));
 
 
   return (

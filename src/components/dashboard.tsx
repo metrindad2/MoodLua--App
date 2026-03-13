@@ -62,7 +62,8 @@ export default function Dashboard() {
 
   // Filtra os registros para pegar apenas os dias com fluxo menstrual desde o início do período atual.
   const periodLogs = dailyLogs.filter(log => {
-      const logDate = startOfDay(new Date(log.date));
+      // Correção: Adicionar 'T00:00:00' para garantir que a data seja lida no fuso horário local.
+      const logDate = startOfDay(new Date(log.date + 'T00:00:00'));
       return logDate >= cycleInfo.menstruationStartDate && log.flowIntensity && log.flowIntensity !== 'nenhum';
   });
 
@@ -70,16 +71,17 @@ export default function Dashboard() {
   if (periodLogs.length > 0) {
       // Encontra a data mais recente entre os dias registrados com fluxo.
       lastLoggedFlowDate = periodLogs.reduce((latest, current) => {
-          const latestDate = startOfDay(new Date(latest.date));
-          const currentDate = startOfDay(new Date(current.date));
+          // Correção: Adicionar 'T00:00:00' para garantir que a data seja lida no fuso horário local.
+          const latestDate = startOfDay(new Date(latest.date + 'T00:00:00'));
+          const currentDate = startOfDay(new Date(current.date + 'T00:00:00'));
           return isAfter(currentDate, latestDate) ? current : latest;
       }).date;
   }
   
   // A data final do destaque será a data mais tardia entre a previsão e o último dia registrado.
   // Isso garante que o destaque se estenda se o período for mais longo, mas não encurte se a usuária esquecer de registrar.
-  const highlightEndDate = lastLoggedFlowDate && isAfter(startOfDay(new Date(lastLoggedFlowDate)), predictedEndDate) 
-      ? startOfDay(new Date(lastLoggedFlowDate)) 
+  const highlightEndDate = lastLoggedFlowDate && isAfter(startOfDay(new Date(lastLoggedFlowDate + 'T00:00:00')), predictedEndDate) 
+      ? startOfDay(new Date(lastLoggedFlowDate + 'T00:00:00')) 
       : predictedEndDate;
 
   const highlightedRange = {
@@ -135,7 +137,6 @@ export default function Dashboard() {
           <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
             <DialogTrigger asChild>
               <Button
-                variant="outline"
                 className="w-full"
                 onClick={() => setNewStartDate(new Date())}
               >

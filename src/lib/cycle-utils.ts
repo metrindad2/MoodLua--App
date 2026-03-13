@@ -42,7 +42,9 @@ export function calculateCycleInfo(userProfile: UserProfile): CycleInfo | null {
   }
 
   const today = startOfDay(new Date());
-  const lastPeriod = startOfDay(new Date(userProfile.lastMenstruationDate));
+  // Correção: Adicionar 'T00:00:00' para garantir que a data seja interpretada no fuso horário local
+  // e não em UTC, o que causava o erro de "um dia antes".
+  const lastPeriod = startOfDay(new Date(userProfile.lastMenstruationDate + 'T00:00:00'));
 
   // O dia atual do ciclo é a diferença de dias desde a última menstruação + 1.
   const currentCycleDay = differenceInDays(today, lastPeriod) + 1;
@@ -94,12 +96,12 @@ export function calculateCycleInfo(userProfile: UserProfile): CycleInfo | null {
  */
 export function prepareDataForAI(userProfile: UserProfile, dailyLogs: DailyLog[], cycleInfo: CycleInfo) {
   return {
-    lastMenstruationDate: formatISO(new Date(userProfile.lastMenstruationDate), { representation: 'date' }),
+    lastMenstruationDate: formatISO(new Date(userProfile.lastMenstruationDate + 'T00:00:00'), { representation: 'date' }),
     flowDurationDays: userProfile.flowDurationDays,
     cycleLengthDays: userProfile.cycleLengthDays,
     currentCycleDay: cycleInfo.currentCycleDay,
     loggedData: dailyLogs.map(log => ({
-      date: formatISO(new Date(log.date), { representation: 'date' }),
+      date: formatISO(new Date(log.date + 'T00:00:00'), { representation: 'date' }),
       flowIntensity: log.flowIntensity,
       symptoms: log.symptoms,
       mood: log.mood
