@@ -6,9 +6,8 @@ import { calculateCycleInfo } from '@/lib/cycle-utils';
 import { CycleProgress } from './cycle-progress';
 import { PhaseTips } from './phase-tips';
 import { DailyTracker } from './daily-tracker';
-import { CycleHistory } from './cycle-history';
 import { SimpleCalendar } from './simple-calendar';
-import { addDays, subDays, format, startOfDay, isAfter } from 'date-fns';
+import { addDays, subDays, startOfDay, isAfter } from 'date-fns';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import {
@@ -179,7 +178,6 @@ export default function Dashboard() {
       </Card>
 
       <DailyTracker />
-      <CycleHistory />
     </div>
   );
 }

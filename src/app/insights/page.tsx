@@ -8,21 +8,6 @@ import { personalizedCycleInsights, PersonalizedCycleInsightsOutput } from '@/ai
 import { BrainCircuit, Star, Orbit, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { calculateCycleInfo, prepareDataForAI } from '@/lib/cycle-utils';
-import { Mood } from '@/lib/types';
-import { MOOD_MAP } from '@/lib/moods';
-
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from 'recharts';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 /**
  * Página de Insights com IA.
@@ -69,21 +54,6 @@ export default function InsightsPage() {
     }
   };
 
-  const moodToValue = (mood: Mood | undefined) => {
-    return mood ? MOOD_MAP.get(mood)?.score ?? null : null;
-  }
-  
-  const moodChartData = dailyLogs
-    .filter(log => log.mood)
-    // Ordena os registros por data antes de formatá-los para o gráfico.
-    .sort((a, b) => new Date(a.date + 'T00:00:00').getTime() - new Date(b.date + 'T00:00:00').getTime())
-    .map(log => ({
-      // Correção: Adiciona 'T00:00:00' para garantir que a data seja lida no fuso horário local.
-      date: format(new Date(log.date + 'T00:00:00'), 'dd/MMM', { locale: ptBR }),
-      humor: moodToValue(log.mood),
-    }));
-
-
   return (
     <div className="p-4 space-y-6">
       <Card>
@@ -122,36 +92,6 @@ export default function InsightsPage() {
               </ul>
             </CardContent>
           </Card>
-
-          {dailyLogs.some(log => log.mood) && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Gráfico de Humor</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={moodChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" fontSize={12} />
-                  <YAxis 
-                    domain={[0, 5.5]} 
-                    ticks={[1, 3, 5]}
-                    tickFormatter={(v) => {
-                        if(v === 1) return 'Baixo';
-                        if(v === 3) return 'Normal';
-                        if(v === 5) return 'Alto';
-                        return '';
-                    }} 
-                    fontSize={12} 
-                  />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="humor" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-          )}
 
           <Card>
             <CardHeader>
