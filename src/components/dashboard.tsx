@@ -12,22 +12,21 @@ import { addDays, subDays, format } from 'date-fns';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Droplets } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Dashboard() {
   const { userProfile, updateUserProfile } = useCycleData();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [newStartDate, setNewStartDate] = useState<Date | null>(null);
   const { toast } = useToast();
 
   if (!userProfile) return null;
@@ -35,17 +34,18 @@ export default function Dashboard() {
   const cycleInfo = calculateCycleInfo(userProfile);
   if (!cycleInfo) return null;
 
-  const handleStartPeriod = () => {
+  const handleStartPeriod = (startDate: Date) => {
     if (userProfile) {
       updateUserProfile({
         ...userProfile,
-        lastMenstruationDate: format(new Date(), 'yyyy-MM-dd'),
+        lastMenstruationDate: format(startDate, 'yyyy-MM-dd'),
       });
       toast({
         title: 'Novo ciclo iniciado!',
         description: 'As previsões do seu ciclo foram recalculadas.',
       });
       setIsConfirmOpen(false);
+      setNewStartDate(null);
     }
   };
 
@@ -106,29 +106,58 @@ export default function Dashboard() {
       <Card>
         <CardContent className="pt-6">
           {!cycleInfo.isMenstruating ? (
-            <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" className="w-full">
+            <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setNewStartDate(new Date())}
+                >
                   <Droplets className="mr-2" />
                   Registrar Início do Período
                 </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Confirmar Início da Menstruação?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Isso definirá hoje como o primeiro dia do seu novo ciclo menstrual e as previsões serão recalculadas a partir desta data.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleStartPeriod} className="bg-accent text-accent-foreground hover:bg-accent/90">Confirmar</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Quando seu período começou?</DialogTitle>
+                  <DialogDescription>
+                    Selecione a data de início da sua última menstruação para
+                    recalcular as previsões do ciclo.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="py-4">
+                  <SimpleCalendar
+                    initialDate={newStartDate || new Date()}
+                    selectedDate={newStartDate}
+                    onDateClick={(date) => setNewStartDate(date)}
+                  />
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setIsConfirmOpen(false);
+                      setNewStartDate(null);
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={() => newStartDate && handleStartPeriod(newStartDate)}
+                    disabled={!newStartDate}
+                    className="bg-accent text-accent-foreground hover:bg-accent/90"
+                  >
+                    Confirmar Data
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           ) : (
             <div className="text-center text-sm text-muted-foreground p-2">
-              <p>Seu período menstrual está em andamento. Continue fazendo seus registros diários!</p>
+              <p>
+                Seu período menstrual está em andamento. Continue fazendo seus
+                registros diários!
+              </p>
             </div>
           )}
         </CardContent>
