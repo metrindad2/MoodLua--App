@@ -52,11 +52,18 @@ const PersonalizedCycleInsightsInputSchema = z.object({
             'Lista de sintomas experientes neste dia (ex: "dor de cabeça", "cólicas").'
           ),
         mood: z
-          .enum(["feliz", "neutra", "triste", "irritada", "ansiosa", "energizada", "cansada"])
+          .enum([
+            'feliz',
+            'energizada',
+            'calma',
+            'neutra',
+            'ansiosa',
+            'cansada',
+            'triste',
+            'irritada',
+          ])
           .optional()
-          .describe(
-            'Humor neste dia (ex: "feliz", "neutra", "triste", "irritada").'
-          ),
+          .describe('Humor neste dia.'),
       })
     )
     .describe(

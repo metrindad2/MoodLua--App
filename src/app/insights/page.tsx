@@ -9,6 +9,7 @@ import { BrainCircuit, Star, Orbit, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { calculateCycleInfo, prepareDataForAI } from '@/lib/cycle-utils';
 import { Mood } from '@/lib/types';
+import { MOOD_MAP } from '@/lib/moods';
 
 import {
   LineChart,
@@ -69,16 +70,7 @@ export default function InsightsPage() {
   };
 
   const moodToValue = (mood: Mood | undefined) => {
-    const mapping: Record<Mood, number> = {
-      'feliz': 5,
-      'energizada': 4,
-      'neutra': 3,
-      'cansada': 2,
-      'ansiosa': 2,
-      'triste': 1,
-      'irritada': 1,
-    };
-    return mood ? mapping[mood] : null;
+    return mood ? MOOD_MAP.get(mood)?.score ?? null : null;
   }
   
   const moodChartData = dailyLogs
@@ -139,7 +131,17 @@ export default function InsightsPage() {
                 <LineChart data={moodChartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" fontSize={12} />
-                  <YAxis domain={[0, 5]} tickFormatter={(v) => ['Ruim', '', 'Ok', '', 'Bom'][v-1]} fontSize={12} />
+                  <YAxis 
+                    domain={[0, 5.5]} 
+                    ticks={[1, 3, 5]}
+                    tickFormatter={(v) => {
+                        if(v === 1) return 'Baixo';
+                        if(v === 3) return 'Normal';
+                        if(v === 5) return 'Alto';
+                        return '';
+                    }} 
+                    fontSize={12} 
+                  />
                   <Tooltip />
                   <Legend />
                   <Line type="monotone" dataKey="humor" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />

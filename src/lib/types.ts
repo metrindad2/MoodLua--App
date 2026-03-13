@@ -22,13 +22,13 @@ export type UserProfile = {
  */
 export type Mood =
   | 'feliz'
+  | 'energizada'
   | 'calma'
-  | 'triste'
-  | 'irritada'
+  | 'neutra'
   | 'ansiosa'
   | 'cansada'
-  | 'carinhosa'
-  | 'neutra';
+  | 'triste'
+  | 'irritada';
 
 /**
  * Define a estrutura para um registro diário.

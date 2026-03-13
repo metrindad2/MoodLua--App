@@ -7,30 +7,8 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Droplets } from 'lucide-react';
-
-const moodOptions: { value: Mood; label: string; icon: string }[] = [
-  { value: 'feliz', label: 'Feliz', icon: '😊' },
-  { value: 'calma', label: 'Calma', icon: '😌' },
-  { value: 'triste', label: 'Triste', icon: '😔' },
-  { value: 'irritada', label: 'Irritada', icon: '😠' },
-  { value: 'ansiosa', label: 'Ansiosa', icon: '😟' },
-  { value: 'cansada', label: 'Cansada', icon: '😩' },
-  { value: 'carinhosa', label: 'Carinhosa', icon: '🥰' },
-  { value: 'neutra', label: 'Neutra', icon: '😐' },
-];
-
-const symptomsOptions = [
-  { id: 'dor_de_cabeca', label: 'Dor de cabeça', icon: '🤕' },
-  { id: 'colica', label: 'Cólica', icon: '😖' },
-  { id: 'inchaco', label: 'Inchaço', icon: '🎈' },
-  { id: 'desejo_por_doce', label: 'Desejo por doce', icon: '🍫' },
-  { id: 'dor_nas_costas', label: 'Dor nas costas', icon: '🚶‍♀️' },
-  { id: 'nausea', label: 'Náusea', icon: '🤢' },
-  { id: 'insonia', label: 'Insônia', icon: ' sleepless' },
-  { id: 'seios_sensiveis', label: 'Seios sensíveis', icon: '🍈' },
-  { id: 'tontura', label: 'Tontura', icon: '😵' },
-  { id: 'mais_apetite', label: 'Mais apetite', icon: '🍔' },
-];
+import { MOOD_OPTIONS } from '@/lib/moods';
+import { SYMPTOM_OPTIONS } from '@/lib/symptoms';
 
 const flowOptions: { value: DailyLog['flowIntensity']; label: string }[] = [
     { value: 'nenhum', label: 'Nenhum' },
@@ -118,7 +96,7 @@ export function DailyTracker() {
 
             <p className="text-sm font-medium mt-6 mb-4">Humor</p>
             <div className="grid grid-cols-4 gap-2">
-              {moodOptions.map((option) => (
+              {MOOD_OPTIONS.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => handleMoodSelect(option.value)}
@@ -135,8 +113,8 @@ export function DailyTracker() {
               ))}
             </div>
              <p className="text-sm font-medium mt-6 mb-4">Sintomas</p>
-              <div className="grid grid-cols-4 gap-2">
-                {symptomsOptions.map((option) => (
+              <div className="grid grid-cols-5 gap-2">
+                {SYMPTOM_OPTIONS.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => handleSymptomSelect(option.id)}
