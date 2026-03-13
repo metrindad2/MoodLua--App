@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader } from './ui/card';
 import { format, addDays, subDays, isToday, isSameDay, startOfDay, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { Droplets, CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { MOOD_OPTIONS } from '@/lib/moods';
 import { SYMPTOM_OPTIONS } from '@/lib/symptoms';
 import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
@@ -79,7 +79,7 @@ export function DailyTracker() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <h2 className="text-lg font-semibold">Registro Diário</h2>
+          <h2 className="text-lg font-semibold">Como você está hoje?</h2>
           <div className="flex items-center gap-1">
               <Button variant="ghost" size="icon" onClick={goToPreviousDay}>
                   <ChevronLeft className="h-5 w-5" />
@@ -112,62 +112,67 @@ export function DailyTracker() {
               </Button>
           </div>
       </CardHeader>
-      <CardContent className="pt-4">
-        <p className="text-sm font-medium mb-4 flex items-center gap-2">
-            <Droplets className="w-4 h-4 text-primary" /> Fluxo Menstrual
-        </p>
-        <div className="grid grid-cols-4 gap-2">
-            {flowOptions.map((option) => (
-                <button
-                    key={option.value}
-                    onClick={() => handleFlowSelect(option.value)}
-                    className={cn(
-                        'flex items-center justify-center p-2 rounded-lg border-2 transition-colors text-sm h-12',
-                        selectedFlow === option.value
-                            ? 'bg-primary/20 border-primary font-semibold'
-                            : 'bg-transparent border-transparent hover:bg-primary/10'
-                    )}
-                >
-                  {option.label}
-                </button>
-            ))}
+      <CardContent className="pt-4 space-y-6">
+        <div>
+            <h3 className="text-sm font-medium mb-3 text-muted-foreground">Fluxo</h3>
+            <div className="grid grid-cols-4 gap-2">
+                {flowOptions.map((option) => (
+                    <button
+                        key={option.value}
+                        onClick={() => handleFlowSelect(option.value)}
+                        className={cn(
+                            'flex items-center justify-center p-2 rounded-lg border-2 transition-colors text-sm h-12',
+                            selectedFlow === option.value
+                                ? 'bg-primary/10 border-primary font-semibold text-primary'
+                                : 'bg-muted/50 border-muted hover:bg-muted'
+                        )}
+                    >
+                      {option.label}
+                    </button>
+                ))}
+            </div>
         </div>
 
-        <p className="text-sm font-medium mt-6 mb-4">Humor</p>
-        <div className="grid grid-cols-4 gap-2">
-          {MOOD_OPTIONS.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => handleMoodSelect(option.value)}
-              className={cn(
-                  'flex flex-col items-center justify-center gap-1 p-2 rounded-lg border-2 transition-colors',
-                  selectedMood === option.value
-                    ? 'bg-accent/20 border-accent'
-                    : 'bg-transparent border-transparent hover:bg-accent/10'
-              )}
-            >
-              <span className="text-2xl">{option.icon}</span>
-              <span className="text-xs text-center">{option.label}</span>
-            </button>
-          ))}
+        <div>
+          <h3 className="text-sm font-medium mb-3 text-muted-foreground">Humor</h3>
+          <div className="grid grid-cols-4 gap-2">
+            {MOOD_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => handleMoodSelect(option.value)}
+                className={cn(
+                    'flex flex-col items-center justify-center gap-1 p-2 rounded-lg border-2 transition-colors h-20',
+                    selectedMood === option.value
+                      ? 'bg-accent/10 border-accent font-semibold text-accent'
+                      : 'bg-muted/50 border-muted hover:bg-muted'
+                )}
+              >
+                <span className="text-3xl">{option.icon}</span>
+                <span className="text-xs text-center">{option.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
-          <p className="text-sm font-medium mt-6 mb-4">Sintomas</p>
-          <div className="grid grid-cols-5 gap-2">
+        
+        <div>
+          <h3 className="text-sm font-medium mb-3 text-muted-foreground">Sintomas</h3>
+          <div className="grid grid-cols-4 gap-2">
             {SYMPTOM_OPTIONS.map((option) => (
               <button
                 key={option.id}
                 onClick={() => handleSymptomSelect(option.id)}
                 className={cn(
-                  'flex flex-col items-center justify-center gap-1 p-2 rounded-lg border-2 transition-colors',
+                  'flex flex-col items-center justify-center gap-1 p-2 rounded-lg border-2 transition-colors h-20',
                   selectedSymptoms.includes(option.id)
-                    ? 'bg-accent/20 border-accent'
-                    : 'bg-transparent border-transparent hover:bg-accent/10'
+                    ? 'bg-accent/10 border-accent font-semibold text-accent'
+                    : 'bg-muted/50 border-muted hover:bg-muted'
                 )}
               >
                 <span className="text-2xl">{option.icon}</span>
                 <span className="text-xs text-center">{option.label}</span>
               </button>
             ))}
+          </div>
         </div>
       </CardContent>
     </Card>
