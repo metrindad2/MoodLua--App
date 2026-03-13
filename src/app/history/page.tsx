@@ -6,319 +6,211 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from '@/components/ui/card';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-  BarChart,
-  Bar,
-} from 'recharts';
-import { format } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { calculateCycleInfo } from '@/lib/cycle-utils';
+import { format, parseISO, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { DailyLog, Mood } from '@/lib/types';
-import { MOOD_MAP } from '@/lib/moods';
-import { SYMPTOM_OPTIONS } from '@/lib/symptoms';
-import {
-  History,
-  Droplets,
-  Smile,
-  Activity,
-  CalendarDays,
-  BookOpenText,
-} from 'lucide-react';
+import { BrainCircuit, ChevronRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
+
+// Component to render the cycle dots visualization
+const CycleDots = ({
+  totalDays,
+  flowDays,
+  maxDots = 42,
+}: {
+  totalDays: number;
+  flowDays: number;
+  maxDots?: number;
+}) => {
+  const displayDots = Math.min(totalDays, maxDots);
+  const displayFlowDots = Math.min(flowDays, displayDots);
+
+  if (totalDays <= 0) return null;
+
+  return (
+    <div className="flex flex-wrap gap-1.5 mt-2">
+      {Array.from({ length: displayDots }).map((_, i) => (
+        <div
+          key={i}
+          className={cn(
+            'h-2 w-2 rounded-full',
+            i < displayFlowDots ? 'bg-accent' : 'bg-chart-2'
+          )}
+        />
+      ))}
+    </div>
+  );
+};
 
 export default function HistoryPage() {
-  const { dailyLogs, cycleHistory, loading } = useCycleData();
-
-  // Ordena os logs por data, do mais recente para o mais antigo
-  const sortedLogs = [...dailyLogs].sort(
-    (a, b) =>
-      new Date(b.date + 'T00:00:00').getTime() -
-      new Date(a.date + 'T00:00:00').getTime()
-  );
-
-  // 1. Dados para o Gráfico de Humor
-  const moodToValue = (mood: Mood | undefined) =>
-    mood ? MOOD_MAP.get(mood)?.score ?? null : null;
-  const moodChartData = [...dailyLogs]
-    .filter((log) => log.mood)
-    .sort(
-      (a, b) =>
-        new Date(a.date + 'T00:00:00').getTime() -
-        new Date(b.date + 'T00:00:00').getTime()
-    )
-    .map((log) => ({
-      date: format(new Date(log.date + 'T00:00:00'), 'dd/MMM', {
-        locale: ptBR,
-      }),
-      humor: moodToValue(log.mood),
-    }));
-
-  // 2. Dados de Frequência de Sintomas
-  const symptomCounts = new Map<string, number>();
-  dailyLogs.forEach((log) => {
-    log.symptoms?.forEach((symptomId) => {
-      symptomCounts.set(symptomId, (symptomCounts.get(symptomId) || 0) + 1);
-    });
-  });
-  const symptomFrequencyData = Array.from(symptomCounts.entries())
-    .map(([id, count]) => ({
-      id,
-      count,
-      label: SYMPTOM_OPTIONS.find((s) => s.id === id)?.label || id,
-      icon: SYMPTOM_OPTIONS.find((s) => s.id === id)?.icon,
-    }))
-    .sort((a, b) => b.count - a.count);
-
-  // 3. Dados para o Histórico de Fluxo
-  const flowIntensityMap: Record<string, number> = {
-    leve: 1,
-    médio: 2,
-    intenso: 3,
-  };
-  const flowChartData = [...dailyLogs]
-    .filter((log) => log.flowIntensity && log.flowIntensity !== 'nenhum')
-    .sort(
-      (a, b) =>
-        new Date(a.date + 'T00:00:00').getTime() -
-        new Date(b.date + 'T00:00:00').getTime()
-    )
-    .map((log) => ({
-      date: format(new Date(log.date + 'T00:00:00'), 'dd/MMM', {
-        locale: ptBR,
-      }),
-      intensidade: flowIntensityMap[log.flowIntensity!],
-    }));
-
-  // 4. Histórico de Ciclos Menstruais
-  const sortedHistory = [...cycleHistory].sort(
-    (a, b) =>
-      new Date(b.startDate + 'T00:00:00').getTime() -
-      new Date(a.startDate + 'T00:00:00').getTime()
-  );
+  const { userProfile, cycleHistory, loading } = useCycleData();
 
   if (loading) {
     return (
-      <div className="p-4 space-y-4">
-        <Skeleton className="h-24 w-full" />
+      <div className="p-4 space-y-6">
         <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-64 w-full" />
       </div>
     );
   }
 
-  return (
-    <div className="p-4 space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-primary">
-            <History className="h-6 w-6" />
-            Seu Histórico Completo
-          </CardTitle>
-          <CardDescription>
-            Visualize seus ciclos, humor, sintomas e registros diários.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+  if (!userProfile) {
+    return (
+      <div className="p-4">
+        <Card>
+          <CardContent className="pt-6 text-center text-muted-foreground">
+            <p>Por favor, configure seu perfil para ver o histórico.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-      {/* Histórico de Ciclos Menstruais */}
-      <Card>
+  const currentCycleInfo = calculateCycleInfo(userProfile);
+
+  // --- Data Calculation ---
+  const sortedHistory = [...cycleHistory].sort((a, b) =>
+    parseISO(b.startDate).getTime() - parseISO(a.startDate).getTime()
+  );
+  const lastCycle = sortedHistory.length > 0 ? sortedHistory[0] : null;
+
+  const cycleLengths = cycleHistory.map((c) => c.cycleLength);
+  const cycleVariation =
+    cycleLengths.length > 1
+      ? { min: Math.min(...cycleLengths), max: Math.max(...cycleLengths) }
+      : { min: userProfile.cycleLengthDays, max: userProfile.cycleLengthDays };
+
+  return (
+    <div className="p-4 space-y-6 bg-background text-foreground">
+      {/* Meus Ciclos Card */}
+      <Card className="bg-card shadow-lg overflow-hidden">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <CalendarDays className="text-primary" /> Histórico de Ciclos
-          </CardTitle>
+          <CardTitle className="text-xl">Meus Ciclos</CardTitle>
         </CardHeader>
-        <CardContent>
-          {sortedHistory.length > 0 ? (
-            <ul className="space-y-3">
-              {sortedHistory.map((cycle, index) => (
-                <li
-                  key={index}
-                  className="flex justify-between items-center text-sm"
-                >
-                  <span>
-                    Início em{' '}
-                    {format(
-                      new Date(cycle.startDate + 'T00:00:00'),
-                      'dd MMM yyyy',
-                      { locale: ptBR }
-                    )}
-                  </span>
-                  <span className="font-semibold text-primary">
-                    {cycle.cycleLength} dias
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Nenhum ciclo completo registrado ainda.
+        <CardContent className="space-y-4 text-sm">
+          <div className="space-y-3 px-1">
+            {lastCycle ? (
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">
+                  Duração do ciclo anterior
+                </span>
+                <span className="font-bold">{lastCycle.cycleLength} dias</span>
+              </div>
+            ) : (
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">
+                  Duração média do ciclo
+                </span>
+                <span className="font-bold">
+                  {userProfile.cycleLengthDays} dias
+                </span>
+              </div>
+            )}
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">
+                Duração da menstruação (média)
+              </span>
+              <span className="font-bold">
+                {userProfile.flowDurationDays} dias
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">
+                Variação na duração do ciclo
+              </span>
+              <span className="font-bold">
+                {cycleVariation.min === cycleVariation.max
+                  ? `${cycleVariation.min}`
+                  : `${cycleVariation.min}-${cycleVariation.max}`}{' '}
+                dias
+              </span>
+            </div>
+          </div>
+
+          <div className="!mt-6 rounded-lg bg-muted/50 p-4">
+            <h3 className="font-semibold flex items-center gap-2">
+              <BrainCircuit className="text-primary w-5 h-5" /> Assistente de
+              Saúde
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1 mb-3">
+              Vamos examinar as estatísticas do seu ciclo e os sintomas, eventos
+              e humores registrados.
             </p>
-          )}
+            <Link href="/insights" passHref>
+              <Button className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
+                Vamos conversar
+              </Button>
+            </Link>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Gráfico de Humor */}
-      {moodChartData.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Smile className="text-accent" /> Gráfico de Humor
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={moodChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" fontSize={12} />
-                <YAxis
-                  domain={[0, 5.5]}
-                  ticks={[1, 3, 5]}
-                  tickFormatter={(v) => {
-                    if (v === 1) return 'Baixo';
-                    if (v === 3) return 'Normal';
-                    if (v === 5) return 'Alto';
-                    return '';
-                  }}
-                  fontSize={12}
-                />
-                <Tooltip />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="humor"
-                  stroke="hsl(var(--accent))"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Frequência de Sintomas */}
-      {symptomFrequencyData.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Activity className="text-secondary" /> Frequência de Sintomas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {symptomFrequencyData.map((symptom) => (
-                <div
-                  key={symptom.id}
-                  className="flex items-center justify-between text-sm"
-                >
-                  <span className="flex items-center gap-2">
-                    {symptom.icon} {symptom.label}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {symptom.count} {symptom.count > 1 ? 'vezes' : 'vez'}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Histórico de Fluxo */}
-      {flowChartData.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Droplets className="text-primary" /> Histórico de Fluxo
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={flowChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" fontSize={12} />
-                <YAxis
-                  domain={[0, 4]}
-                  ticks={[1, 2, 3]}
-                  tickFormatter={(v) => {
-                    if (v === 1) return 'Leve';
-                    if (v === 2) return 'Médio';
-                    if (v === 3) return 'Intenso';
-                    return '';
-                  }}
-                  fontSize={12}
-                />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="intensidade" fill="hsl(var(--primary))" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Lista de Registros Diários */}
-      <Card>
+      {/* Histórico Card */}
+      <Card className="bg-card shadow-lg">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <BookOpenText className="text-muted-foreground" /> Registros Diários
-          </CardTitle>
+          <CardTitle className="text-xl">Histórico</CardTitle>
         </CardHeader>
-        <CardContent>
-          {sortedLogs.length > 0 ? (
-            <div className="max-h-96 overflow-y-auto space-y-4 pr-2">
-              {sortedLogs.map((log: DailyLog) => {
-                const mood = log.mood ? MOOD_MAP.get(log.mood) : null;
-                const symptoms = log.symptoms
-                  ?.map(
-                    (sId) => SYMPTOM_OPTIONS.find((so) => so.id === sId)?.label
-                  )
-                  .filter(Boolean);
-
-                return (
-                  <div key={log.date} className="p-3 rounded-lg border">
-                    <p className="font-semibold">
-                      {format(
-                        new Date(log.date + 'T00:00:00'),
-                        "dd 'de' MMMM, yyyy",
-                        { locale: ptBR }
-                      )}
-                    </p>
-                    <div className="text-sm text-muted-foreground mt-2 space-y-1">
-                      {log.flowIntensity && log.flowIntensity !== 'nenhum' && (
-                        <p>
-                          <span className="font-medium text-foreground">Fluxo:</span>{' '}
-                          {log.flowIntensity}
-                        </p>
-                      )}
-                      {mood && (
-                        <p>
-                          <span className="font-medium text-foreground">Humor:</span>{' '}
-                          {mood.icon} {mood.label}
-                        </p>
-                      )}
-                      {symptoms && symptoms.length > 0 && (
-                        <p>
-                          <span className="font-medium text-foreground">Sintomas:</span>{' '}
-                          {symptoms.join(', ')}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+        <CardContent className="space-y-1">
+          {/* Current Cycle */}
+          {currentCycleInfo && (
+            <div className="p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="font-bold">
+                    Ciclo atual: {currentCycleInfo.currentCycleDay} dias
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Começou em{' '}
+                    {format(
+                      currentCycleInfo.menstruationStartDate,
+                      "d 'de' MMMM",
+                      { locale: ptBR }
+                    )}
+                  </p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <CycleDots
+                totalDays={currentCycleInfo.currentCycleDay}
+                flowDays={userProfile.flowDurationDays}
+              />
             </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Nenhum registro diário encontrado.
+          )}
+
+          {/* Past Cycles */}
+          {sortedHistory.map((cycle, index) => {
+            const startDate = parseISO(cycle.startDate);
+            const endDate = addDays(startDate, cycle.cycleLength - 1);
+
+            return (
+              <div
+                key={index}
+                className="p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-bold">{cycle.cycleLength} dias</p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(startDate, 'd MMM', { locale: ptBR })} -{' '}
+                      {format(endDate, 'd MMM yyyy', { locale: ptBR })}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <CycleDots
+                  totalDays={cycle.cycleLength}
+                  flowDays={userProfile.flowDurationDays}
+                />
+              </div>
+            );
+          })}
+          {sortedHistory.length === 0 && !currentCycleInfo && (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              Nenhum histórico de ciclo encontrado.
             </p>
           )}
         </CardContent>
