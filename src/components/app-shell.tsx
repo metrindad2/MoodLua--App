@@ -48,16 +48,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // If there IS a profile, show the full app shell.
   return (
     <div className="relative mx-auto flex h-dvh max-w-md flex-col border-x border-border bg-muted">
-      {/* Cabeçalho centralizado com a logo */}
-      <header className="flex shrink-0 items-center justify-center border-b border-border bg-background p-4">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.png" alt="MoodLua Logo" width={28} height={28} />
-          <h1 className="font-bold text-xl text-primary">MoodLua</h1>
-        </Link>
-      </header>
-
       {/* Área de conteúdo principal com rolagem e padding para não ficar sob a navegação */}
-      <main className="flex-1 overflow-y-auto pb-24 bg-background">{children}</main>
+      <main className="flex-1 overflow-y-auto pb-24 bg-background">
+        {/* Cabeçalho centralizado com a logo */}
+        <header className="flex shrink-0 items-center justify-center border-b border-border bg-background p-4">
+          <Link href="/" className="flex items-center gap-2">
+            <Image src="/logo.png" alt="MoodLua Logo" width={28} height={28} />
+            <h1 className="font-bold text-xl text-primary">MoodLua</h1>
+          </Link>
+        </header>
+        {children}
+      </main>
 
       {/* Botão SOS Flutuante Adicionado de Volta */}
       <FloatingSosButton />
