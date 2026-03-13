@@ -6,9 +6,12 @@ import { Card, CardContent } from './ui/card';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { Droplets } from 'lucide-react';
+import { Droplets, CalendarIcon } from 'lucide-react';
 import { MOOD_OPTIONS } from '@/lib/moods';
 import { SYMPTOM_OPTIONS } from '@/lib/symptoms';
+import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
+import { SimpleCalendar } from './simple-calendar';
+import { Button } from './ui/button';
 
 const flowOptions: { value: DailyLog['flowIntensity']; label: string }[] = [
     { value: 'nenhum', label: 'Nenhum' },
@@ -21,30 +24,31 @@ const flowOptions: { value: DailyLog['flowIntensity']; label: string }[] = [
 export function DailyTracker() {
   const { getLogForDate, addOrUpdateDailyLog } = useCycleData();
   
-  const [today] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
   const [selectedMood, setSelectedMood] = useState<Mood | undefined>();
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [selectedFlow, setSelectedFlow] = useState<DailyLog['flowIntensity']>();
   
-  // Carrega o log do dia ao iniciar o componente.
-  // A dependência [getLogForDate] garante que o componente recarregue se os logs no contexto mudarem.
+  // Carrega o log do dia sempre que a data selecionada ou os logs no contexto mudarem.
   useEffect(() => {
-    const log = getLogForDate(today);
+    const log = getLogForDate(selectedDate);
     setSelectedMood(log?.mood);
     setSelectedSymptoms(log?.symptoms || []);
     setSelectedFlow(log?.flowIntensity);
-  }, [today, getLogForDate]);
+  }, [selectedDate, getLogForDate]);
 
   const handleFlowSelect = (flow: DailyLog['flowIntensity']) => {
     const newFlow = selectedFlow === flow ? undefined : flow;
     setSelectedFlow(newFlow);
-    addOrUpdateDailyLog({ date: today, flowIntensity: newFlow });
+    addOrUpdateDailyLog({ date: selectedDate, flowIntensity: newFlow });
   };
 
   const handleMoodSelect = (mood: Mood) => {
     const newMood = selectedMood === mood ? undefined : mood;
     setSelectedMood(newMood);
-    addOrUpdateDailyLog({ date: today, mood: newMood });
+    addOrUpdateDailyLog({ date: selectedDate, mood: newMood });
   };
 
   const handleSymptomSelect = (symptomId: string) => {
@@ -52,17 +56,37 @@ export function DailyTracker() {
       ? selectedSymptoms.filter((s) => s !== symptomId)
       : [...selectedSymptoms, symptomId];
     setSelectedSymptoms(newSymptoms);
-    addOrUpdateDailyLog({ date: today, symptoms: newSymptoms });
+    addOrUpdateDailyLog({ date: selectedDate, symptoms: newSymptoms });
   };
   
   return (
     <div className="space-y-4">
       <div>
         <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold">Como você está hoje?</h2>
-            <span className="text-sm text-muted-foreground">
-                {format(today, "dd 'de' MMMM", { locale: ptBR })}
-            </span>
+            <h2 className="text-lg font-semibold">Seu registro diário</h2>
+            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+              <PopoverTrigger asChild>
+                  <Button
+                    variant={'ghost'}
+                    className={cn(
+                      'justify-start text-left font-normal text-muted-foreground'
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
+                  </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <SimpleCalendar
+                  initialDate={selectedDate}
+                  selectedDate={selectedDate}
+                  onDateClick={(date) => {
+                    setSelectedDate(date);
+                    setIsCalendarOpen(false);
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
         </div>
         <Card>
           <CardContent className="pt-6">
