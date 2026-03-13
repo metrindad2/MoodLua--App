@@ -4,7 +4,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   Home,
-  CalendarDays,
   BrainCircuit,
   Settings,
 } from 'lucide-react';
@@ -20,7 +19,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { href: '/', label: 'Início', icon: Home },
-    { href: '/calendar', label: 'Calendário', icon: CalendarDays },
     { href: '/insights', label: 'Insights', icon: BrainCircuit },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
