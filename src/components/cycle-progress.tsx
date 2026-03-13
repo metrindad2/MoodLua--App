@@ -30,7 +30,9 @@ export function CycleProgress({
             <div className="text-4xl font-bold">Dia {currentDay}</div>
             <div className="text-muted-foreground">{phase}</div>
             <div className="text-xs text-muted-foreground mt-1">
-              {daysUntilNext} dias para a próxima
+              {daysUntilNext >= 0
+                ? `${daysUntilNext} dias para a próxima`
+                : 'Período atrasado'}
             </div>
           </div>
         </div>
