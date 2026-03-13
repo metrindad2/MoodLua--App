@@ -51,7 +51,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative mx-auto flex h-dvh max-w-md flex-col border-x border-border bg-muted">
       {/* Cabeçalho centralizado com a logo */}
-      <header className="flex shrink-0 items-center justify-between border-b border-border bg-background p-4">
+      <header className="flex shrink-0 items-center justify-center border-b border-border bg-background p-4">
         <Link href="/" className="flex items-center gap-2">
           <Image src="/logo.png" alt="MoodLua Logo" width={28} height={28} />
           <h1 className="font-bold text-xl text-primary">MoodLua</h1>
