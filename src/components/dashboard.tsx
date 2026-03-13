@@ -105,61 +105,52 @@ export default function Dashboard() {
 
       <Card>
         <CardContent className="pt-6">
-          {!cycleInfo.isMenstruating ? (
-            <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-              <DialogTrigger asChild>
+          <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setNewStartDate(new Date())}
+              >
+                <Droplets className="mr-2" />
+                Registrar Início do Período
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Quando seu período começou?</DialogTitle>
+                <DialogDescription>
+                  Selecione a data de início da sua última menstruação para
+                  recalcular as previsões do ciclo.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                <SimpleCalendar
+                  initialDate={newStartDate || new Date()}
+                  selectedDate={newStartDate}
+                  onDateClick={(date) => setNewStartDate(date)}
+                />
+              </div>
+              <DialogFooter>
                 <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setNewStartDate(new Date())}
+                  variant="ghost"
+                  onClick={() => {
+                    setIsConfirmOpen(false);
+                    setNewStartDate(null);
+                  }}
                 >
-                  <Droplets className="mr-2" />
-                  Registrar Início do Período
+                  Cancelar
                 </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Quando seu período começou?</DialogTitle>
-                  <DialogDescription>
-                    Selecione a data de início da sua última menstruação para
-                    recalcular as previsões do ciclo.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="py-4">
-                  <SimpleCalendar
-                    initialDate={newStartDate || new Date()}
-                    selectedDate={newStartDate}
-                    onDateClick={(date) => setNewStartDate(date)}
-                  />
-                </div>
-                <DialogFooter>
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      setIsConfirmOpen(false);
-                      setNewStartDate(null);
-                    }}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    onClick={() => newStartDate && handleStartPeriod(newStartDate)}
-                    disabled={!newStartDate}
-                    className="bg-accent text-accent-foreground hover:bg-accent/90"
-                  >
-                    Confirmar Data
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          ) : (
-            <div className="text-center text-sm text-muted-foreground p-2">
-              <p>
-                Seu período menstrual está em andamento. Continue fazendo seus
-                registros diários!
-              </p>
-            </div>
-          )}
+                <Button
+                  onClick={() => newStartDate && handleStartPeriod(newStartDate)}
+                  disabled={!newStartDate}
+                  className="bg-accent text-accent-foreground hover:bg-accent/90"
+                >
+                  Confirmar Data
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </CardContent>
       </Card>
 
