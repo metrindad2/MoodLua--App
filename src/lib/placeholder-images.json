@@ -1,3 +1,70 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "poppy-seed",
+      "description": "A poppy seed to represent baby size at week 4",
+      "imageUrl": "https://picsum.photos/seed/101/200/200",
+      "imageHint": "poppy seed"
+    },
+    {
+      "id": "lentil-grain",
+      "description": "A lentil grain to represent baby size at week 6",
+      "imageUrl": "https://picsum.photos/seed/102/200/200",
+      "imageHint": "lentil grain"
+    },
+    {
+      "id": "bean",
+      "description": "A bean to represent baby size at week 8",
+      "imageUrl": "https://picsum.photos/seed/103/200/200",
+      "imageHint": "bean"
+    },
+    {
+      "id": "olive",
+      "description": "An olive to represent baby size at week 10",
+      "imageUrl": "https://picsum.photos/seed/104/200/200",
+      "imageHint": "olive"
+    },
+    {
+      "id": "lemon",
+      "description": "A lemon to represent baby size at week 12",
+      "imageUrl": "https://picsum.photos/seed/105/200/200",
+      "imageHint": "lemon"
+    },
+    {
+      "id": "avocado",
+      "description": "An avocado to represent baby size at week 16",
+      "imageUrl": "https://picsum.photos/seed/106/200/200",
+      "imageHint": "avocado"
+    },
+    {
+      "id": "banana",
+      "description": "A banana to represent baby size at week 20",
+      "imageUrl": "https://picsum.photos/seed/107/200/200",
+      "imageHint": "banana"
+    },
+    {
+      "id": "corn-cob",
+      "description": "A corn cob to represent baby size at week 24",
+      "imageUrl": "https://picsum.photos/seed/108/200/200",
+      "imageHint": "corn cob"
+    },
+    {
+      "id": "coconut",
+      "description": "A coconut to represent baby size at week 30",
+      "imageUrl": "https://picsum.photos/seed/109/200/200",
+      "imageHint": "coconut"
+    },
+    {
+      "id": "papaya",
+      "description": "A papaya to represent baby size at week 36",
+      "imageUrl": "https://picsum.photos/seed/110/200/200",
+      "imageHint": "papaya"
+    },
+    {
+      "id": "pumpkin",
+      "description": "A small pumpkin to represent baby size at week 40",
+      "imageUrl": "https://picsum.photos/seed/111/200/200",
+      "imageHint": "small pumpkin"
+    }
+  ]
 }
