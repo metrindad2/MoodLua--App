@@ -162,6 +162,7 @@ export default function OnboardingForm() {
                     <FormControl>
                       <Input
                         type="number"
+                        min="15"
                         {...field}
                         className="bg-white/20 border-none placeholder:text-white/70"
                       />
@@ -181,6 +182,7 @@ export default function OnboardingForm() {
                     <FormControl>
                       <Input
                         type="number"
+                        min="1"
                         {...field}
                         className="bg-white/20 border-none placeholder:text-white/70"
                       />
