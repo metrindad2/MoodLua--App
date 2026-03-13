@@ -6,6 +6,7 @@ import {
   Home,
   BrainCircuit,
   Settings,
+  Baby,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -20,6 +21,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: '/', label: 'Início', icon: Home },
     { href: '/insights', label: 'Insights', icon: BrainCircuit },
+    { href: '/pregnancy', label: 'Gravidez', icon: Baby },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
 
