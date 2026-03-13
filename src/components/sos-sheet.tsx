@@ -89,7 +89,7 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
                     duration: 7000
                 });
             },
-            { enableHighAccuracy: false, timeout: 20000, maximumAge: 0 }
+            { enableHighAccuracy: true, timeout: 30000, maximumAge: 10000 }
         );
 
     }, [sosSettings, toast]);
