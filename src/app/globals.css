@@ -4,11 +4,11 @@
 
 @layer base {
   :root {
-    --background: 320 100% 98%;
+    --background: 0 0% 100%;
     --foreground: 275 40% 20%;
-    --card: 310 100% 99%;
+    --card: 0 0% 100%;
     --card-foreground: 275 40% 20%;
-    --popover: 310 100% 99%;
+    --popover: 0 0% 100%;
     --popover-foreground: 275 40% 20%;
     --primary: 270 60% 55%;
     --primary-foreground: 270 100% 98%;
@@ -66,17 +66,12 @@
     @apply border-border;
   }
   body {
-    @apply text-foreground;
-    /* Light mode gradient inspired by the image */
-    background-image: linear-gradient(to bottom, hsl(300, 80%, 90%), hsl(320, 100%, 98%));
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+    @apply text-foreground bg-muted;
   }
 
   @media (prefers-color-scheme: dark) {
     body {
-      /* Dark mode gradient from the image */
-      background-image: linear-gradient(to bottom, hsl(270, 39%, 21%), hsl(277, 51%, 52%));
+       @apply bg-background;
     }
   }
 }

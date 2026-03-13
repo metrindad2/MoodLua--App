@@ -20,14 +20,15 @@ export type UserProfile = {
 /**
  * Define os possíveis valores para o humor que a usuária pode registrar.
  */
-export type Mood = 
-  | "feliz" 
-  | "neutra" 
-  | "triste" 
-  | "irritada" 
-  | "ansiosa" 
-  | "energizada" 
-  | "cansada";
+export type Mood =
+  | 'feliz'
+  | 'calma'
+  | 'triste'
+  | 'irritada'
+  | 'ansiosa'
+  | 'cansada'
+  | 'carinhosa'
+  | 'neutra';
 
 /**
  * Define a estrutura para um registro diário.

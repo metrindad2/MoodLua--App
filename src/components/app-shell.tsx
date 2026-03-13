@@ -8,6 +8,7 @@ import {
   BrainCircuit,
   Settings,
   ShieldAlert,
+  Heart,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -29,7 +30,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="relative mx-auto flex h-dvh max-w-md flex-col items-center justify-center border-x border-border bg-transparent p-4">
+      <div className="relative mx-auto flex h-dvh max-w-md flex-col items-center justify-center border-x border-border bg-background p-4">
         <div className="space-y-4 p-4 w-full">
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-20 w-full" />
@@ -51,17 +52,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // If there IS a profile, show the full app shell.
   return (
-    <div className="relative mx-auto flex h-dvh max-w-md flex-col border-x border-border bg-transparent">
+    <div className="relative mx-auto flex h-dvh max-w-md flex-col border-x border-border bg-muted">
       {/* Cabeçalho centralizado com a logo */}
-      <header className="flex shrink-0 items-center justify-center border-b border-border p-4">
+      <header className="flex shrink-0 items-center justify-between border-b border-border bg-background p-4">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.png" alt="MoodLua Logo" width={32} height={32} />
-          <h1 className="font-bold text-2xl text-primary">MoodLua</h1>
+          <Image src="/logo.png" alt="MoodLua Logo" width={28} height={28} />
+          <h1 className="font-bold text-xl text-primary">MoodLua</h1>
         </Link>
+        <div className="flex items-center gap-2">
+          <Heart className="w-6 h-6 text-primary" />
+        </div>
       </header>
 
       {/* Área de conteúdo principal com rolagem e padding para não ficar sob a navegação */}
-      <main className="flex-1 overflow-y-auto pb-24">{children}</main>
+      <main className="flex-1 overflow-y-auto pb-24 bg-background">{children}</main>
 
       {/* Botão SOS Flutuante */}
       <FloatingSosButton />

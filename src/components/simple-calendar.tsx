@@ -32,6 +32,11 @@ interface SimpleCalendarProps {
     from: Date;
     to: Date;
   };
+  // Opcional: um intervalo de dias para previsão
+  previsionRange?: {
+    from: Date;
+    to: Date;
+  };
 }
 
 /**
@@ -43,6 +48,7 @@ export function SimpleCalendar({
   selectedDate,
   onDateClick,
   highlightedRange,
+  previsionRange,
 }: SimpleCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(initialDate));
 
@@ -73,10 +79,18 @@ export function SimpleCalendar({
     return current >= from && current <= to;
   };
 
+  const isDayInPrevisionRange = (day: Date) => {
+    if (!previsionRange) return false;
+    const from = startOfDay(previsionRange.from);
+    const to = startOfDay(previsionRange.to);
+    const current = startOfDay(day);
+    return current >= from && current <= to;
+  };
+
   return (
-    <div className="p-4 rounded-lg border bg-card text-card-foreground">
+    <div className="rounded-lg bg-card text-card-foreground">
       {/* Cabeçalho com o mês/ano e botões de navegação */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 px-2">
         <Button variant="ghost" size="icon" onClick={prevMonth} aria-label="Mês anterior">
           <ChevronLeft className="h-5 w-5" />
         </Button>
@@ -105,20 +119,17 @@ export function SimpleCalendar({
             onClick={() => onDateClick?.(date)}
             disabled={!isSameMonth(date, currentMonth)}
             className={cn(
-              'relative flex h-10 w-full items-center justify-center rounded-full transition-colors',
+              'relative flex h-10 w-full items-center justify-center transition-colors rounded-md',
               // Desabilita dias de outros meses
               !isSameMonth(date, currentMonth) && 'text-muted-foreground/50 cursor-default',
-              // Estilo base para dias do mês atual
-              isSameMonth(date, currentMonth) && 'hover:bg-accent hover:text-accent-foreground',
+              isSameMonth(date, currentMonth) && 'hover:bg-accent/20',
               // Destaca o dia de hoje com uma borda
-              isToday(date) && 'border-2 border-primary',
+              isToday(date) && 'border-2 border-primary rounded-full',
               // Destaca o intervalo (período menstrual)
-              isDayInRange(date) && 'bg-primary/80 text-primary-foreground rounded-none',
-              // Arredonda as pontas do intervalo
-              highlightedRange && isSameDay(date, highlightedRange.from) && 'rounded-l-full',
-              highlightedRange && isSameDay(date, highlightedRange.to) && 'rounded-r-full',
+              isDayInRange(date) && 'bg-primary text-primary-foreground rounded-full',
+              isDayInPrevisionRange(date) && 'bg-primary/30 text-primary-foreground rounded-full',
               // Destaca o dia selecionado (para o formulário)
-              selectedDate && isSameDay(date, selectedDate) && 'bg-accent text-accent-foreground ring-2 ring-accent-foreground'
+              selectedDate && isSameDay(date, selectedDate) && 'bg-accent text-accent-foreground ring-2 ring-accent-foreground rounded-full'
             )}
             aria-label={format(date, 'PPP', { locale: ptBR })}
           >
