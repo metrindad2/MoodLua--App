@@ -17,7 +17,7 @@ import { Baby, HeartPulse, Stethoscope, Carrot } from 'lucide-react';
 const weeklyDevelopment: Record<number, string> = {
   4: 'O coração do seu bebê começa a se formar e a bater. É um pequeno tubo que em breve se tornará um órgão complexo.',
   5: 'O cérebro, a medula espinhal e outros órgãos principais começam a se formar. O embrião parece um pequeno girino.',
-  6: 'Pequenos brotos que se tornarão braços e pernas aparecem. As características faciais, como olhos e narinas, começam a se desenvolver.',
+  6: 'Pequenos brotos que se tornarão braços e pernas aparecem. As características faciais, como olhos e narinas, começam a se desenvolver. Neste estágio, ele tem o tamanho de um grão de feijão!',
   7: 'As mãos e os pés estão se formando, parecendo pequenas pás. O bebê já tem o tamanho de um mirtilo.',
   8: 'O bebê começa a se mover, embora você ainda não consiga sentir. Todos os órgãos essenciais já começaram a se formar.',
   12: 'Os órgãos genitais se formam e o bebê já tem o tamanho de um limão. As unhas começam a crescer.',
