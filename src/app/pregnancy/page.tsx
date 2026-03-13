@@ -21,7 +21,7 @@ const weeklyDevelopment: Record<number, string> = {
   6: 'Pequenos brotos que se tornarão braços e pernas aparecem. As características faciais, como olhos e narinas, começam a se desenvolver.',
   7: 'As mãos e os pés estão se formando, parecendo pequenas pás. O desenvolvimento dos órgãos internos continua.',
   8: 'O bebê começa a se mover, embora você ainda não consiga sentir. Todos os órgãos essenciais já começaram a se formar.',
-  12: 'Os órgãos genitais se formam и as unhas começam a crescer. Os reflexos do bebê estão se desenvolvendo.',
+  12: 'Os órgãos genitais se formam e as unhas começam a crescer. Os reflexos do bebê estão se desenvolvendo.',
   16: 'O bebê pode fazer movimentos de sucção com a boca. O sistema esquelético está se desenvolvendo rapidamente.',
   20: 'Metade do caminho! Você pode sentir os primeiros movimentos do bebê (flutters). Ele agora pode ouvir sons.',
   24: 'O bebê tem chances de sobreviver se nascer prematuramente. Os pulmões estão se desenvolvendo, mas ainda não estão maduros.',
