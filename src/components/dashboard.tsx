@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useCycleData } from '@/context/cycle-data-context';
 import { calculateCycleInfo } from '@/lib/cycle-utils';
 import { CycleProgress } from './cycle-progress';
@@ -9,41 +8,14 @@ import { DailyTracker } from './daily-tracker';
 import { SimpleCalendar } from './simple-calendar';
 import { addDays, subDays, startOfDay, isAfter } from 'date-fns';
 import { Card, CardContent } from './ui/card';
-import { Button } from './ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
 
 export default function Dashboard() {
-  const { userProfile, dailyLogs, startNewCycle } = useCycleData();
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [newStartDate, setNewStartDate] = useState<Date | null>(null);
-  const { toast } = useToast();
+  const { userProfile, dailyLogs } = useCycleData();
 
   if (!userProfile) return null;
 
   const cycleInfo = calculateCycleInfo(userProfile);
   if (!cycleInfo) return null;
-
-  const handleConfirmNewPeriod = (startDate: Date) => {
-    if (userProfile && startNewCycle) {
-      startNewCycle(startDate);
-      
-      toast({
-        title: 'Novo ciclo iniciado!',
-        description: `Sua menstruação foi registrada automaticamente por ${userProfile.flowDurationDays} dias.`,
-      });
-      setIsConfirmOpen(false);
-      setNewStartDate(null);
-    }
-  };
 
   const phase = cycleInfo.isMenstruating
     ? 'Menstrual'
@@ -128,54 +100,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardContent className="pt-6">
-          <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-            <DialogTrigger asChild>
-              <Button
-                className="w-full"
-                onClick={() => setNewStartDate(new Date())}
-              >
-                Registrar menstruação
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Registrar menstruação</DialogTitle>
-                <DialogDescription>
-                  Selecione o dia em que seu período começou para registrar e recalcular as previsões.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="py-4">
-                <SimpleCalendar
-                  initialDate={newStartDate || new Date()}
-                  selectedDate={newStartDate}
-                  onDateClick={(date) => setNewStartDate(date)}
-                />
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setIsConfirmOpen(false);
-                    setNewStartDate(null);
-                  }}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={() => newStartDate && handleConfirmNewPeriod(newStartDate)}
-                  disabled={!newStartDate}
-                  className="bg-accent text-accent-foreground hover:bg-accent/90"
-                >
-                  Salvar
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </CardContent>
-      </Card>
 
       <DailyTracker />
     </div>

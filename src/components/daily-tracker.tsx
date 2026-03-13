@@ -4,7 +4,7 @@ import { useCycleData } from '@/context/cycle-data-context';
 import { DailyLog, Mood } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from './ui/card';
-import { format, addDays, subDays, isToday, isSameDay, startOfDay, differenceInDays } from 'date-fns';
+import { format, addDays, subDays, isSameDay, startOfDay, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -13,6 +13,8 @@ import { SYMPTOM_OPTIONS } from '@/lib/symptoms';
 import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
 import { SimpleCalendar } from './simple-calendar';
 import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 
 const flowOptions: { value: DailyLog['flowIntensity']; label: string }[] = [
     { value: 'nenhum', label: 'Nenhum' },
@@ -22,10 +24,12 @@ const flowOptions: { value: DailyLog['flowIntensity']; label: string }[] = [
 ];
 
 export function DailyTracker() {
-  const { getLogForDate, addOrUpdateDailyLog } = useCycleData();
+  const { getLogForDate, addOrUpdateDailyLog, userProfile, startNewCycle } = useCycleData();
   
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const { toast } = useToast();
 
   const [selectedMood, setSelectedMood] = useState<Mood | undefined>();
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
@@ -75,6 +79,17 @@ export function DailyTracker() {
 
     return format(date, "dd 'de' MMMM", { locale: ptBR });
   }
+
+  const handleConfirmNewPeriod = () => {
+    if (userProfile && startNewCycle) {
+      startNewCycle(selectedDate);
+      toast({
+        title: 'Novo ciclo iniciado!',
+        description: `Sua menstruação foi registrada automaticamente por ${userProfile.flowDurationDays} dias.`,
+      });
+      setIsConfirmOpen(false);
+    }
+  };
   
   return (
     <Card>
@@ -173,6 +188,37 @@ export function DailyTracker() {
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="border-t pt-6 mt-6">
+          <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="w-full">
+                Começou a menstruar neste dia? Iniciar novo ciclo
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Iniciar novo ciclo?</DialogTitle>
+                <DialogDescription>
+                  Confirmar que sua menstruação começou em{' '}
+                  <span className="font-semibold">{format(selectedDate, 'PPP', { locale: ptBR })}</span>?
+                  Isso irá calcular a duração do seu ciclo anterior e iniciar um novo.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setIsConfirmOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleConfirmNewPeriod}
+                  className="bg-accent text-accent-foreground hover:bg-accent/90"
+                >
+                  Confirmar e Iniciar
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </CardContent>
     </Card>
