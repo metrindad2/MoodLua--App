@@ -103,6 +103,11 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
                         <Button variant="ghost">Fechar</Button>
                     </SheetClose>
                 </SheetHeader>
+                 <div className="text-center text-sm text-muted-foreground mb-6 -mt-4 px-2">
+                    <p>
+                        O botão SOS é uma função de segurança. Com dois toques, você pode ligar para serviços de emergência ou enviar uma mensagem de ajuda (com sua localização) para seus contatos de confiança.
+                    </p>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                     {emergencyServices.map(service => (
                         <Card key={service.name} className="p-4 flex flex-col items-center justify-center text-center bg-background rounded-2xl">
