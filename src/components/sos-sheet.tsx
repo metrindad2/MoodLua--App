@@ -63,24 +63,8 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
             return;
         }
 
-        if (navigator.permissions && navigator.permissions.query) {
-            try {
-                const permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
-                if (permissionStatus.state === 'denied') {
-                    toast({
-                        title: 'Permissão de Localização Negada',
-                        description: 'Para enviar sua posição, habilite o acesso à localização para este site nas configurações do seu navegador.',
-                        variant: 'destructive',
-                        duration: 10000
-                    });
-                    sendWhatsAppMessage(sosSettings.emergencyMessage, contact.number);
-                    return;
-                }
-            } catch (e) {
-                console.error("Não foi possível consultar a permissão de geolocalização:", e);
-            }
-        }
-
+        // Simplificação: Vamos confiar diretamente no `getCurrentPosition` para lidar com o fluxo de permissões.
+        // Ele solicitará a permissão se necessário e retornará um erro apropriado se for negado.
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
@@ -92,7 +76,7 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
                 let errorDescription: string;
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
-                        errorDescription = 'Você negou o acesso à localização. A mensagem foi enviada sem ela.';
+                        errorDescription = 'Você negou o acesso à localização. Para enviar sua posição, habilite a permissão nas configurações do seu navegador.';
                         break;
                     case error.POSITION_UNAVAILABLE:
                         errorDescription = 'Informações de localização não estão disponíveis. A mensagem foi enviada sem ela.';
@@ -108,7 +92,7 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
                     title: 'Erro de Localização',
                     description: errorDescription,
                     variant: 'destructive',
-                    duration: 7000
+                    duration: 10000,
                 });
                 sendWhatsAppMessage(sosSettings.emergencyMessage, contact.number);
             },
