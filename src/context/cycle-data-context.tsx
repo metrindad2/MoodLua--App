@@ -77,16 +77,13 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     
     setDailyLogs(prevLogs => {
       const existingLogIndex = prevLogs.findIndex(l => l.date === dateString);
-      let updatedLogs;
       if (existingLogIndex > -1) {
-        updatedLogs = [...prevLogs];
+        const updatedLogs = [...prevLogs];
         updatedLogs[existingLogIndex] = { ...updatedLogs[existingLogIndex], ...newLog };
+        return updatedLogs;
       } else {
-        updatedLogs = [...prevLogs, newLog];
+        return [...prevLogs, newLog];
       }
-      return updatedLogs.filter(
-        (value, index, self) => index === self.findIndex(t => t.date === value.date)
-      );
     });
   }, []);
 
