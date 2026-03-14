@@ -37,7 +37,7 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
     };
 
     const triggerSos = useCallback(async (contact: { name: string; number: string }) => {
-        toast({ title: 'Acionando Contato de Emergência', description: `Preparando mensagem para ${contact.name}` });
+        toast({ title: 'SOS Acionado', description: `Preparando mensagem para ${contact.name}...` });
 
         const sendWhatsAppMessage = (message: string, contactNumber: string) => {
             let cleanNumber = contactNumber.replace(/\D/g, '');
@@ -47,7 +47,7 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
             const whatsappUri = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
             toast({
                 title: 'Abrindo o WhatsApp...',
-                description: `Sua mensagem para ${contact.name} está pronta.`,
+                description: `Sua mensagem está pronta.`,
                 duration: 4000,
             });
             window.open(whatsappUri, '_blank');
@@ -58,42 +58,56 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
                 title: 'Localização não suportada',
                 description: 'Seu navegador não suporta geolocalização. A mensagem será enviada sem a localização.',
                 variant: 'destructive',
+                duration: 8000,
             });
             sendWhatsAppMessage(sosSettings.emergencyMessage, contact.number);
             return;
         }
+        
+        toast({
+            title: 'Obtendo sua localização...',
+            description: 'Por favor, aguarde e aprove a solicitação do navegador se necessário.',
+            duration: 10000, // Timeout is 10s
+        });
 
-        // Simplificação: Vamos confiar diretamente no `getCurrentPosition` para lidar com o fluxo de permissões.
-        // Ele solicitará a permissão se necessário e retornará um erro apropriado se for negado.
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
                 const locationUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
                 const message = `${sosSettings.emergencyMessage}\nMinha localização: ${locationUrl}`;
+                
+                toast({
+                    title: 'Localização obtida com sucesso!',
+                    description: 'Enviando mensagem com sua localização.',
+                    duration: 4000,
+                });
+                
                 sendWhatsAppMessage(message, contact.number);
             },
             (error: GeolocationPositionError) => {
                 let errorDescription: string;
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
-                        errorDescription = 'Você negou o acesso à localização. Para enviar sua posição, habilite a permissão nas configurações do seu navegador.';
+                        errorDescription = 'Permissão negada. Para enviar sua posição, habilite a localização nas configurações do seu navegador.';
                         break;
                     case error.POSITION_UNAVAILABLE:
-                        errorDescription = 'Informações de localização não estão disponíveis. A mensagem foi enviada sem ela.';
+                        errorDescription = 'Sinal de GPS ou rede indisponível. A mensagem será enviada sem sua posição.';
                         break;
                     case error.TIMEOUT:
-                        errorDescription = 'A solicitação de localização demorou demais. A mensagem foi enviada sem ela.';
+                        errorDescription = 'A solicitação de localização demorou demais. A mensagem será enviada sem sua posição.';
                         break;
                     default:
-                        errorDescription = 'Não foi possível obter sua localização. A mensagem foi enviada sem ela.';
+                        errorDescription = 'Não foi possível obter sua localização. A mensagem será enviada sem sua posição.';
                         break;
                 }
+
                 toast({
-                    title: 'Erro de Localização',
+                    title: `Erro de Localização (Cód: ${error.code})`,
                     description: errorDescription,
                     variant: 'destructive',
                     duration: 10000,
                 });
+
                 sendWhatsAppMessage(sosSettings.emergencyMessage, contact.number);
             },
             { 
