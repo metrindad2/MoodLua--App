@@ -8,23 +8,25 @@ import {
   Baby,
   BrainCircuit,
   Settings,
-  Shield,
+  Heart,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useCycleData } from '@/context/cycle-data-context';
 import { Skeleton } from './ui/skeleton';
+import { useState } from 'react';
+import { SosModal } from './sos-modal';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { userProfile, loading } = useCycleData();
+  const [isSosOpen, setIsSosOpen] = useState(false);
 
   const navItems = [
     { href: '/', label: 'Ciclo', icon: Droplet },
     { href: '/history', label: 'Histórico', icon: History },
     { href: '/pregnancy', label: 'Gravidez', icon: Baby },
     { href: '/insights', label: 'Insights', icon: BrainCircuit },
-    { href: '/ajuda', label: 'Ajuda', icon: Shield },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
 
@@ -85,6 +87,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
       </footer>
+      
+      {userProfile && (
+        <>
+          <button
+            onClick={() => setIsSosOpen(true)}
+            className="fixed bottom-[85px] right-4 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-background shadow-lg transition-transform hover:scale-110 active:scale-100"
+          >
+            <Heart className="h-8 w-8 text-destructive" fill="currentColor" />
+          </button>
+          <SosModal open={isSosOpen} onOpenChange={setIsSosOpen} />
+        </>
+      )}
     </div>
   );
 }

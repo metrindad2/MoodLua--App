@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { UserProfile, DailyLog, MoodLuaData, CycleLog } from '@/lib/types';
+import { UserProfile, DailyLog, MoodLuaData, CycleLog, EmergencyContact } from '@/lib/types';
 import { format, addDays, differenceInDays, startOfDay } from 'date-fns';
 
 const LOCAL_STORAGE_KEY = 'moodLuaData';
@@ -11,12 +11,15 @@ interface CycleDataContextType {
   dailyLogs: DailyLog[];
   cycleHistory: CycleLog[];
   pregnancyLmpDate: string | null;
+  emergencyContacts: EmergencyContact[];
   loading: boolean;
   updateUserProfile: (profile: UserProfile) => void;
   addOrUpdateDailyLog: (log: Omit<DailyLog, 'date'> & { date: Date }) => void;
   getLogForDate: (date: Date) => DailyLog | undefined;
   startNewCycle: (startDate: Date) => void;
   updatePregnancyLmpDate: (date: string | null) => void;
+  addEmergencyContact: (contact: EmergencyContact) => void;
+  removeEmergencyContact: (contactId: string) => void;
 }
 
 const CycleDataContext = createContext<CycleDataContextType | undefined>(undefined);
@@ -26,6 +29,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
   const [cycleHistory, setCycleHistory] = useState<CycleLog[]>([]);
   const [pregnancyLmpDate, setPregnancyLmpDate] = useState<string | null>(null);
+  const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,6 +41,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         if (data.dailyLogs) setDailyLogs(data.dailyLogs);
         if (data.cycleHistory) setCycleHistory(data.cycleHistory);
         if (data.pregnancyLmpDate) setPregnancyLmpDate(data.pregnancyLmpDate);
+        if (data.emergencyContacts) setEmergencyContacts(data.emergencyContacts);
       }
     } catch (error) {
       console.error("Failed to load data from localStorage", error);
@@ -52,6 +57,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         dailyLogs,
         cycleHistory,
         pregnancyLmpDate,
+        emergencyContacts,
       };
       try {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
@@ -59,7 +65,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         console.error("Failed to save data to localStorage", error);
       }
     }
-  }, [userProfile, dailyLogs, cycleHistory, pregnancyLmpDate, loading]);
+  }, [userProfile, dailyLogs, cycleHistory, pregnancyLmpDate, emergencyContacts, loading]);
 
   const updateUserProfile = (profile: UserProfile) => {
     setUserProfile(profile);
@@ -152,17 +158,28 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     return dailyLogs.find(log => log.date === dateString);
   }, [dailyLogs]);
 
+  const addEmergencyContact = useCallback((contact: EmergencyContact) => {
+    setEmergencyContacts(prev => [...prev, contact]);
+  }, []);
+
+  const removeEmergencyContact = useCallback((contactId: string) => {
+    setEmergencyContacts(prev => prev.filter(c => c.id !== contactId));
+  }, []);
+
   const value = {
     userProfile,
     dailyLogs,
     cycleHistory,
     pregnancyLmpDate,
+    emergencyContacts,
     loading,
     updateUserProfile,
     addOrUpdateDailyLog,
     getLogForDate,
     startNewCycle,
     updatePregnancyLmpDate,
+    addEmergencyContact,
+    removeEmergencyContact,
   };
 
   return (
