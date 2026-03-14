@@ -24,7 +24,7 @@ import {
   startOfDay,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Check, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCycleData } from '@/context/cycle-data-context';
 import { useToast } from '@/hooks/use-toast';
@@ -96,17 +96,27 @@ function MonthView({
 export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrationModalProps) {
   const { dailyLogs, addOrUpdateDailyLog, startNewCycle } = useCycleData();
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
-  const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
+  const [monthsToRender, setMonthsToRender] = useState<Date[]>([]);
   const { toast } = useToast();
   
   // This effect loads the currently logged period days when the modal opens
+  // and generates the list of months to display.
   useEffect(() => {
     if (open) {
+      // Load selected days
       const periodDays = dailyLogs
         .filter(log => log.flowIntensity && log.flowIntensity !== 'nenhum')
         .map(log => startOfDay(new Date(log.date + 'T00:00:00')));
       setSelectedDays(periodDays);
-      setCurrentMonth(startOfMonth(new Date()));
+      
+      // Generate months for scrolling view
+      const today = new Date();
+      const initialMonths: Date[] = [];
+      // We'll render the last 12 months, including the current one.
+      for (let i = 11; i >= 0; i--) { 
+          initialMonths.push(subMonths(startOfMonth(today), i));
+      }
+      setMonthsToRender(initialMonths);
     }
   }, [open, dailyLogs]);
 
@@ -121,9 +131,6 @@ export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrati
     });
   };
   
-  const goToNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
-  const goToPrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
-
   const handleSave = () => {
     // Determine which days were originally logged
     const originallyLogged = dailyLogs
@@ -178,24 +185,19 @@ export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrati
         </DialogHeader>
         
         <ScrollArea className="flex-1">
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <Button variant="ghost" size="icon" onClick={goToPrevMonth} aria-label="Mês anterior">
-                  <ChevronLeft className="h-5 w-5" />
-                </Button>
-                <h3 className="text-lg font-semibold capitalize text-center">
-                  {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
-                </h3>
-                <Button variant="ghost" size="icon" onClick={goToNextMonth} aria-label="Próximo mês">
-                  <ChevronRight className="h-5 w-5" />
-                </Button>
-              </div>
-
-              <MonthView 
-                  monthDate={currentMonth}
-                  selectedDays={selectedDays}
-                  onDayClick={handleDayClick}
-              />
+            <div className="p-4 space-y-8">
+              {monthsToRender.map((month) => (
+                <div key={month.toISOString()}>
+                  <h3 className="text-lg font-semibold capitalize text-center mb-4">
+                    {format(month, 'MMMM yyyy', { locale: ptBR })}
+                  </h3>
+                  <MonthView 
+                      monthDate={month}
+                      selectedDays={selectedDays}
+                      onDayClick={handleDayClick}
+                  />
+                </div>
+              ))}
             </div>
         </ScrollArea>
 
