@@ -3,7 +3,6 @@
 // com a interação do usuário no navegador, como cliques de botão e preenchimento de formulário.
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +10,6 @@ import { addDays, differenceInDays, format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Baby, HeartPulse, Stethoscope, Carrot, Ruler } from 'lucide-react';
 import { useCycleData } from '@/context/cycle-data-context';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 // --- LÓGICA DE DADOS (Equivalente ao "script.js" em parte) ---
 
@@ -32,19 +30,19 @@ const weeklyDevelopment: Record<number, string> = {
   40: 'Seu bebê está totalmente desenvolvido e pronto para nascer!',
 };
 
-// BANCO DE DADOS 2: Comparações de tamanho do bebê por semana, agora com imagens.
-const weeklySizeComparison: Record<number, { text: string; imageId: string }> = {
-    4: { text: 'um grão de papoula', imageId: 'poppy-seed' },
-    6: { text: 'um grão de lentilha', imageId: 'lentil-grain' },
-    8: { text: 'um feijão', imageId: 'bean' },
-    10: { text: 'uma azeitona', imageId: 'olive' },
-    12: { text: 'um limão', imageId: 'lemon' },
-    16: { text: 'um abacate', imageId: 'avocado' },
-    20: { text: 'uma banana', imageId: 'banana' },
-    24: { text: 'uma espiga de milho', imageId: 'corn-cob' },
-    30: { text: 'um coco', imageId: 'coconut' },
-    36: { text: 'um mamão', imageId: 'papaya' },
-    40: { text: 'uma pequena abóbora', imageId: 'pumpkin' },
+// BANCO DE DADOS 2: Comparações de tamanho do bebê por semana.
+const weeklySizeComparison: Record<number, { text: string }> = {
+    4: { text: 'um grão de papoula' },
+    6: { text: 'um grão de lentilha' },
+    8: { text: 'um feijão' },
+    10: { text: 'uma azeitona' },
+    12: { text: 'um limão' },
+    16: { text: 'um abacate' },
+    20: { text: 'uma banana' },
+    24: { text: 'uma espiga de milho' },
+    30: { text: 'um coco' },
+    36: { text: 'um mamão' },
+    40: { text: 'uma pequena abóbora' },
 };
 
 
@@ -59,7 +57,7 @@ const getDevelopmentTip = (week: number): string => {
 };
 
 // FUNÇÃO 2: Busca a comparação de tamanho para a semana atual.
-const getSizeComparison = (week: number): { text: string; imageId: string } | null => {
+const getSizeComparison = (week: number): { text: string } | null => {
   if (weeklySizeComparison[week]) {
     return weeklySizeComparison[week];
   }
@@ -73,7 +71,7 @@ type PregnancyInfo = {
   days: number;
   dueDate: string;
   developmentTip: string;
-  sizeComparison: { text: string; imageId: string } | null;
+  sizeComparison: { text: string } | null;
 };
 
 // --- COMPONENTE REACT (Equivalente ao "HTML" e "JavaScript" juntos) ---
@@ -194,7 +192,7 @@ export default function PregnancyPage() {
             </CardContent>
           </Card>
           
-          {/* --- NOVO CARD: Tamanho do Bebê com Imagem --- */}
+          {/* --- CARD: Tamanho do Bebê --- */}
           {pregnancyInfo.sizeComparison && (
             <Card>
               <CardHeader>
@@ -203,29 +201,11 @@ export default function PregnancyPage() {
                   Tamanho do Bebê
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-center gap-4 text-center">
-                    {(() => {
-                        const image = PlaceHolderImages.find(img => img.id === pregnancyInfo.sizeComparison?.imageId);
-                        if (image) {
-                            return (
-                                <Image
-                                    src={image.imageUrl}
-                                    alt={image.description}
-                                    width={150}
-                                    height={150}
-                                    className="rounded-lg object-cover"
-                                    data-ai-hint={image.imageHint}
-                                />
-                            );
-                        }
-                        return null;
-                    })()}
-                    <p className="text-muted-foreground">
-                        Nesta semana, seu bebê está aproximadamente do tamanho de{' '}
-                        <span className="font-semibold text-foreground">{pregnancyInfo.sizeComparison.text}</span>.
-                    </p>
-                </div>
+              <CardContent className="text-center">
+                <p className="text-muted-foreground">
+                    Nesta semana, seu bebê está aproximadamente do tamanho de{' '}
+                    <span className="font-semibold text-foreground">{pregnancyInfo.sizeComparison.text}</span>.
+                </p>
               </CardContent>
             </Card>
           )}
