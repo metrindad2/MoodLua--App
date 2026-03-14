@@ -109,12 +109,12 @@ export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrati
         .map(log => startOfDay(new Date(log.date + 'T00:00:00')));
       setSelectedDays(periodDays);
       
-      // Generate months for scrolling view
+      // Generate months for scrolling view, in reverse chronological order (present to past).
       const today = new Date();
       const initialMonths: Date[] = [];
-      // We'll render the last 60 months (5 years), including the current one.
+      // We'll render the last 60 months (5 years), starting with the current one.
       const totalMonths = 60;
-      for (let i = totalMonths - 1; i >= 0; i--) { 
+      for (let i = 0; i < totalMonths; i++) { 
           initialMonths.push(subMonths(startOfMonth(today), i));
       }
       setMonthsToRender(initialMonths);
@@ -127,6 +127,7 @@ export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrati
       if (prev.some((d) => isSameDay(d, dayStart))) {
         return prev.filter((d) => !isSameDay(d, dayStart));
       } else {
+        // Sort selected days to easily find the first day of the cycle
         return [...prev, dayStart].sort((a,b) => a.getTime() - b.getTime());
       }
     });
