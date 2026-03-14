@@ -4,16 +4,16 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   Droplet,
+  History,
+  Baby,
   BrainCircuit,
   Settings,
-  Baby,
-  History,
+  Shield,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useCycleData } from '@/context/cycle-data-context';
 import { Skeleton } from './ui/skeleton';
-import { FloatingSosButton } from './floating-sos-button';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -24,6 +24,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: '/history', label: 'Histórico', icon: History },
     { href: '/pregnancy', label: 'Gravidez', icon: Baby },
     { href: '/insights', label: 'Insights', icon: BrainCircuit },
+    { href: '/ajuda', label: 'Ajuda', icon: Shield },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
 
@@ -63,9 +64,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </header>
         {children}
       </main>
-
-      {/* Botão SOS Flutuante Adicionado de Volta */}
-      <FloatingSosButton />
 
       {/* Navegação Inferior Fixa */}
       <footer className="fixed bottom-0 left-1/2 w-full max-w-md -translate-x-1/2 shrink-0 border-t border-border bg-background/90 backdrop-blur-sm">

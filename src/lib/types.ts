@@ -50,15 +50,6 @@ export type CycleLog = {
 };
 
 /**
- * Define a estrutura para as configurações da função de emergência (SOS).
- */
-export type SosSettings = {
-  policeNumber: string;
-  emergencyContacts: { name: string; number: string }[]; // Uma lista de contatos com nome e número
-  emergencyMessage: string;
-};
-
-/**
  * Agrupa todos os dados do aplicativo em uma única estrutura.
  * Isso é útil para salvar e carregar todo o estado do app de uma só vez,
  * por exemplo, no \`localStorage\`.
@@ -66,7 +57,6 @@ export type SosSettings = {
 export type MoodLuaData = {
   userProfile: UserProfile | null;
   dailyLogs: DailyLog[];
-  sosSettings: SosSettings;
   cycleHistory: CycleLog[];
   pregnancyLmpDate: string | null;
 };

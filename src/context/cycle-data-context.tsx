@@ -1,8 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { UserProfile, DailyLog, SosSettings, MoodLuaData, CycleLog } from '@/lib/types';
-import { DEFAULT_SOS_SETTINGS } from '@/lib/config';
+import { UserProfile, DailyLog, MoodLuaData, CycleLog } from '@/lib/types';
 import { format, addDays, differenceInDays, startOfDay } from 'date-fns';
 
 const LOCAL_STORAGE_KEY = 'moodLuaData';
@@ -10,13 +9,11 @@ const LOCAL_STORAGE_KEY = 'moodLuaData';
 interface CycleDataContextType {
   userProfile: UserProfile | null;
   dailyLogs: DailyLog[];
-  sosSettings: SosSettings;
   cycleHistory: CycleLog[];
   pregnancyLmpDate: string | null;
   loading: boolean;
   updateUserProfile: (profile: UserProfile) => void;
   addOrUpdateDailyLog: (log: Omit<DailyLog, 'date'> & { date: Date }) => void;
-  updateSosSettings: (settings: SosSettings) => void;
   getLogForDate: (date: Date) => DailyLog | undefined;
   startNewCycle: (startDate: Date) => void;
   updatePregnancyLmpDate: (date: string | null) => void;
@@ -27,7 +24,6 @@ const CycleDataContext = createContext<CycleDataContextType | undefined>(undefin
 export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
-  const [sosSettings, setSosSettings] = useState<SosSettings>(DEFAULT_SOS_SETTINGS);
   const [cycleHistory, setCycleHistory] = useState<CycleLog[]>([]);
   const [pregnancyLmpDate, setPregnancyLmpDate] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,7 +35,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         const data: MoodLuaData = JSON.parse(storedData);
         if (data.userProfile) setUserProfile(data.userProfile);
         if (data.dailyLogs) setDailyLogs(data.dailyLogs);
-        if (data.sosSettings) setSosSettings(data.sosSettings);
         if (data.cycleHistory) setCycleHistory(data.cycleHistory);
         if (data.pregnancyLmpDate) setPregnancyLmpDate(data.pregnancyLmpDate);
       }
@@ -55,7 +50,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
       const dataToSave: MoodLuaData = {
         userProfile,
         dailyLogs,
-        sosSettings,
         cycleHistory,
         pregnancyLmpDate,
       };
@@ -65,7 +59,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         console.error("Failed to save data to localStorage", error);
       }
     }
-  }, [userProfile, dailyLogs, sosSettings, cycleHistory, pregnancyLmpDate, loading]);
+  }, [userProfile, dailyLogs, cycleHistory, pregnancyLmpDate, loading]);
 
   const updateUserProfile = (profile: UserProfile) => {
     setUserProfile(profile);
@@ -106,10 +100,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
       }
     });
   }, []);
-
-  const updateSosSettings = (settings: SosSettings) => {
-    setSosSettings(settings);
-  };
   
   const startNewCycle = useCallback((newStartDate: Date) => {
     if (!userProfile) return;
@@ -165,13 +155,11 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   const value = {
     userProfile,
     dailyLogs,
-    sosSettings,
     cycleHistory,
     pregnancyLmpDate,
     loading,
     updateUserProfile,
     addOrUpdateDailyLog,
-    updateSosSettings,
     getLogForDate,
     startNewCycle,
     updatePregnancyLmpDate,

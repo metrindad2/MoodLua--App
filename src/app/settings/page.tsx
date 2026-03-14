@@ -1,13 +1,13 @@
-'use client'; // Needs to be a client component to use the form
+'use client'; // Needs to be a client component
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Settings as SettingsIcon } from 'lucide-react';
+import { Settings as SettingsIcon, Info } from 'lucide-react';
 import { SettingsForm } from '@/components/settings-form';
 
 /**
  * Página de Configurações.
  *
- * Espaço para as configurações do aplicativo, incluindo a função SOS.
+ * Espaço para as configurações do aplicativo.
  */
 export default function SettingsPage() {
   return (
@@ -19,11 +19,22 @@ export default function SettingsPage() {
             Configurações
           </CardTitle>
           <CardDescription>
-            Gerencie as preferências do seu aplicativo, incluindo os contatos e a mensagem de emergência (SOS).
+            Gerencie as preferências do seu aplicativo.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <SettingsForm />
+          <Card className="bg-muted/50 border-dashed">
+            <CardHeader className="flex-row items-center gap-4 space-y-0">
+               <Info className="w-5 h-5 text-muted-foreground" />
+               <CardTitle className="text-lg">Perfil</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                No momento, as configurações de perfil, como nome e dados do ciclo,
+                não podem ser editadas após o cadastro inicial.
+              </p>
+            </CardContent>
+          </Card>
         </CardContent>
       </Card>
     </div>

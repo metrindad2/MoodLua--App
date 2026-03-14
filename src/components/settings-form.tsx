@@ -14,74 +14,44 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useCycleData } from '@/context/cycle-data-context';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
-import type { SosSettings } from '@/lib/types';
 
 /**
  * Esquema de validação para o formulário de configurações.
- * Garante que os dados de SOS inseridos sejam válidos.
+ * Garante que os dados inseridos sejam válidos.
  */
 const formSchema = z.object({
-  policeNumber: z.string().min(2, 'O número deve ter pelo menos 2 dígitos.'),
-  emergencyContacts: z.string(), // Recebe uma string com múltiplos contatos, um por linha
-  emergencyMessage: z.string().min(10, 'A mensagem deve ter pelo menos 10 caracteres.'),
+  name: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.'),
 });
 
 type SettingsFormValues = z.infer<typeof formSchema>;
 
 /**
  * Formulário de Configurações.
- * Permite que a usuária personalize as informações da função SOS.
+ * Permite que a usuária personalize as informações.
  */
 export function SettingsForm() {
-  const { sosSettings, updateSosSettings } = useCycleData();
   const { toast } = useToast();
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(formSchema),
-    // Converte o array de objetos de contatos em uma string de múltiplas linhas para o textarea.
     defaultValues: {
-      ...sosSettings,
-      emergencyContacts: sosSettings.emergencyContacts.map(c => `${c.name}: ${c.number}`).join('\n'),
+      name: '',
     },
   });
 
   // `useEffect` para atualizar o formulário se as configurações no contexto mudarem.
   useEffect(() => {
     form.reset({
-      ...sosSettings,
-      emergencyContacts: sosSettings.emergencyContacts.map(c => `${c.name}: ${c.number}`).join('\n'),
+      name: 'Usuária',
     });
-  }, [sosSettings, form]);
+  }, [form]);
 
   function onSubmit(values: SettingsFormValues) {
-    // Converte a string do textarea de volta para um array de objetos de contato.
-    const contacts = values.emergencyContacts
-      .split('\n')
-      .map(line => {
-        const parts = line.split(':');
-        const name = parts[0]?.trim();
-        const number = parts.slice(1).join(':').trim(); // Garante que números com ":" funcionem
-        if (name && number) {
-          return { name, number };
-        }
-        return null;
-      })
-      .filter((c): c is { name: string; number: string } => c !== null);
-      
-    const newSettings: SosSettings = {
-        policeNumber: values.policeNumber,
-        emergencyMessage: values.emergencyMessage,
-        emergencyContacts: contacts,
-    };
-
-    updateSosSettings(newSettings);
     toast({
       title: 'Configurações Salvas!',
-      description: 'Suas informações de emergência foram atualizadas.',
+      description: 'Suas informações foram atualizadas.',
     });
   }
 
@@ -90,61 +60,21 @@ export function SettingsForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
-          name="policeNumber"
+          name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Número da Polícia</FormLabel>
+              <FormLabel>Nome</FormLabel>
               <FormControl>
-                <Input placeholder="Ex: 190" {...field} />
+                <Input placeholder="Seu nome" {...field} disabled />
               </FormControl>
               <FormDescription>
-                Número para o qual o app ligará em uma emergência.
+                A edição do perfil será implementada em breve.
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="emergencyContacts"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Contatos de Emergência</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Um por linha. Ex: Gaby: 11987654321"
-                  className="resize-none min-h-[100px]"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Adicione um contato por linha no formato "Nome: Número".
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="emergencyMessage"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Mensagem de Emergência</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Sua mensagem personalizada..."
-                  className="resize-none"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Esta mensagem será enviada junto com sua localização.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="bg-accent text-accent-foreground hover:bg-accent/90">Salvar Alterações</Button>
+        <Button type="submit" className="bg-accent text-accent-foreground hover:bg-accent/90" disabled>Salvar Alterações</Button>
       </form>
     </Form>
   );
