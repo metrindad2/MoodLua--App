@@ -39,16 +39,24 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
     const triggerSos = useCallback((contact: { name: string; number: string }) => {
         toast({ title: 'Acionando Contato de Emergência', description: `Preparando mensagem para ${contact.name}` });
 
-        const sendSms = (message: string, contactNumber: string) => {
-            const cleanNumber = contactNumber.replace(/[\s()-]/g, '');
-            const smsUri = `sms:${cleanNumber}?body=${encodeURIComponent(message)}`;
+        const sendWhatsAppMessage = (message: string, contactNumber: string) => {
+            // Remove todos os caracteres que não são dígitos para limpar o número.
+            let cleanNumber = contactNumber.replace(/\D/g, '');
+
+            // Heurística para números brasileiros: se tiver 10 ou 11 dígitos (DDD + número),
+            // adiciona o código do país (55). Isso garante o formato internacional.
+            if (cleanNumber.length === 10 || cleanNumber.length === 11) {
+                cleanNumber = `55${cleanNumber}`;
+            }
             
+            const whatsappUri = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
+
             toast({
-                title: 'Abrindo app de Mensagens...',
+                title: 'Abrindo o WhatsApp...',
                 description: `Sua mensagem para ${contact.name} está pronta.`,
                 duration: 4000,
             });
-            window.location.href = smsUri;
+            window.open(whatsappUri, '_blank');
         };
 
         if (!navigator.geolocation) {
@@ -57,7 +65,7 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
                 description: 'Seu navegador não suporta geolocalização. A mensagem será enviada sem a localização.',
                 variant: 'destructive',
             });
-            sendSms(sosSettings.emergencyMessage, contact.number);
+            sendWhatsAppMessage(sosSettings.emergencyMessage, contact.number);
             return;
         }
 
@@ -66,7 +74,7 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
                 const { latitude, longitude } = position.coords;
                 const locationUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
                 const message = `${sosSettings.emergencyMessage}\nMinha localização: ${locationUrl}`;
-                sendSms(message, contact.number);
+                sendWhatsAppMessage(message, contact.number);
             },
             (error: GeolocationPositionError) => {
                 let errorDescription: string;
@@ -91,8 +99,8 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
                     duration: 7000
                 });
                 
-                // Fallback: send message without location
-                sendSms(sosSettings.emergencyMessage, contact.number);
+                // Fallback: envia a mensagem pelo WhatsApp sem a localização
+                sendWhatsAppMessage(sosSettings.emergencyMessage, contact.number);
             },
             { 
                 enableHighAccuracy: false, // Prioriza velocidade sobre precisão.
