@@ -103,9 +103,9 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
                 sendWhatsAppMessage(sosSettings.emergencyMessage, contact.number);
             },
             { 
-                enableHighAccuracy: false, // Prioriza velocidade sobre precisão.
-                timeout: 15000, // Limite de 15 segundos.
-                maximumAge: 60000 // Aceita uma localização de até 1 minuto atrás.
+                enableHighAccuracy: true, // Solicita a localização mais precisa possível.
+                timeout: 10000, // Limite de 10 segundos para obter a localização.
+                maximumAge: 0 // Não utiliza uma localização em cache.
             }
         );
 
