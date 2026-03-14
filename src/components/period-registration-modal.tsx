@@ -112,8 +112,9 @@ export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrati
       // Generate months for scrolling view
       const today = new Date();
       const initialMonths: Date[] = [];
-      // We'll render the last 12 months, including the current one.
-      for (let i = 11; i >= 0; i--) { 
+      // We'll render the last 60 months (5 years), including the current one.
+      const totalMonths = 60;
+      for (let i = totalMonths - 1; i >= 0; i--) { 
           initialMonths.push(subMonths(startOfMonth(today), i));
       }
       setMonthsToRender(initialMonths);
