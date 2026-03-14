@@ -94,7 +94,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             onClick={() => setIsSosOpen(true)}
             className="fixed bottom-[85px] right-4 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-background shadow-lg transition-transform hover:scale-110 active:scale-100"
           >
-            <Heart className="h-8 w-8 text-destructive" fill="currentColor" />
+            <Heart className="h-8 w-8 text-accent" fill="currentColor" />
           </button>
           <SosModal open={isSosOpen} onOpenChange={setIsSosOpen} />
         </>
