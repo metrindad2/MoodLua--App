@@ -11,7 +11,6 @@ import {
   isSameDay,
   startOfDay,
   differenceInDays,
-  isAfter,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -54,8 +53,6 @@ export function DailyTracker() {
   const [selectedFlow, setSelectedFlow] =
     useState<DailyLog['flowIntensity']>();
 
-  const cycleInfo = userProfile ? calculateCycleInfo(userProfile) : null;
-
   useEffect(() => {
     const log = getLogForDate(selectedDate);
     setSelectedMood(log?.mood);
@@ -67,31 +64,6 @@ export function DailyTracker() {
     const newFlow = selectedFlow === flow ? undefined : flow;
     setSelectedFlow(newFlow);
     addOrUpdateDailyLog({ date: selectedDate, flowIntensity: newFlow });
-
-    // Se a usuária registrar um fluxo que parece ser de um novo ciclo,
-    // proativamente oferecemos para iniciar um novo ciclo para ela.
-    if (newFlow && newFlow !== 'nenhum' && cycleInfo) {
-      const today = startOfDay(new Date());
-      const selectedDayStart = startOfDay(selectedDate);
-
-      // Não acionar para datas futuras
-      if (isAfter(selectedDayStart, today)) return;
-
-      const isAlreadyInPeriod =
-        selectedDayStart >= cycleInfo.menstruationStartDate &&
-        selectedDayStart < cycleInfo.menstruationEndDate;
-
-      // Heurística: o ciclo atual é "longo o suficiente" para estar terminando,
-      // OU a data selecionada é após o início previsto do próximo ciclo.
-      const isTimeForNewCycle =
-        cycleInfo.currentCycleDay > 21 ||
-        selectedDayStart >= cycleInfo.nextPeriodStartDate;
-
-      if (!isAlreadyInPeriod && isTimeForNewCycle) {
-        // Isso parece o início de um novo período! Peça confirmação.
-        setIsConfirmOpen(true);
-      }
-    }
   };
 
   const handleMoodSelect = (mood: Mood) => {
