@@ -56,7 +56,7 @@ export function SosMessageManager() {
                             <Textarea
                                 placeholder="Ex: Preciso de ajuda urgente. Esta é a minha localização:"
                                 {...field}
-                                rows={3}
+                                rows={2}
                              />
                         </FormControl>
                          <FormDescription>
