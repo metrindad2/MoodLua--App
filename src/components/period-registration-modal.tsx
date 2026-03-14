@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -19,11 +19,12 @@ import {
   isSameMonth,
   isSameDay,
   subMonths,
+  addMonths,
   isAfter,
   startOfDay,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Check, X } from 'lucide-react';
+import { Check, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCycleData } from '@/context/cycle-data-context';
 import { useToast } from '@/hooks/use-toast';
@@ -53,10 +54,7 @@ function MonthView({
   const weekdays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
   return (
-    <div className="mb-6">
-      <h3 className="text-lg font-semibold capitalize text-center mb-4 text-foreground">
-        {format(monthDate, 'MMMM yyyy', { locale: ptBR })}
-      </h3>
+    <div>
       <div className="grid grid-cols-7 text-center text-sm text-muted-foreground mb-2">
         {weekdays.map((weekday, i) => (
           <div key={i} className="font-medium">
@@ -98,6 +96,7 @@ function MonthView({
 export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrationModalProps) {
   const { dailyLogs, addOrUpdateDailyLog, startNewCycle } = useCycleData();
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
+  const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
   const { toast } = useToast();
   
   // This effect loads the currently logged period days when the modal opens
@@ -107,14 +106,9 @@ export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrati
         .filter(log => log.flowIntensity && log.flowIntensity !== 'nenhum')
         .map(log => startOfDay(new Date(log.date + 'T00:00:00')));
       setSelectedDays(periodDays);
+      setCurrentMonth(startOfMonth(new Date()));
     }
   }, [open, dailyLogs]);
-  
-  // We'll show the current month and the 5 previous ones for a good range.
-  const monthsToDisplay = useMemo(() => {
-    const today = startOfDay(new Date());
-    return Array.from({ length: 6 }, (_, i) => subMonths(today, i)).reverse();
-  }, []);
 
   const handleDayClick = (day: Date) => {
     const dayStart = startOfDay(day);
@@ -126,6 +120,9 @@ export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrati
       }
     });
   };
+  
+  const goToNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+  const goToPrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
 
   const handleSave = () => {
     // Determine which days were originally logged
@@ -182,14 +179,23 @@ export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrati
         
         <ScrollArea className="flex-1">
             <div className="p-4">
-                {monthsToDisplay.map(month => (
-                    <MonthView 
-                        key={month.toString()}
-                        monthDate={month}
-                        selectedDays={selectedDays}
-                        onDayClick={handleDayClick}
-                    />
-                ))}
+              <div className="flex items-center justify-between mb-4">
+                <Button variant="ghost" size="icon" onClick={goToPrevMonth} aria-label="Mês anterior">
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+                <h3 className="text-lg font-semibold capitalize text-center">
+                  {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
+                </h3>
+                <Button variant="ghost" size="icon" onClick={goToNextMonth} aria-label="Próximo mês">
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+              </div>
+
+              <MonthView 
+                  monthDate={currentMonth}
+                  selectedDays={selectedDays}
+                  onDayClick={handleDayClick}
+              />
             </div>
         </ScrollArea>
 
