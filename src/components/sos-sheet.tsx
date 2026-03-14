@@ -36,21 +36,15 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
         window.location.href = `tel:${number}`;
     };
 
-    const triggerSos = useCallback((contact: { name: string; number: string }) => {
+    const triggerSos = useCallback(async (contact: { name: string; number: string }) => {
         toast({ title: 'Acionando Contato de Emergência', description: `Preparando mensagem para ${contact.name}` });
 
         const sendWhatsAppMessage = (message: string, contactNumber: string) => {
-            // Remove todos os caracteres que não são dígitos para limpar o número.
             let cleanNumber = contactNumber.replace(/\D/g, '');
-
-            // Heurística para números brasileiros: se tiver 10 ou 11 dígitos (DDD + número),
-            // adiciona o código do país (55). Isso garante o formato internacional.
             if (cleanNumber.length === 10 || cleanNumber.length === 11) {
                 cleanNumber = `55${cleanNumber}`;
             }
-            
             const whatsappUri = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
-
             toast({
                 title: 'Abrindo o WhatsApp...',
                 description: `Sua mensagem para ${contact.name} está pronta.`,
@@ -61,12 +55,30 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
 
         if (!navigator.geolocation) {
             toast({
-                title: 'Erro de Localização',
+                title: 'Localização não suportada',
                 description: 'Seu navegador não suporta geolocalização. A mensagem será enviada sem a localização.',
                 variant: 'destructive',
             });
             sendWhatsAppMessage(sosSettings.emergencyMessage, contact.number);
             return;
+        }
+
+        if (navigator.permissions && navigator.permissions.query) {
+            try {
+                const permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
+                if (permissionStatus.state === 'denied') {
+                    toast({
+                        title: 'Permissão de Localização Negada',
+                        description: 'Para enviar sua posição, habilite o acesso à localização para este site nas configurações do seu navegador.',
+                        variant: 'destructive',
+                        duration: 10000
+                    });
+                    sendWhatsAppMessage(sosSettings.emergencyMessage, contact.number);
+                    return;
+                }
+            } catch (e) {
+                console.error("Não foi possível consultar a permissão de geolocalização:", e);
+            }
         }
 
         navigator.geolocation.getCurrentPosition(
@@ -80,16 +92,16 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
                 let errorDescription: string;
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
-                        errorDescription = 'Você negou o acesso à localização. A mensagem será enviada sem ela.';
+                        errorDescription = 'Você negou o acesso à localização. A mensagem foi enviada sem ela.';
                         break;
                     case error.POSITION_UNAVAILABLE:
-                        errorDescription = 'Informações de localização não estão disponíveis. A mensagem será enviada sem ela.';
+                        errorDescription = 'Informações de localização não estão disponíveis. A mensagem foi enviada sem ela.';
                         break;
                     case error.TIMEOUT:
-                        errorDescription = 'A solicitação de localização demorou demais. A mensagem será enviada sem ela.';
+                        errorDescription = 'A solicitação de localização demorou demais. A mensagem foi enviada sem ela.';
                         break;
                     default:
-                        errorDescription = 'Não foi possível obter sua localização. A mensagem será enviada sem ela.';
+                        errorDescription = 'Não foi possível obter sua localização. A mensagem foi enviada sem ela.';
                         break;
                 }
                 toast({
@@ -98,14 +110,12 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
                     variant: 'destructive',
                     duration: 7000
                 });
-                
-                // Fallback: envia a mensagem pelo WhatsApp sem a localização
                 sendWhatsAppMessage(sosSettings.emergencyMessage, contact.number);
             },
             { 
-                enableHighAccuracy: true, // Solicita a localização mais precisa possível.
-                timeout: 10000, // Limite de 10 segundos para obter a localização.
-                maximumAge: 0 // Não utiliza uma localização em cache.
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
             }
         );
 
