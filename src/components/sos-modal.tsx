@@ -15,6 +15,7 @@ import { ScrollArea } from './ui/scroll-area';
 function SosMessageButton({ contact }: { contact: EmergencyContact }) {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { sosMessage } = useCycleData();
 
   const handleSos = () => {
     setLoading(true);
@@ -25,7 +26,7 @@ function SosMessageButton({ contact }: { contact: EmergencyContact }) {
       (position) => {
         const { latitude, longitude } = position.coords;
         const googleMapsLink = `https://maps.google.com/?q=${latitude},${longitude}`;
-        const helpMessage = `Preciso de ajuda. Minha localização atual é:\n${googleMapsLink}`;
+        const helpMessage = `${sosMessage}\n${googleMapsLink}`;
         const encodedMessage = encodeURIComponent(helpMessage);
         
         let phone = contact.phone.replace(/\D/g, '');
@@ -46,7 +47,7 @@ function SosMessageButton({ contact }: { contact: EmergencyContact }) {
         }
         toast({ title: `Erro (Cód: ${geoError.code})`, description: errorMessage, variant: 'destructive' });
 
-        const helpMessage = `Preciso de ajuda.`;
+        const helpMessage = sosMessage;
         const encodedMessage = encodeURIComponent(helpMessage);
         let phone = contact.phone.replace(/\D/g, '');
         if (phone.length <= 11) {

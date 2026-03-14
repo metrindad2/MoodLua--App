@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Settings as SettingsIcon } from 'lucide-react';
 import { EmergencyContactManager } from '@/components/emergency-contact-manager';
+import { SosMessageManager } from '@/components/sos-message-manager';
 
 /**
  * Página de Configurações.
@@ -22,7 +23,8 @@ export default function SettingsPage() {
             Gerencie as preferências do seu aplicativo.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          <SosMessageManager />
           <EmergencyContactManager />
         </CardContent>
       </Card>

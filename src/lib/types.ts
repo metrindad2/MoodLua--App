@@ -69,4 +69,5 @@ export type MoodLuaData = {
   cycleHistory: CycleLog[];
   pregnancyLmpDate: string | null;
   emergencyContacts?: EmergencyContact[];
+  sosMessage?: string;
 };
