@@ -59,7 +59,7 @@ function SosMessageButton({ contact }: { contact: EmergencyContact }) {
   };
 
   return (
-    <Button onClick={handleSos} disabled={loading} size="sm" className="bg-destructive hover:bg-destructive/90">
+    <Button onClick={handleSos} disabled={loading} size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90">
       <MessageSquare className="mr-2 h-4 w-4" />
       {loading ? '...' : 'SOS'}
     </Button>
