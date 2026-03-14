@@ -21,6 +21,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { AppIntroCarousel } from '@/components/app-intro-carousel';
 
 const formSchema = z.object({
   email: z.string().email('Por favor, insira um email válido.'),
@@ -63,20 +64,21 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-dvh p-4 bg-gradient-to-b from-purple-900 to-fuchsia-600 text-white">
-      <div className="flex flex-col items-center justify-center text-center mb-6">
+    <div className="flex flex-col items-center justify-center min-h-dvh p-4 bg-gradient-to-b from-purple-900 to-fuchsia-600 text-white">
+      <div className="flex flex-col items-center justify-center text-center pt-8 pb-4">
         <Image
           src="/logo.png"
           alt="MoodLua Logo"
-          width={64}
-          height={64}
+          width={56}
+          height={56}
           className="mb-2"
         />
-        <h1 className="text-3xl font-bold">MoodLua</h1>
-        <p className="text-white/80">Faça login para continuar</p>
+        <h1 className="text-3xl font-bold">Bem-vinda de volta!</h1>
       </div>
 
-      <Card className="w-full max-w-md rounded-2xl bg-white/10 backdrop-blur-lg shadow-lg border border-white/20 p-6 text-white">
+      <AppIntroCarousel />
+
+      <Card className="w-full max-w-md rounded-2xl bg-white/10 backdrop-blur-lg shadow-lg border border-white/20 p-6 mt-4 text-white">
         <CardHeader>
           <CardTitle className="text-center text-2xl">Login</CardTitle>
         </CardHeader>
@@ -128,7 +130,7 @@ export default function LoginPage() {
         </CardContent>
       </Card>
 
-      <div className="mt-6 text-center">
+      <div className="mt-6 text-center pb-8">
         <Link href="/" className="text-sm text-white/80 hover:text-white">
           Não tem conta? Crie uma
         </Link>

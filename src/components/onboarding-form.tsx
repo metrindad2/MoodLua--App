@@ -24,6 +24,7 @@ import { UserProfile } from '@/lib/types';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { AppIntroCarousel } from '@/components/app-intro-carousel';
 
 // Esquema atualizado para o novo formulário de criação de conta
 const formSchema = z.object({
@@ -73,20 +74,24 @@ export default function OnboardingForm() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-dvh p-4 bg-gradient-to-b from-purple-900 to-fuchsia-600 text-white">
-      <div className="flex flex-col items-center justify-center text-center mb-6">
+    <div className="flex flex-col items-center justify-center min-h-dvh p-4 bg-gradient-to-b from-purple-900 to-fuchsia-600 text-white">
+      <div className="flex flex-col items-center justify-center text-center pt-8 pb-4">
         <Image
           src="/logo.png"
           alt="MoodLua Logo"
-          width={64}
-          height={64}
+          width={56}
+          height={56}
           className="mb-2"
         />
-        <h1 className="text-3xl font-bold">MoodLua</h1>
-        <p className="text-white/80">Crie sua conta para começar</p>
+        <h1 className="text-3xl font-bold">Bem-vinda à MoodLua</h1>
       </div>
 
-      <div className="w-full max-w-md rounded-2xl bg-white/10 backdrop-blur-lg shadow-lg border border-white/20 p-6">
+      <AppIntroCarousel />
+
+      <div className="w-full max-w-md rounded-2xl bg-white/10 backdrop-blur-lg shadow-lg border border-white/20 p-6 mt-4">
+        <p className="text-center text-white/90 mb-4 font-semibold">
+          Crie sua conta para começar
+        </p>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -233,13 +238,13 @@ export default function OnboardingForm() {
               type="submit"
               className="w-full bg-white/30 hover:bg-white/40 text-white font-bold text-base py-6"
             >
-              Criar conta
+              Criar conta e começar
             </Button>
           </form>
         </Form>
       </div>
 
-      <div className="mt-6 text-center">
+      <div className="mt-6 text-center pb-8">
         <Link href="/login" className="text-sm text-white/80 hover:text-white">
           Já tem conta? Faça login
         </Link>
