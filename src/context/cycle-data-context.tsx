@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { UserProfile, DailyLog, SosSettings, MoodLuaData, CycleLog } from '@/lib/types';
 import { DEFAULT_SOS_SETTINGS } from '@/lib/config';
-import { format, addDays, differenceInDays } from 'date-fns';
+import { format, addDays, differenceInDays, startOfDay } from 'date-fns';
 
 const LOCAL_STORAGE_KEY = 'moodLuaData';
 
@@ -73,15 +73,35 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   
   const addOrUpdateDailyLog = useCallback((log: Omit<DailyLog, 'date'> & { date: Date }) => {
     const dateString = format(log.date, 'yyyy-MM-dd');
-    const newLog = { ...log, date: dateString };
     
     setDailyLogs(prevLogs => {
       const existingLogIndex = prevLogs.findIndex(l => l.date === dateString);
+      const newLog = { ...log, date: dateString };
+      
       if (existingLogIndex > -1) {
         const updatedLogs = [...prevLogs];
-        updatedLogs[existingLogIndex] = { ...updatedLogs[existingLogIndex], ...newLog };
+        const currentLog = updatedLogs[existingLogIndex];
+
+        // Merge fields, but if a field is explicitly set to undefined, remove it.
+        const mergedLog = { ...currentLog, ...newLog };
+        for (const key in mergedLog) {
+            if (mergedLog[key as keyof typeof mergedLog] === undefined) {
+                delete mergedLog[key as keyof typeof mergedLog];
+            }
+        }
+        updatedLogs[existingLogIndex] = mergedLog;
+
+        // If the log is now empty (except for date), remove it.
+        if (Object.keys(mergedLog).length <= 1) {
+            return updatedLogs.filter((_, index) => index !== existingLogIndex);
+        }
+
         return updatedLogs;
       } else {
+         // Don't add a log if it only contains the date
+        if (Object.keys(newLog).length <= 1) {
+            return prevLogs;
+        }
         return [...prevLogs, newLog];
       }
     });
@@ -103,7 +123,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
 
     // 2. Remove duplicatas e ordena as datas cronologicamente.
     const uniqueSortedDates = [...new Set(allKnownStartDates)]
-      .map(dateStr => new Date(`${dateStr}T00:00:00`))
+      .map(dateStr => startOfDay(new Date(`${dateStr}T00:00:00`)))
       .sort((a, b) => a.getTime() - b.getTime());
 
     // 3. A data da última menstruação (LMP) no perfil é sempre a mais recente.
@@ -111,7 +131,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     const newLmpDateStr = format(newLmpDate, 'yyyy-MM-dd');
 
     // 4. Reconstrói o histórico de ciclos com base nas datas ordenadas.
-    // O histórico contém apenas os ciclos *concluídos*.
     const newCycleHistory: CycleLog[] = [];
     for (let i = 0; i < uniqueSortedDates.length - 1; i++) {
       const cycleStartDate = uniqueSortedDates[i];
@@ -132,15 +151,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     setUserProfile(prevProfile => 
       prevProfile ? { ...prevProfile, lastMenstruationDate: newLmpDateStr } : null
     );
-
-    // 6. Registra automaticamente o fluxo para a duração do período a partir da nova data.
-    // Isso garante que o início do período seja marcado, seja ele novo ou um registro corrigido.
-    for (let i = 0; i < userProfile.flowDurationDays; i++) {
-      const dateOfFlow = addDays(newStartDate, i);
-      // Chama a função de log que já lida com adicionar/atualizar.
-      addOrUpdateDailyLog({ date: dateOfFlow, flowIntensity: 'médio' });
-    }
-  }, [userProfile, cycleHistory, addOrUpdateDailyLog]);
+  }, [userProfile, cycleHistory]);
 
   const updatePregnancyLmpDate = (date: string | null) => {
     setPregnancyLmpDate(date);

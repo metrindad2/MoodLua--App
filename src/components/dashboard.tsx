@@ -8,9 +8,13 @@ import { DailyTracker } from './daily-tracker';
 import { SimpleCalendar } from './simple-calendar';
 import { addDays, subDays, startOfDay, isAfter } from 'date-fns';
 import { Card, CardContent } from './ui/card';
+import { useState } from 'react';
+import { Button } from './ui/button';
+import { PeriodRegistrationModal } from './period-registration-modal';
 
 export default function Dashboard() {
   const { userProfile, dailyLogs } = useCycleData();
+  const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
 
   if (!userProfile) return null;
 
@@ -87,7 +91,7 @@ export default function Dashboard() {
               highlightedRange={highlightedRange}
               previsionRange={previsionRange}
             />
-            <div className="flex items-center gap-6 p-2 text-sm">
+            <div className="flex items-center justify-between gap-6 p-2 text-sm border-b pb-4 mb-4">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-primary"></div>
                 <span>Período</span>
@@ -97,11 +101,25 @@ export default function Dashboard() {
                 <span>Previsão</span>
               </div>
             </div>
+            <div className="px-2 pt-2">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setIsRegistrationOpen(true)}
+              >
+                Registrar Período Menstrual
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       <DailyTracker />
+
+      <PeriodRegistrationModal
+        open={isRegistrationOpen}
+        onOpenChange={setIsRegistrationOpen}
+      />
     </div>
   );
 }
