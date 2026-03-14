@@ -39,12 +39,25 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
     const triggerSos = useCallback((contact: { name: string; number: string }) => {
         toast({ title: 'Acionando Contato de Emergência', description: `Preparando mensagem para ${contact.name}` });
 
+        const sendSms = (message: string, contactNumber: string) => {
+            const cleanNumber = contactNumber.replace(/[\s()-]/g, '');
+            const smsUri = `sms:${cleanNumber}?body=${encodeURIComponent(message)}`;
+            
+            toast({
+                title: 'Abrindo app de Mensagens...',
+                description: `Sua mensagem para ${contact.name} está pronta.`,
+                duration: 4000,
+            });
+            window.location.href = smsUri;
+        };
+
         if (!navigator.geolocation) {
             toast({
                 title: 'Erro de Localização',
-                description: 'Seu navegador não suporta geolocalização.',
+                description: 'Seu navegador não suporta geolocalização. A mensagem será enviada sem a localização.',
                 variant: 'destructive',
             });
+            sendSms(sosSettings.emergencyMessage, contact.number);
             return;
         }
 
@@ -53,43 +66,39 @@ export function SosSheet({ open, onOpenChange }: SosSheetProps) {
                 const { latitude, longitude } = position.coords;
                 const locationUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
                 const message = `${sosSettings.emergencyMessage}\nMinha localização: ${locationUrl}`;
-                
-                // Limpa caracteres comuns de formatação do número
-                const cleanNumber = contact.number.replace(/[\s()-]/g, '');
-                
-                // Cria o link SMS para abrir o app de mensagens com tudo preenchido
-                const smsUri = `sms:${cleanNumber}?body=${encodeURIComponent(message)}`;
-
-                toast({
-                    title: 'Abrindo app de Mensagens...',
-                    description: `Sua mensagem para ${contact.name} está pronta.`,
-                    duration: 4000,
-                });
-
-                // Redireciona para o app de SMS
-                window.location.href = smsUri;
+                sendSms(message, contact.number);
             },
             (error: GeolocationPositionError) => {
-                let description = 'Não foi possível obter sua localização. Tente acionar os contatos manualmente.';
+                let errorDescription: string;
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
-                        description = 'Você negou o acesso à localização. Por favor, habilite nas configurações do seu navegador para usar esta função.';
+                        errorDescription = 'Você negou o acesso à localização. A mensagem será enviada sem ela.';
                         break;
                     case error.POSITION_UNAVAILABLE:
-                        description = 'Informações de localização não estão disponíveis no momento. Verifique seu sinal de GPS.';
+                        errorDescription = 'Informações de localização não estão disponíveis. A mensagem será enviada sem ela.';
                         break;
                     case error.TIMEOUT:
-                        description = 'A solicitação de localização demorou demais. Tente novamente em um local com melhor sinal.';
+                        errorDescription = 'A solicitação de localização demorou demais. A mensagem será enviada sem ela.';
+                        break;
+                    default:
+                        errorDescription = 'Não foi possível obter sua localização. A mensagem será enviada sem ela.';
                         break;
                 }
                 toast({
                     title: 'Erro de Localização',
-                    description: description,
+                    description: errorDescription,
                     variant: 'destructive',
                     duration: 7000
                 });
+                
+                // Fallback: send message without location
+                sendSms(sosSettings.emergencyMessage, contact.number);
             },
-            { enableHighAccuracy: true, timeout: 30000, maximumAge: 10000 }
+            { 
+                enableHighAccuracy: false, // Prioriza velocidade sobre precisão.
+                timeout: 15000, // Limite de 15 segundos.
+                maximumAge: 60000 // Aceita uma localização de até 1 minuto atrás.
+            }
         );
 
     }, [sosSettings, toast]);
