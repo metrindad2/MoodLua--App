@@ -8,7 +8,6 @@ import {
   Baby,
   BrainCircuit,
   Settings,
-  Shield,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -24,7 +23,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: '/history', label: 'Histórico', icon: History },
     { href: '/pregnancy', label: 'Gravidez', icon: Baby },
     { href: '/insights', label: 'Insights', icon: BrainCircuit },
-    { href: '/ajuda', label: 'Ajuda', icon: Shield },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
 
