@@ -14,6 +14,7 @@ import {
   isSameDay,
   isToday,
   startOfDay,
+  isAfter,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -25,6 +26,8 @@ interface SimpleCalendarProps {
   initialDate?: Date;
   // Opcional: um dia que deve ser marcado como 'selecionado'
   selectedDate?: Date | null;
+  // Opcional: um array de dias que devem ser marcados como 'selecionados'
+  selectedDates?: Date[];
   // Opcional: um callback para quando um dia é clicado
   onDateClick?: (date: Date) => void;
   // Opcional: um intervalo de dias para destacar (ex: período menstrual)
@@ -37,6 +40,8 @@ interface SimpleCalendarProps {
     from: Date;
     to: Date;
   };
+  // Opcional: desabilita a seleção de datas futuras
+  disableFutureDates?: boolean;
 }
 
 /**
@@ -46,9 +51,11 @@ interface SimpleCalendarProps {
 export function SimpleCalendar({
   initialDate = new Date(),
   selectedDate,
+  selectedDates,
   onDateClick,
   highlightedRange,
   previsionRange,
+  disableFutureDates,
 }: SimpleCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(initialDate));
 
@@ -113,29 +120,36 @@ export function SimpleCalendar({
 
       {/* Grid para os dias do mês */}
       <div className="grid grid-cols-7 text-center text-sm">
-        {days.map((date, i) => (
-          <button
-            key={i}
-            onClick={() => onDateClick?.(date)}
-            disabled={!isSameMonth(date, currentMonth)}
-            className={cn(
-              'relative flex h-10 w-full items-center justify-center transition-colors rounded-md',
-              // Desabilita dias de outros meses
-              !isSameMonth(date, currentMonth) && 'text-muted-foreground/50 cursor-default',
-              isSameMonth(date, currentMonth) && 'hover:bg-accent/20',
-              // Destaca o dia de hoje com uma borda
-              isToday(date) && 'border-2 border-primary rounded-full',
-              // Destaca o intervalo (período menstrual)
-              isDayInRange(date) && 'bg-primary text-primary-foreground rounded-full',
-              isDayInPrevisionRange(date) && 'bg-primary/30 text-primary-foreground rounded-full',
-              // Destaca o dia selecionado (para o formulário)
-              selectedDate && isSameDay(date, selectedDate) && 'bg-accent text-accent-foreground ring-2 ring-accent-foreground rounded-full'
-            )}
-            aria-label={format(date, 'PPP', { locale: ptBR })}
-          >
-            {format(date, 'd')}
-          </button>
-        ))}
+        {days.map((date, i) => {
+          const isFuture = disableFutureDates && isAfter(startOfDay(date), startOfDay(new Date()));
+          const isSelectedByDate = selectedDate && isSameDay(date, selectedDate);
+          const isSelectedByDates = selectedDates?.some(d => isSameDay(d, date));
+
+          return (
+            <button
+              key={i}
+              onClick={() => onDateClick?.(date)}
+              disabled={!isSameMonth(date, currentMonth) || isFuture}
+              className={cn(
+                'relative flex h-10 w-full items-center justify-center transition-colors rounded-md',
+                // Desabilita dias de outros meses
+                !isSameMonth(date, currentMonth) && 'text-muted-foreground/50 cursor-default',
+                isFuture && 'text-muted-foreground/50 cursor-not-allowed',
+                isSameMonth(date, currentMonth) && !isFuture && 'hover:bg-accent/20',
+                // Destaca o dia de hoje com uma borda
+                isToday(date) && 'border-2 border-primary rounded-full',
+                // Destaca o intervalo (período menstrual)
+                isDayInRange(date) && 'bg-primary text-primary-foreground rounded-full',
+                isDayInPrevisionRange(date) && 'bg-primary/30 text-primary-foreground rounded-full',
+                // Destaca o dia/dias selecionado(s)
+                (isSelectedByDate || isSelectedByDates) && 'bg-accent text-accent-foreground ring-2 ring-accent-foreground rounded-full'
+              )}
+              aria-label={format(date, 'PPP', { locale: ptBR })}
+            >
+              {format(date, 'd')}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
