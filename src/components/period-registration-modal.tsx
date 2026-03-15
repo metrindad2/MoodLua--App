@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -98,26 +98,49 @@ export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrati
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
   const [monthsToRender, setMonthsToRender] = useState<Date[]>([]);
   const { toast } = useToast();
+
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const currentMonthRef = useRef<HTMLDivElement>(null);
   
-  // This effect loads the currently logged period days when the modal opens
-  // and generates the list of months to display.
   useEffect(() => {
     if (open) {
-      // Load selected days
+      // 1. Carrega os dias já registrados com fluxo menstrual
       const periodDays = dailyLogs
         .filter(log => log.flowIntensity && log.flowIntensity !== 'nenhum')
         .map(log => startOfDay(new Date(log.date + 'T00:00:00')));
       setSelectedDays(periodDays);
       
-      // Generate months for scrolling view, in reverse chronological order (present to past).
+      // 2. Gera a lista de meses para exibir: 5 anos para o passado e 1 para o futuro
       const today = new Date();
-      const initialMonths: Date[] = [];
-      // We'll render the last 60 months (5 years), starting with the current one.
-      const totalMonths = 60;
-      for (let i = 0; i < totalMonths; i++) { 
-          initialMonths.push(subMonths(startOfMonth(today), i));
+      const allMonths: Date[] = [];
+      const pastMonthsCount = 60; // 5 anos
+      const futureMonthsCount = 12; // 1 ano
+      const startDate = subMonths(startOfMonth(today), pastMonthsCount);
+      const endDate = addMonths(startOfMonth(today), futureMonthsCount);
+
+      let currentDate = startDate;
+      while (currentDate <= endDate) {
+          allMonths.push(currentDate);
+          currentDate = addMonths(currentDate, 1);
       }
-      setMonthsToRender(initialMonths);
+      setMonthsToRender(allMonths);
+      
+      // 3. Rola a visualização para o mês atual assim que o modal é aberto
+      // O timeout garante que a interface tenha tempo de renderizar antes da rolagem.
+      setTimeout(() => {
+        if (currentMonthRef.current && scrollAreaRef.current) {
+          const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
+          if (viewport) {
+            // Calcula a posição para centralizar o mês atual na tela
+            const viewportHeight = viewport.clientHeight;
+            const elementTop = currentMonthRef.current.offsetTop;
+            const elementHeight = currentMonthRef.current.offsetHeight;
+
+            const scrollToPosition = elementTop - (viewportHeight / 2) + (elementHeight / 2);
+            viewport.scrollTo({ top: scrollToPosition, behavior: 'auto' });
+          }
+        }
+      }, 100);
     }
   }, [open, dailyLogs]);
 
@@ -127,45 +150,32 @@ export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrati
       if (prev.some((d) => isSameDay(d, dayStart))) {
         return prev.filter((d) => !isSameDay(d, dayStart));
       } else {
-        // Sort selected days to easily find the first day of the cycle
         return [...prev, dayStart].sort((a,b) => a.getTime() - b.getTime());
       }
     });
   };
   
   const handleSave = () => {
-    // Determine which days were originally logged
     const originallyLogged = dailyLogs
       .filter(log => log.flowIntensity && log.flowIntensity !== 'nenhum')
       .map(log => startOfDay(new Date(log.date + 'T00:00:00')));
 
-    // Union of original and new selections to know which days to process
     const allPotentiallyChangedDays = [
       ...new Set([...originallyLogged, ...selectedDays].map(d => d.getTime()))
     ].map(t => new Date(t));
 
-    // Update logs
     for (const day of allPotentiallyChangedDays) {
       const isNowSelected = selectedDays.some(d => isSameDay(d, day));
       const wasOriginallySelected = originallyLogged.some(d => isSameDay(d, day));
 
-      // If status changed, update log
       if (isNowSelected !== wasOriginallySelected) {
         addOrUpdateDailyLog({ date: day, flowIntensity: isNowSelected ? 'médio' : 'nenhum' });
       }
     }
     
-    // If there are any selected days, find the earliest one and start a new cycle.
     if (selectedDays.length > 0) {
-      const newStartDate = selectedDays[0]; // Already sorted
+      const newStartDate = selectedDays[0]; 
       startNewCycle(newStartDate);
-    } else {
-        // If all days were deselected, we might need to find the new latest cycle start
-        // a more complex logic might be needed, but for now we let startNewCycle handle it
-        // by passing a date that will trigger a recalculation.
-        // For simplicity, we can assume deselecting all requires manual fix via profile.
-        // A better approach would be to find the last known start date from history.
-        // For now, we just rely on the user to select at least one day if they had a period.
     }
 
     toast({
@@ -186,20 +196,23 @@ export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrati
            </Button>
         </DialogHeader>
         
-        <ScrollArea className="flex-1">
+        <ScrollArea ref={scrollAreaRef} className="flex-1">
             <div className="p-4 space-y-8">
-              {monthsToRender.map((month) => (
-                <div key={month.toISOString()}>
-                  <h3 className="text-lg font-semibold capitalize text-center mb-4">
-                    {format(month, 'MMMM yyyy', { locale: ptBR })}
-                  </h3>
-                  <MonthView 
-                      monthDate={month}
-                      selectedDays={selectedDays}
-                      onDayClick={handleDayClick}
-                  />
-                </div>
-              ))}
+              {monthsToRender.map((month) => {
+                const isCurrentMonth = isSameMonth(month, startOfMonth(new Date()));
+                return (
+                    <div key={month.toISOString()} ref={isCurrentMonth ? currentMonthRef : null}>
+                        <h3 className="text-lg font-semibold capitalize text-center mb-4">
+                        {format(month, 'MMMM yyyy', { locale: ptBR })}
+                        </h3>
+                        <MonthView 
+                            monthDate={month}
+                            selectedDays={selectedDays}
+                            onDayClick={handleDayClick}
+                        />
+                    </div>
+                );
+            })}
             </div>
         </ScrollArea>
 
