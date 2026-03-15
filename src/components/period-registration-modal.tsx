@@ -22,6 +22,7 @@ import {
   addMonths,
   isAfter,
   startOfDay,
+  getYear,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Check, X } from 'lucide-react';
@@ -186,6 +187,18 @@ export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrati
     onOpenChange(false);
   };
   
+  // Agrupa os meses por ano para a nova interface
+  const monthsByYear = monthsToRender.reduce((acc, month) => {
+    const year = getYear(month);
+    if (!acc[year]) {
+      acc[year] = [];
+    }
+    acc[year].push(month);
+    return acc;
+  }, {} as Record<number, Date[]>);
+
+  const years = Object.keys(monthsByYear).map(Number).sort((a,b) => a - b);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md w-full h-dvh bg-background flex flex-col p-0 gap-0 sm:rounded-lg">
@@ -197,22 +210,32 @@ export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrati
         </DialogHeader>
         
         <ScrollArea ref={scrollAreaRef} className="flex-1">
-            <div className="p-4 space-y-8">
-              {monthsToRender.map((month) => {
-                const isCurrentMonth = isSameMonth(month, startOfMonth(new Date()));
-                return (
-                    <div key={month.toISOString()} ref={isCurrentMonth ? currentMonthRef : null}>
-                        <h3 className="text-lg font-semibold capitalize text-center mb-4">
-                        {format(month, 'MMMM yyyy', { locale: ptBR })}
-                        </h3>
-                        <MonthView 
-                            monthDate={month}
-                            selectedDays={selectedDays}
-                            onDayClick={handleDayClick}
-                        />
-                    </div>
-                );
-            })}
+            <div className="p-4">
+              {years.map(year => (
+                <div key={year}>
+                  {/* Cabeçalho de ano fixo */}
+                  <h2 className="text-center font-bold text-xl text-primary sticky top-0 bg-background/95 backdrop-blur-sm py-3 z-10 border-b mb-4">
+                    {year}
+                  </h2>
+                  <div className="space-y-8">
+                    {monthsByYear[year].map(month => {
+                      const isCurrentMonth = isSameMonth(month, startOfMonth(new Date()));
+                      return (
+                        <div key={month.toISOString()} ref={isCurrentMonth ? currentMonthRef : null}>
+                          <h3 className="text-lg font-semibold capitalize text-center mb-2">
+                            {format(month, 'MMMM', { locale: ptBR })}
+                          </h3>
+                          <MonthView 
+                              monthDate={month}
+                              selectedDays={selectedDays}
+                              onDayClick={handleDayClick}
+                          />
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
         </ScrollArea>
 
