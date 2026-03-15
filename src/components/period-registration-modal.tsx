@@ -111,11 +111,11 @@ export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrati
         .map(log => startOfDay(new Date(log.date + 'T00:00:00')));
       setSelectedDays(periodDays);
       
-      // 2. Gera a lista de meses para exibir: 5 anos para o passado e 1 para o futuro
+      // 2. Gera a lista de meses para exibir: 10 anos para o passado e 10 para o futuro
       const today = new Date();
       const allMonths: Date[] = [];
-      const pastMonthsCount = 60; // 5 anos
-      const futureMonthsCount = 12; // 1 ano
+      const pastMonthsCount = 120; // 10 anos
+      const futureMonthsCount = 120; // 10 anos
       const startDate = subMonths(startOfMonth(today), pastMonthsCount);
       const endDate = addMonths(startOfMonth(today), futureMonthsCount);
 
