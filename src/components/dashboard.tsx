@@ -12,7 +12,7 @@ import { Card, CardContent } from './ui/card';
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { PeriodRegistrationModal } from './period-registration-modal';
-import { Calendar, History } from 'lucide-react';
+import { History } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Dashboard() {
@@ -81,16 +81,15 @@ export default function Dashboard() {
       />
       
       <PhaseTips phase={phase} />
-
-      <div className="space-y-3">
-        <Card className="shadow-md shadow-primary/5">
-          <CardContent className="p-2">
+      
+      <Card>
+          <CardContent className="p-2 pt-4">
             <SimpleCalendar
               initialDate={new Date()}
               highlightedRange={highlightedRange}
               previsionRange={previsionRange}
             />
-            <div className="flex items-center justify-between gap-6 p-2 text-sm border-b pb-4 mb-4">
+            <div className="flex items-center justify-between gap-6 px-2 text-sm border-b pb-4 mb-4">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-primary"></div>
                 <span>Período</span>
@@ -111,14 +110,13 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-      </div>
 
       <DailyTracker />
 
-      <div className="space-y-3">
-        <div className="flex justify-between items-center">
+      <div>
+        <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
-                <History className="w-5 h-5 text-primary" />
+                <History className="w-5 h-5 text-secondary" />
                 Histórico de Ciclos
             </h2>
             <Link href="/history">
@@ -129,24 +127,24 @@ export default function Dashboard() {
           const startDate = parseISO(cycle.startDate);
           const endDate = addDays(startDate, cycle.cycleLength - 1);
           return (
-             <div
-                key={index}
-                className="flex flex-col justify-between items-start p-3 rounded-xl bg-secondary/50 text-secondary-foreground flex-grow"
-                >
-                    <p className="font-bold text-sm">
+             <Card key={index}>
+                <CardContent className="p-4 flex justify-between items-center">
+                    <p className="font-semibold text-sm">
                         {format(startDate, "d 'de' MMM", { locale: ptBR })} -{' '}
-                        {format(endDate, "d 'de' MMM yyyy", { locale: ptBR })}
+                        {format(endDate, "d 'de' MMM, yyyy", { locale: ptBR })}
                     </p>
                     <p className="font-bold text-lg text-primary">{cycle.cycleLength} dias</p>
-                </div>
+                </CardContent>
+             </Card>
           );
         }) : (
-            <div className="text-sm text-muted-foreground text-center py-4 px-4 rounded-xl bg-secondary/50">
-              Seu histórico de ciclos aparecerá aqui.
-            </div>
+            <Card>
+                <CardContent className="pt-6 text-sm text-muted-foreground text-center">
+                  Seu histórico de ciclos aparecerá aqui.
+                </CardContent>
+            </Card>
         )}
       </div>
-
 
       <PeriodRegistrationModal
         open={isRegistrationOpen}

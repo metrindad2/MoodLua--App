@@ -1,4 +1,5 @@
 import { Sparkles } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 interface PhaseTipsProps {
   phase: string;
@@ -15,14 +16,18 @@ export function PhaseTips({ phase }: PhaseTipsProps) {
   const phaseTips = tipsData[phase as keyof typeof tipsData] || tipsData['Folicular'];
   
   return (
-    <div className="rounded-xl bg-secondary/50 p-4">
-        <h3 className="font-semibold flex items-center gap-2 mb-2">
-          <Sparkles className="w-5 h-5 text-primary" />
-          Dicas para a fase {phase}
-        </h3>
-        <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
-          {phaseTips.map((tip, i) => <li key={i}>{tip}</li>)}
-        </ul>
-    </div>
+    <Card>
+        <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-secondary" />
+                Dicas para a fase {phase}
+            </CardTitle>
+        </CardHeader>
+        <CardContent>
+            <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
+              {phaseTips.map((tip, i) => <li key={i}>{tip}</li>)}
+            </ul>
+        </CardContent>
+    </Card>
   );
 }

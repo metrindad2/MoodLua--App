@@ -34,7 +34,6 @@ export default function HistoryPage() {
     );
   }
 
-  // --- Data Calculation ---
   const sortedHistory = [...cycleHistory].sort(
     (a, b) => parseISO(b.startDate).getTime() - parseISO(a.startDate).getTime()
   );
@@ -47,12 +46,11 @@ export default function HistoryPage() {
   const lastCycle = sortedHistory.length > 0 ? sortedHistory[0] : null;
 
   return (
-    <div className="p-4 space-y-6 bg-background text-foreground">
-      {/* Meus Ciclos Card */}
-      <Card className="bg-card shadow-lg overflow-hidden">
+    <div className="p-4 space-y-6">
+      <Card>
         <CardHeader>
           <CardTitle className="text-xl flex items-center gap-2">
-            <HistoryIcon className="w-6 h-6 text-primary" />
+            <HistoryIcon className="w-6 h-6 text-secondary" />
             Estatísticas do Ciclo
           </CardTitle>
         </CardHeader>
@@ -82,16 +80,16 @@ export default function HistoryPage() {
             </div>
           </div>
           
-          <div className="!mt-6 rounded-lg bg-secondary/50 p-4">
-            <h3 className="font-semibold flex items-center gap-2">
-              <BrainCircuit className="text-primary w-5 h-5" /> Assistente de
+          <div className="!mt-6 rounded-lg bg-accent p-4">
+            <h3 className="font-semibold flex items-center gap-2 text-accent-foreground">
+              <Sparkles className="text-primary w-5 h-5" /> Assistente de
               Saúde
             </h3>
-            <p className="text-xs text-muted-foreground mt-1 mb-3">
+            <p className="text-xs text-accent-foreground/80 mt-1 mb-3">
               Receba insights personalizados sobre seu ciclo e bem-estar com nossa IA.
             </p>
             <Link href="/insights" passHref>
-              <Button className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
+              <Button className="w-full">
                 Gerar Insights
               </Button>
             </Link>
@@ -100,36 +98,38 @@ export default function HistoryPage() {
         </CardContent>
       </Card>
 
-      {/* Histórico Card */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <h2 className="text-xl font-semibold px-1 flex items-center gap-2">
-            <Calendar className="w-6 h-6 text-primary" />
+            <Calendar className="w-6 h-6 text-secondary" />
             Histórico de Ciclos
         </h2>
         {sortedHistory.length === 0 && (
-           <div className="text-sm text-muted-foreground text-center py-4 px-4 rounded-xl bg-secondary/50">
-            Nenhum histórico de ciclo encontrado.
-          </div>
+           <Card>
+            <CardContent className="pt-6 text-sm text-muted-foreground text-center">
+                Nenhum histórico de ciclo encontrado.
+            </CardContent>
+           </Card>
         )}
-        <div className="flex flex-wrap gap-3">
-            {sortedHistory.map((cycle, index) => {
-            const startDate = parseISO(cycle.startDate);
-            const endDate = addDays(startDate, cycle.cycleLength - 1);
+        {sortedHistory.map((cycle, index) => {
+        const startDate = parseISO(cycle.startDate);
+        const endDate = addDays(startDate, cycle.cycleLength - 1);
 
-            return (
-                <div
-                key={index}
-                className="flex flex-col justify-between items-start p-3 rounded-xl bg-secondary/50 text-secondary-foreground flex-grow"
-                >
-                    <p className="font-bold text-sm">
-                        {format(startDate, "d 'de' MMM", { locale: ptBR })} -{' '}
-                        {format(endDate, "d 'de' MMM yyyy", { locale: ptBR })}
+        return (
+            <Card key={index}>
+                <CardContent className="p-4 flex justify-between items-center">
+                <div>
+                    <p className="font-semibold text-sm">
+                        {format(startDate, "d 'de' MMMM", { locale: ptBR })}
                     </p>
-                    <p className="font-bold text-lg text-primary">{cycle.cycleLength} dias</p>
+                    <p className="text-xs text-muted-foreground">
+                        {format(endDate, "d 'de' MMMM, yyyy", { locale: ptBR })}
+                    </p>
                 </div>
-            );
-            })}
-        </div>
+                <p className="font-bold text-lg text-primary">{cycle.cycleLength} dias</p>
+                </CardContent>
+            </Card>
+        );
+        })}
       </div>
     </div>
   );

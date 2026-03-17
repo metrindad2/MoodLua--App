@@ -24,7 +24,7 @@ import { UserProfile } from '@/lib/types';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
-import { AppIntroCarousel } from '@/components/app-intro-carousel';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 // Esquema atualizado para o novo formulário de criação de conta
 const formSchema = z.object({
@@ -60,7 +60,6 @@ export default function OnboardingForm() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Prepara os dados do perfil, excluindo a senha.
     const userProfile: UserProfile = {
       name: values.name,
       email: values.email,
@@ -68,13 +67,11 @@ export default function OnboardingForm() {
       cycleLengthDays: values.cycleLengthDays,
       flowDurationDays: values.flowDurationDays,
     };
-    // Por enquanto, isso salva no localStorage. O próximo passo seria integrar
-    // com Firebase Auth para criar um usuário de verdade.
     updateUserProfile(userProfile);
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-dvh p-4 bg-background text-foreground">
+    <div className="flex flex-col items-center justify-center min-h-dvh p-4">
       <div className="flex flex-col items-center justify-center text-center pt-8 pb-4">
         <Image
           src="/logo.png"
@@ -83,164 +80,137 @@ export default function OnboardingForm() {
           height={56}
           className="mb-2"
         />
-        <h1 className="text-3xl font-bold">Bem-vinda à MoodLua</h1>
+        <h1 className="text-3xl font-bold text-foreground">Bem-vinda à MoodLua</h1>
+        <p className="text-muted-foreground mt-2">Crie sua conta para começar a jornada.</p>
       </div>
 
-      <AppIntroCarousel />
+      <Card className="w-full max-w-md mt-6">
+        <CardContent className="pt-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input type="text" placeholder="Seu nome" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-      <div className="w-full max-w-md rounded-2xl bg-card border p-6 mt-4">
-        <p className="text-center text-card-foreground/90 mb-4 font-semibold">
-          Crie sua conta para começar
-        </p>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="Seu nome"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="lastMenstruationDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <Popover
+                      open={isCalendarOpen}
+                      onOpenChange={setIsCalendarOpen}
+                    >
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={'outline'}
+                            className={cn(
+                              'w-full justify-between text-left font-normal',
+                              !field.value && 'text-muted-foreground'
+                            )}
+                          >
+                            {field.value
+                              ? format(field.value, 'PPP', { locale: ptBR })
+                              : 'Data da última menstruação'}
+                            <CalendarIcon className="h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <SimpleCalendar
+                          initialDate={field.value || new Date()}
+                          selectedDate={field.value}
+                          onDateClick={(date) => {
+                            field.onChange(date);
+                            setIsCalendarOpen(false);
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="lastMenstruationDate"
-              render={({ field }) => (
-                <FormItem>
-                  <Popover
-                    open={isCalendarOpen}
-                    onOpenChange={setIsCalendarOpen}
-                  >
-                    <PopoverTrigger asChild>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="cycleLengthDays"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-muted-foreground text-xs pl-1">
+                        Duração do Ciclo (dias)
+                      </FormLabel>
                       <FormControl>
-                        <Button
-                          variant={'outline'}
-                          className={cn(
-                            'w-full justify-between text-left font-normal',
-                            !field.value && 'text-muted-foreground'
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, 'PPP', { locale: ptBR })
-                          ) : (
-                            <span>Último período</span>
-                          )}
-                          <CalendarIcon className="h-4 w-4 opacity-50" />
-                        </Button>
+                        <Input type="number" min="15" {...field} />
                       </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <SimpleCalendar
-                        initialDate={field.value || new Date()}
-                        selectedDate={field.value}
-                        onDateClick={(date) => {
-                          field.onChange(date);
-                          setIsCalendarOpen(false);
-                        }}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="flowDurationDays"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-muted-foreground text-xs pl-1">
+                        Duração da Menstruação
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="number" min="1" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="cycleLengthDays"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-muted-foreground text-xs pl-1">
-                      Ciclo (dias)
-                    </FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        min="15"
-                        {...field}
-                      />
+                      <Input type="email" placeholder="Email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
-                name="flowDurationDays"
+                name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-muted-foreground text-xs pl-1">
-                      Período (dias)
-                    </FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        min="1"
-                        {...field}
-                      />
+                      <Input type="password" placeholder="Senha" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="Email"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Senha"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button
-              type="submit"
-              className="w-full font-bold text-base py-6"
-            >
-              Criar conta e começar
-            </Button>
-          </form>
-        </Form>
-      </div>
+              <Button type="submit" className="w-full font-bold text-base py-6">
+                Criar conta e começar
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
 
       <div className="mt-6 text-center pb-8">
-        <Link href="/login" className="text-sm text-primary/80 hover:text-primary">
+        <Link href="/login" className="text-sm text-primary hover:underline">
           Já tem conta? Faça login
         </Link>
       </div>

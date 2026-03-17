@@ -36,11 +36,11 @@ export function SosMessageManager() {
   }
 
   return (
-    <Card className="bg-muted/50">
+    <Card>
         <CardHeader>
           <CardTitle className="text-lg">Mensagem de Emergência</CardTitle>
           <CardDescription>
-            Personalize a mensagem de texto que será enviada aos seus contatos de emergência.
+            Personalize o texto que será enviado aos seus contatos.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -60,7 +60,7 @@ export function SosMessageManager() {
                              />
                         </FormControl>
                          <FormDescription>
-                            O link da sua localização será adicionado automaticamente no final da mensagem.
+                            O link da sua localização será adicionado automaticamente.
                         </FormDescription>
                         <FormMessage />
                         </FormItem>

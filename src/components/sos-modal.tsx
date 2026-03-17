@@ -10,8 +10,9 @@ import { Phone, MessageSquare, UserPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { ScrollArea } from './ui/scroll-area';
+import { Card } from './ui/card';
 
-// Component for the SOS button logic
+// Component for the SOS message sending logic
 function SosMessageButton({ contact }: { contact: EmergencyContact }) {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -60,7 +61,7 @@ function SosMessageButton({ contact }: { contact: EmergencyContact }) {
   };
 
   return (
-    <Button onClick={handleSos} disabled={loading} size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90">
+    <Button onClick={handleSos} disabled={loading} size="sm">
       <MessageSquare className="mr-2 h-4 w-4" />
       {loading ? '...' : 'SOS'}
     </Button>
@@ -81,23 +82,27 @@ export function SosModal({ open, onOpenChange }: { open: boolean; onOpenChange: 
         </SheetHeader>
 
         <ScrollArea className="flex-1 px-1">
-            <div className="grid grid-cols-2 gap-4">
-            {EMERGENCY_SERVICES.map((service) => (
-                <div key={service.name} className="flex flex-col gap-2 rounded-lg border bg-card text-card-foreground shadow-sm p-4 text-center">
-                    <p className="text-2xl font-bold">{service.number}</p>
-                    <p className="text-sm text-muted-foreground -mt-1">{service.name}</p>
-                    <Button asChild size="sm" className="mt-2 w-full">
-                        <a href={`tel:${service.number}`}>
-                            <Phone className="mr-2 h-4 w-4" /> Ligar
-                        </a>
-                    </Button>
-                </div>
-            ))}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-muted-foreground px-2">Serviços Públicos</h3>
+              <div className="grid grid-cols-2 gap-4">
+              {EMERGENCY_SERVICES.map((service) => (
+                  <Card key={service.name} className="flex flex-col gap-2 p-4 text-center items-center justify-center">
+                      <p className="text-2xl font-bold">{service.number}</p>
+                      <p className="text-sm text-muted-foreground -mt-1">{service.name}</p>
+                      <Button asChild size="sm" variant="destructive" className="mt-2 w-full">
+                          <a href={`tel:${service.number}`}>
+                              <Phone className="mr-2 h-4 w-4" /> Ligar
+                          </a>
+                      </Button>
+                  </Card>
+              ))}
+              </div>
             </div>
 
             <div className="mt-6 space-y-3">
+                <h3 className="font-semibold text-muted-foreground px-2">Seus Contatos</h3>
                 {emergencyContacts.map((contact) => (
-                    <div key={contact.id} className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 flex justify-between items-center">
+                    <Card key={contact.id} className="p-4 flex justify-between items-center">
                         <div>
                             <p className="font-bold">{contact.name}</p>
                             <p className="text-sm text-muted-foreground">{contact.phone}</p>
@@ -110,8 +115,13 @@ export function SosModal({ open, onOpenChange }: { open: boolean; onOpenChange: 
                             </Button>
                             <SosMessageButton contact={contact} />
                         </div>
-                    </div>
+                    </Card>
                 ))}
+                 {emergencyContacts.length === 0 && (
+                    <Card className="p-4 text-center text-sm text-muted-foreground">
+                        Você ainda não adicionou contatos de emergência.
+                    </Card>
+                 )}
             </div>
         </ScrollArea>
         

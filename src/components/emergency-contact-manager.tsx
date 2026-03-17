@@ -35,7 +35,7 @@ export function EmergencyContactManager() {
   }
 
   return (
-    <Card className="bg-muted/50">
+    <Card>
       <CardHeader>
         <CardTitle className="text-lg">Contatos de Emergência</CardTitle>
         <CardDescription>

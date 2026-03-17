@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import {
-  Droplet,
+  LayoutGrid,
   History,
   Baby,
-  BrainCircuit,
+  Sparkles,
   Settings,
-  Heart,
+  HeartPulse,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,7 @@ import { useCycleData } from '@/context/cycle-data-context';
 import { Skeleton } from './ui/skeleton';
 import { useState } from 'react';
 import { SosModal } from './sos-modal';
+import Image from 'next/image';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -22,10 +23,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [isSosOpen, setIsSosOpen] = useState(false);
 
   const navItems = [
-    { href: '/', label: 'Ciclo', icon: Droplet },
+    { href: '/', label: 'Ciclo', icon: LayoutGrid },
     { href: '/history', label: 'Histórico', icon: History },
     { href: '/pregnancy', label: 'Gravidez', icon: Baby },
-    { href: '/insights', label: 'Insights', icon: BrainCircuit },
+    { href: '/insights', label: 'Insights', icon: Sparkles },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
 
@@ -41,32 +42,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // If there's no profile, it's the onboarding/login view. Don't show the main app shell.
-  // This provides a container so the background gradient is visible.
+  // Onboarding/login view without the main app shell.
   if (!userProfile) {
     return (
-      <div className="relative mx-auto h-dvh max-w-md">
+      <div className="relative mx-auto h-dvh max-w-md bg-moodlua-gradient">
         <main>{children}</main>
       </div>
     );
   }
 
-  // If there IS a profile, show the full app shell.
+  // Full app shell for logged-in users.
   return (
-    <div className="relative mx-auto flex h-dvh max-w-md flex-col border-x border-border bg-muted">
-      {/* Área de conteúdo principal com rolagem e padding para não ficar sob a navegação */}
-      <main className="flex-1 overflow-y-auto pb-24 bg-background">
-        {/* Cabeçalho centralizado com a logo */}
-        <header className="flex shrink-0 items-center justify-center border-b border-border bg-background p-4">
-          <Link href="/" className="flex items-center gap-2">
-            <h1 className="font-bold text-xl text-primary">MoodLua</h1>
-          </Link>
-        </header>
+    <div className="relative mx-auto flex h-dvh max-w-md flex-col border-x border-border bg-moodlua-gradient">
+      <header className="flex shrink-0 items-center justify-center p-4">
+        <Link href="/" className="flex items-center gap-2">
+           <Image src="/logo.png" alt="MoodLua Logo" width={32} height={32} />
+           <h1 className="font-bold text-xl text-foreground">MoodLua</h1>
+        </Link>
+      </header>
+      
+      <main className="flex-1 overflow-y-auto pb-24">
         {children}
       </main>
 
-      {/* Navegação Inferior Fixa */}
-      <footer className="fixed bottom-0 left-1/2 w-full max-w-md -translate-x-1/2 shrink-0 border-t border-border bg-background/90 backdrop-blur-sm">
+      <footer className="fixed bottom-0 left-1/2 w-full max-w-md -translate-x-1/2 shrink-0 border-t bg-card/80 backdrop-blur-sm">
         <nav className="flex items-center justify-around p-1">
           {navItems.map((item) => (
             <Link
@@ -92,7 +91,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             onClick={() => setIsSosOpen(true)}
             className="fixed bottom-[85px] right-4 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-110 active:scale-100"
           >
-            <Heart className="h-8 w-8" />
+            <HeartPulse className="h-8 w-8" />
+            <span className="sr-only">Botão de Emergência</span>
           </button>
           <SosModal open={isSosOpen} onOpenChange={setIsSosOpen} />
         </>

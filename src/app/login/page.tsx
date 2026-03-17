@@ -21,7 +21,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { AppIntroCarousel } from '@/components/app-intro-carousel';
 
 const formSchema = z.object({
   email: z.string().email('Por favor, insira um email válido.'),
@@ -29,7 +28,6 @@ const formSchema = z.object({
 });
 
 export default function LoginPage() {
-  // Isto é um login simulado. Em um app real, você chamaria o Firebase Auth aqui.
   const { userProfile, loading } = useCycleData();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -38,8 +36,6 @@ export default function LoginPage() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Em um app real, você validaria as credenciais aqui.
-    // Para este exemplo educacional, apenas registramos no console.
     console.log('Tentativa de login com:', values);
     alert('Funcionalidade de login não implementada.');
   }
@@ -64,7 +60,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-dvh p-4 bg-background text-foreground">
+    <div className="flex flex-col items-center justify-center min-h-dvh p-4">
       <div className="flex flex-col items-center justify-center text-center pt-8 pb-4">
         <Image
           src="/logo.png"
@@ -73,12 +69,11 @@ export default function LoginPage() {
           height={56}
           className="mb-2"
         />
-        <h1 className="text-3xl font-bold">Bem-vinda de volta!</h1>
+        <h1 className="text-3xl font-bold text-foreground">Bem-vinda de volta!</h1>
+        <p className="text-muted-foreground mt-2">Acesse sua conta para continuar.</p>
       </div>
 
-      <AppIntroCarousel />
-
-      <Card className="w-full max-w-md rounded-2xl bg-card border p-6 mt-4">
+      <Card className="w-full max-w-md mt-8">
         <CardHeader>
           <CardTitle className="text-center text-2xl">Login</CardTitle>
         </CardHeader>
@@ -129,7 +124,7 @@ export default function LoginPage() {
       </Card>
 
       <div className="mt-6 text-center pb-8">
-        <Link href="/" className="text-sm text-primary/80 hover:text-primary">
+        <Link href="/" className="text-sm text-primary hover:underline">
           Não tem conta? Crie uma
         </Link>
       </div>

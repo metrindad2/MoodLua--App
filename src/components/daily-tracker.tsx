@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { MOOD_OPTIONS } from '@/lib/moods';
 import { SYMPTOM_OPTIONS } from '@/lib/symptoms';
 import { CircleSlash, Droplet, Droplets, Waves } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 const FLOW_OPTIONS: {
   value: FlowIntensity;
@@ -24,7 +25,6 @@ const FLOW_OPTIONS: {
 export function DailyTracker() {
   const { getLogForDate, addOrUpdateDailyLog, startNewCycle } = useCycleData();
 
-  // Monitora apenas a data atual
   const [selectedDate] = useState(new Date());
 
   const [selectedMood, setSelectedMood] = useState<Mood | undefined>();
@@ -68,82 +68,83 @@ export function DailyTracker() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-baseline">
-        <h2 className="text-lg font-semibold">Registros de Hoje</h2>
-        <span className="text-sm text-muted-foreground">
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Registros de Hoje</CardTitle>
+        <p className="text-sm text-muted-foreground !-mt-1">
           {format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
-        </span>
-      </div>
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div>
+          <h3 className="text-base font-semibold mb-3 text-foreground">Humor</h3>
+          <div className="grid grid-cols-3 gap-2">
+            {MOOD_OPTIONS.map((option) => {
+              return (
+                <button
+                  key={option.value}
+                  onClick={() => handleMoodSelect(option.value)}
+                  className={cn(
+                    'flex flex-col items-center justify-center gap-2 p-3 rounded-lg border-2 transition-colors text-sm font-medium',
+                    selectedMood === option.value
+                      ? 'bg-primary border-primary text-primary-foreground'
+                      : 'bg-transparent border-input hover:bg-accent'
+                  )}
+                >
+                  <span className="text-2xl">{option.emoji}</span>
+                  <span>{option.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-      <div>
-        <h3 className="text-base font-semibold mb-3 text-foreground">Humor</h3>
-        <div className="flex flex-wrap gap-2">
-          {MOOD_OPTIONS.map((option) => {
-            return (
+        <div>
+          <h3 className="text-base font-semibold mb-3 text-foreground">Fluxo</h3>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+            {FLOW_OPTIONS.map((option) => (
               <button
                 key={option.value}
-                onClick={() => handleMoodSelect(option.value)}
-                className={cn(
-                  'flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-full border-2 transition-colors text-sm font-medium',
-                  selectedMood === option.value
-                    ? 'bg-primary border-primary text-primary-foreground'
-                    : 'bg-transparent border-input hover:bg-accent/50'
-                )}
-              >
-                <span>{option.emoji}</span>
-                <span>{option.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-base font-semibold mb-3 text-foreground">Fluxo</h3>
-        <div className="flex flex-wrap gap-2">
-          {FLOW_OPTIONS.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => handleFlowSelect(option.value)}
-              className={cn(
-                'flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-full border-2 transition-colors text-sm font-medium',
-                selectedFlow === option.value
-                  ? 'bg-primary border-primary text-primary-foreground'
-                  : 'bg-transparent border-input hover:bg-accent/50'
-              )}
-            >
-              <option.Icon className="h-4 w-4" />
-              <span>{option.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-base font-semibold mb-3 text-foreground">
-          Sintomas
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {SYMPTOM_OPTIONS.map((option) => {
-            return (
-              <button
-                key={option.id}
-                onClick={() => handleSymptomSelect(option.id)}
+                onClick={() => handleFlowSelect(option.value)}
                 className={cn(
                   'flex items-center justify-center gap-2 px-3 py-2 rounded-full border-2 transition-colors text-sm font-medium',
-                  selectedSymptoms.includes(option.id)
+                  selectedFlow === option.value
                     ? 'bg-primary border-primary text-primary-foreground'
-                    : 'bg-transparent border-input hover:bg-accent/50'
+                    : 'bg-transparent border-input hover:bg-accent'
                 )}
               >
-                <span>{option.emoji}</span>
+                <option.Icon className="h-4 w-4" />
                 <span>{option.label}</span>
               </button>
-            );
-          })}
+            ))}
+          </div>
         </div>
-      </div>
-    </div>
+
+        <div>
+          <h3 className="text-base font-semibold mb-3 text-foreground">
+            Sintomas
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {SYMPTOM_OPTIONS.map((option) => {
+              return (
+                <button
+                  key={option.id}
+                  onClick={() => handleSymptomSelect(option.id)}
+                  className={cn(
+                    'flex items-center justify-center gap-2 px-3 py-2 rounded-full border-2 transition-colors text-sm font-medium',
+                    selectedSymptoms.includes(option.id)
+                      ? 'bg-primary border-primary text-primary-foreground'
+                      : 'bg-transparent border-input hover:bg-accent'
+                  )}
+                >
+                  <span>{option.emoji}</span>
+                  <span>{option.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
