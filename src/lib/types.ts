@@ -32,12 +32,17 @@ export type Mood =
   | 'carinhosa';
 
 /**
+ * Define os possíveis valores para a intensidade do fluxo menstrual.
+ */
+export type FlowIntensity = 'nenhum' | 'leve' | 'médio' | 'intenso';
+
+/**
  * Define a estrutura para um registro diário.
  * A usuária pode criar um desses a cada dia para monitorar seu ciclo.
  */
 export type DailyLog = {
   date: string; // A data do registro, no formato "YYYY-MM-DD"
-  flowIntensity?: 'nenhum' | 'leve' | 'médio' | 'intenso';
+  flowIntensity?: FlowIntensity;
   symptoms?: string[];
   mood?: Mood;
 };
