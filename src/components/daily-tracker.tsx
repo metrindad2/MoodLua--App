@@ -8,6 +8,17 @@ import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { MOOD_OPTIONS } from '@/lib/moods';
 import { SYMPTOM_OPTIONS } from '@/lib/symptoms';
+import type { LucideIcon as LucideIconType } from 'lucide-react';
+import {
+  Smile, Leaf, Angry, CloudRain, Frown, BatteryLow,
+  Waves, BrainCircuit, Expand, GitCommitHorizontal, Dot, PowerOff, Cake, Moon, Pizza, Bone, Snail
+} from 'lucide-react';
+
+const iconMap: Record<string, LucideIconType> = {
+  Smile, Leaf, Angry, CloudRain, Frown, BatteryLow,
+  Waves, BrainCircuit, Expand, GitCommitHorizontal, Dot, PowerOff, Cake, Moon, Pizza, Bone, Snail
+};
+
 
 export function DailyTracker() {
   const { getLogForDate, addOrUpdateDailyLog } = useCycleData();
@@ -52,21 +63,24 @@ export function DailyTracker() {
           Humor
         </h3>
         <div className="flex flex-wrap gap-2">
-          {MOOD_OPTIONS.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => handleMoodSelect(option.value)}
-              className={cn(
-                'flex items-center justify-center gap-2 px-3 py-2 rounded-full border-2 transition-colors text-sm',
-                selectedMood === option.value
-                  ? 'bg-accent/50 border-accent font-semibold text-accent-foreground'
-                  : 'bg-secondary border-secondary hover:border-primary/50'
-              )}
-            >
-              <span>{option.icon}</span>
-              <span>{option.label}</span>
-            </button>
-          ))}
+          {MOOD_OPTIONS.map((option) => {
+            const Icon = iconMap[option.icon];
+            return (
+              <button
+                key={option.value}
+                onClick={() => handleMoodSelect(option.value)}
+                className={cn(
+                  'flex items-center justify-center gap-2 px-4 py-2 rounded-full border-2 transition-colors text-sm font-medium',
+                  selectedMood === option.value
+                    ? 'bg-primary border-primary text-primary-foreground'
+                    : 'bg-transparent border-input hover:bg-accent/50'
+                )}
+              >
+                {Icon && <Icon className="h-4 w-4" />}
+                <span>{option.label}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -75,21 +89,24 @@ export function DailyTracker() {
           Sintomas
         </h3>
         <div className="flex flex-wrap gap-2">
-          {SYMPTOM_OPTIONS.map((option) => (
-            <button
-              key={option.id}
-              onClick={() => handleSymptomSelect(option.id)}
-              className={cn(
-                'flex items-center justify-center gap-2 px-3 py-2 rounded-full border-2 transition-colors text-sm',
-                selectedSymptoms.includes(option.id)
-                  ? 'bg-accent/50 border-accent font-semibold text-accent-foreground'
-                  : 'bg-secondary border-secondary hover:border-primary/50'
-              )}
-            >
-              <span>{option.icon}</span>
-              <span>{option.label}</span>
-            </button>
-          ))}
+          {SYMPTOM_OPTIONS.map((option) => {
+            const Icon = iconMap[option.icon];
+            return (
+              <button
+                key={option.id}
+                onClick={() => handleSymptomSelect(option.id)}
+                className={cn(
+                  'flex items-center justify-center gap-2 px-4 py-2 rounded-full border-2 transition-colors text-sm font-medium',
+                  selectedSymptoms.includes(option.id)
+                  ? 'bg-primary border-primary text-primary-foreground'
+                  : 'bg-transparent border-input hover:bg-accent/50'
+                )}
+              >
+                {Icon && <Icon className="h-4 w-4" />}
+                <span>{option.label}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
     </div>

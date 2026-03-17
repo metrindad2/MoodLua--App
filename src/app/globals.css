@@ -4,39 +4,39 @@
 
 @layer base {
   :root {
-    --background: 276 100% 99%; /* Very light lavender */
-    --foreground: 277 53% 19%; /* Dark purple */
+    --background: 330 100% 99%; /* Very light pink */
+    --foreground: 274 33% 25%; /* Dark muted purple */
 
-    --card: 276 100% 99%;
-    --card-foreground: 277 53% 19%;
+    --card: 330 100% 99%;
+    --card-foreground: 274 33% 25%;
 
-    --popover: 276 100% 99%;
-    --popover-foreground: 277 53% 19%;
+    --popover: 330 100% 99%;
+    --popover-foreground: 274 33% 25%;
 
-    --primary: 288 80% 60%; /* Vibrant purple */
-    --primary-foreground: 300 100% 98%; /* Very light pink for text on primary */
+    --primary: 325 68% 68%; /* Soft rose */
+    --primary-foreground: 330 100% 99%;
 
-    --secondary: 290 100% 96%; /* Lighter purple for card backgrounds */
-    --secondary-foreground: 277 53% 19%;
+    --secondary: 330 60% 97%; /* Lighter pink for card backgrounds */
+    --secondary-foreground: 274 33% 25%;
 
-    --muted: 290 100% 97%;
-    --muted-foreground: 282 15% 50%;
+    --muted: 330 60% 97%;
+    --muted-foreground: 282 10% 55%;
 
-    --accent: 314 75% 80%; /* Softer pink for selected states */
-    --accent-foreground: 277 53% 19%;
+    --accent: 274 41% 86%; /* Soft lavender */
+    --accent-foreground: 274 33% 25%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 290 100% 94%; /* Soft lavender border */
-    --input: 290 100% 94%;
-    --ring: 288 80% 60%;
+    --border: 330 40% 94%;
+    --input: 330 40% 94%;
+    --ring: 325 68% 68%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 1rem;
+    --radius: 0.75rem;
   }
   
   @media (prefers-color-scheme: dark) {
@@ -50,7 +50,7 @@
       --popover: 277 72% 12%;
       --popover-foreground: 314 30% 95%;
 
-      --primary: 288 80% 70%; /* Lighter purple for contrast */
+      --primary: 325 75% 75%; /* Lighter rose for contrast */
       --primary-foreground: 277 25% 15%; /* Dark color for contrast */
 
       --secondary: 282 40% 30%; /* Mid-tone purple */
@@ -59,7 +59,7 @@
       --muted: 277 50% 22%;
       --muted-foreground: 280 20% 70%;
       
-      --accent: 314 75% 75%; /* Lighter accent pink for contrast */
+      --accent: 274 41% 76%; /* Lighter lavender for contrast */
       --accent-foreground: 277 25% 15%;
 
       --destructive: 0 62.8% 30.6%;
@@ -67,7 +67,7 @@
 
       --border: 282 30% 30%; /* Muted purple */
       --input: 282 30% 30%;
-      --ring: 288 80% 70%;
+      --ring: 325 75% 75%;
       --chart-1: 220 70% 50%;
       --chart-2: 160 60% 45%;
       --chart-3: 30 80% 55%;

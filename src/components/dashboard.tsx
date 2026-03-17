@@ -12,7 +12,7 @@ import { Card, CardContent } from './ui/card';
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { PeriodRegistrationModal } from './period-registration-modal';
-import { Calendar, LineChart } from 'lucide-react';
+import { Calendar, History } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Dashboard() {
@@ -85,7 +85,6 @@ export default function Dashboard() {
       <PhaseTips phase={phase} />
 
       <div className="space-y-3">
-        <h2 className="text-lg font-semibold">Calendário</h2>
         <Card className="shadow-md shadow-primary/5">
           <CardContent className="p-2">
             <SimpleCalendar
@@ -121,7 +120,7 @@ export default function Dashboard() {
       <div className="space-y-3">
         <div className="flex justify-between items-center">
             <h2 className="text-lg font-semibold flex items-center gap-2">
-                <LineChart className="w-5 h-5" />
+                <History className="w-5 h-5" />
                 Histórico
             </h2>
             <Link href="/history">

@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { calculateCycleInfo } from '@/lib/cycle-utils';
 import { format, parseISO, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { BrainCircuit, Calendar, LineChart } from 'lucide-react';
+import { BrainCircuit, Calendar, History as HistoryIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function HistoryPage() {
@@ -52,7 +52,7 @@ export default function HistoryPage() {
       <Card className="bg-card shadow-lg overflow-hidden">
         <CardHeader>
           <CardTitle className="text-xl flex items-center gap-2">
-            <LineChart className="w-6 h-6 text-primary" />
+            <HistoryIcon className="w-6 h-6 text-primary" />
             Estatísticas
           </CardTitle>
         </CardHeader>

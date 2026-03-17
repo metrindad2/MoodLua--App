@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   Droplet,
   History,
@@ -60,7 +59,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Cabeçalho centralizado com a logo */}
         <header className="flex shrink-0 items-center justify-center border-b border-border bg-background p-4">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="MoodLua Logo" width={28} height={28} />
             <h1 className="font-bold text-xl text-primary">MoodLua</h1>
           </Link>
         </header>
@@ -94,7 +92,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             onClick={() => setIsSosOpen(true)}
             className="fixed bottom-[85px] right-4 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-110 active:scale-100"
           >
-            <Heart className="h-8 w-8 fill-current" />
+            <Heart className="h-8 w-8" />
           </button>
           <SosModal open={isSosOpen} onOpenChange={setIsSosOpen} />
         </>

@@ -1,5 +1,5 @@
 'use client';
-import { Flower2 } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 interface CycleProgressProps {
   currentDay: number;
@@ -26,7 +26,7 @@ export function CycleProgress({
       >
         <div className="absolute flex h-[88%] w-[88%] items-center justify-center rounded-full bg-background">
           <div className="text-center">
-            <Flower2 className="w-8 h-8 text-primary mx-auto mb-1" />
+            <Sparkles className="w-8 h-8 text-primary mx-auto mb-1" />
             <div className="text-4xl font-bold">Dia {currentDay}</div>
             <div className="font-semibold text-muted-foreground">{phase}</div>
             <div className="text-xs text-muted-foreground mt-1">
