@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
-import { Lightbulb } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 interface PhaseTipsProps {
   phase: string;
@@ -19,7 +19,7 @@ export function PhaseTips({ phase }: PhaseTipsProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-md">
-          <Lightbulb className="w-5 h-5 text-primary" />
+          <Sparkles className="w-5 h-5 text-primary" />
           Dicas para a fase {phase}
         </CardTitle>
       </CardHeader>

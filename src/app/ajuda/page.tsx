@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Copy, MessageCircle, Shield, Smartphone, RefreshCw } from 'lucide-react';
+import { Copy, MessageCircle, HeartHandshake, Smartphone, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 // Define a estrutura para os dados de localização para manter o código tipado.
@@ -150,7 +150,7 @@ export default function AjudaPage() {
       <Card className="w-full max-w-md bg-card/80">
         <CardHeader>
           <div className="flex justify-center mb-4">
-            <Shield className="w-12 h-12 text-destructive" />
+            <HeartHandshake className="w-12 h-12 text-primary" />
           </div>
           <CardTitle className="text-2xl font-bold">
             Pedido de Ajuda
@@ -165,7 +165,7 @@ export default function AjudaPage() {
           {location && !loading ? (
             <div className="w-full space-y-3 animate-in fade-in-50">
                 <p className='text-sm text-muted-foreground pb-2'>Sua localização foi obtida. Escolha uma opção para pedir ajuda:</p>
-              <Button onClick={handleShareWhatsApp} className="w-full bg-green-500 hover:bg-green-600 text-white" size="lg">
+              <Button onClick={handleShareWhatsApp} className="w-full" size="lg">
                 <Smartphone className="mr-2" /> Enviar via WhatsApp
               </Button>
               <Button onClick={handleShareSms} className="w-full" size="lg" variant="secondary">

@@ -4,54 +4,54 @@
 
 @layer base {
   :root {
-    --background: 280 100% 98%;
-    --foreground: 282 25% 25%;
-    --card: 280 80% 96%;
+    --background: 314 100% 98%; /* Light lavender-white */
+    --foreground: 282 25% 25%; /* Dark purple */
+    --card: 314 80% 96%; /* Light lavender */
     --card-foreground: 282 25% 25%;
-    --popover: 280 100% 98%;
+    --popover: 314 100% 98%;
     --popover-foreground: 282 25% 25%;
-    --primary: 314 55% 51%;
+    --primary: 314 65% 55%; /* Vibrant magenta */
     --primary-foreground: 0 0% 100%;
-    --secondary: 280 70% 92%;
+    --secondary: 314 70% 92%; /* Soft lavender */
     --secondary-foreground: 282 25% 25%;
-    --muted: 280 70% 95%;
+    --muted: 314 70% 95%; /* Lighter lavender */
     --muted-foreground: 282 15% 50%;
-    --accent: 316 78% 57%;
+    --accent: 330 80% 65%; /* Bright pink */
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84.2% 60.2%; /* Keep red for destructive actions */
     --destructive-foreground: 0 0% 98%;
-    --border: 280 40% 90%;
-    --input: 280 50% 92%;
-    --ring: 314 55% 51%;
+    --border: 314 40% 90%; /* Soft purple-gray */
+    --input: 314 50% 92%;
+    --ring: 314 65% 55%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.75rem;
+    --radius: 1rem;
   }
   
   @media (prefers-color-scheme: dark) {
     :root {
-      --background: 277 72% 12%;
-      --foreground: 280 30% 95%;
-      --card: 277 60% 17%;
-      --card-foreground: 280 30% 95%;
+      --background: 277 72% 12%; /* Very dark purple */
+      --foreground: 314 30% 95%; /* Light lavender-white */
+      --card: 277 60% 17%; /* Lighter dark purple */
+      --card-foreground: 314 30% 95%;
       --popover: 277 72% 12%;
-      --popover-foreground: 280 30% 95%;
-      --primary: 314 65% 65%;
-      --primary-foreground: 0 0% 100%;
-      --secondary: 282 40% 30%;
-      --secondary-foreground: 280 30% 95%;
+      --popover-foreground: 314 30% 95%;
+      --primary: 314 75% 70%; /* Lighter magenta for contrast */
+      --primary-foreground: 277 25% 15%; /* Dark color for contrast on light button */
+      --secondary: 282 40% 30%; /* Mid-tone purple */
+      --secondary-foreground: 314 30% 95%;
       --muted: 277 50% 22%;
       --muted-foreground: 280 20% 70%;
-      --accent: 316 80% 70%;
-      --accent-foreground: 0 0% 10%;
+      --accent: 330 90% 75%; /* Lighter pink for contrast */
+      --accent-foreground: 330 25% 15%; /* Dark color for contrast on light button */
       --destructive: 0 62.8% 30.6%;
       --destructive-foreground: 0 0% 98%;
-      --border: 282 30% 30%;
+      --border: 282 30% 30%; /* Muted purple */
       --input: 282 30% 30%;
-      --ring: 314 65% 65%;
+      --ring: 314 75% 70%;
       --chart-1: 220 70% 50%;
       --chart-2: 160 60% 45%;
       --chart-3: 30 80% 55%;
@@ -66,12 +66,6 @@
     @apply border-border;
   }
   body {
-    @apply text-foreground bg-muted;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    body {
-       @apply bg-background;
-    }
+    @apply text-foreground bg-background;
   }
 }
