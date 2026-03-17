@@ -33,10 +33,8 @@ export default function Dashboard() {
     : 'Folicular';
 
   // --- Lógica de Destaque Dinâmico ---
-  // A data final prevista é baseada no que foi inserido no login.
   const predictedEndDate = subDays(cycleInfo.menstruationEndDate, 1);
 
-  // Filtra os registros para pegar apenas os dias com fluxo menstrual desde o início do período atual.
   const periodLogs = dailyLogs.filter(log => {
       const logDate = startOfDay(new Date(log.date + 'T00:00:00'));
       return logDate >= cycleInfo.menstruationStartDate && log.flowIntensity && log.flowIntensity !== 'nenhum';
@@ -71,7 +69,7 @@ export default function Dashboard() {
 
   const sortedHistory = [...cycleHistory]
     .sort((a, b) => parseISO(b.startDate).getTime() - parseISO(a.startDate).getTime())
-    .slice(0, 2);
+    .slice(0, 1);
 
   return (
     <div className="p-4 space-y-8">
@@ -120,40 +118,33 @@ export default function Dashboard() {
       <div className="space-y-3">
         <div className="flex justify-between items-center">
             <h2 className="text-lg font-semibold flex items-center gap-2">
-                <History className="w-5 h-5" />
-                Histórico
+                <History className="w-5 h-5 text-primary" />
+                Histórico de Ciclos
             </h2>
             <Link href="/history">
                  <Button variant="link" className="text-primary">Ver tudo</Button>
             </Link>
         </div>
-         {sortedHistory.map((cycle, index) => {
+         {sortedHistory.length > 0 ? sortedHistory.map((cycle, index) => {
           const startDate = parseISO(cycle.startDate);
           const endDate = addDays(startDate, cycle.cycleLength - 1);
           return (
-            <div
-              key={index}
-              className="flex justify-between items-center p-4 rounded-xl bg-secondary text-secondary-foreground"
-            >
-              <div className="flex items-center gap-3">
-                 <Calendar className="w-5 h-5 text-muted-foreground" />
-                 <p className="font-bold text-sm">
-                    {format(startDate, "d MMM", { locale: ptBR })} -{' '}
-                    {format(endDate, "d MMM yy", { locale: ptBR })}
-                 </p>
-              </div>
-              <div className="text-right">
-                <p className="font-bold text-sm">{cycle.cycleLength} dias</p>
-                <p className="text-xs text-muted-foreground">Ciclo</p>
-              </div>
-            </div>
+             <div
+                key={index}
+                className="flex flex-col justify-between items-start p-3 rounded-xl bg-secondary/50 text-secondary-foreground flex-grow"
+                >
+                    <p className="font-bold text-sm">
+                        {format(startDate, "d 'de' MMM", { locale: ptBR })} -{' '}
+                        {format(endDate, "d 'de' MMM yyyy", { locale: ptBR })}
+                    </p>
+                    <p className="font-bold text-lg text-primary">{cycle.cycleLength} dias</p>
+                </div>
           );
-        })}
-         {sortedHistory.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-4">
+        }) : (
+            <div className="text-sm text-muted-foreground text-center py-4 px-4 rounded-xl bg-secondary/50">
               Seu histórico de ciclos aparecerá aqui.
-            </p>
-          )}
+            </div>
+        )}
       </div>
 
 

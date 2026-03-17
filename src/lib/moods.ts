@@ -3,12 +3,12 @@ import { Mood } from '@/lib/types';
 export const MOOD_OPTIONS: {
   value: Mood;
   label: string;
-  icon: string;
+  emoji: string;
 }[] = [
-  { value: 'feliz', label: 'Feliz', icon: 'Smile' },
-  { value: 'calma', label: 'Calma', icon: 'Leaf' },
-  { value: 'irritada', label: 'Irritada', icon: 'Angry' },
-  { value: 'triste', label: 'Triste', icon: 'CloudRain' },
-  { value: 'ansiosa', label: 'Ansiosa', icon: 'Frown' },
-  { value: 'cansada', label: 'Cansada', icon: 'BatteryLow' },
+  { value: 'feliz', label: 'Feliz', emoji: '😊' },
+  { value: 'calma', label: 'Calma', emoji: '😌' },
+  { value: 'irritada', label: 'Irritada', emoji: '😠' },
+  { value: 'triste', label: 'Triste', emoji: '😢' },
+  { value: 'ansiosa', label: 'Ansiosa', emoji: '😟' },
+  { value: 'cansada', label: 'Cansada', emoji: '😴' },
 ];

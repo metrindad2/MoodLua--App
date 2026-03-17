@@ -1,29 +1,18 @@
 'use client';
 
 import { useCycleData } from '@/context/cycle-data-context';
-import { DailyLog, Mood } from '@/lib/types';
+import { Mood } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { MOOD_OPTIONS } from '@/lib/moods';
 import { SYMPTOM_OPTIONS } from '@/lib/symptoms';
-import type { LucideIcon as LucideIconType } from 'lucide-react';
-import {
-  Smile, Leaf, Angry, CloudRain, Frown, BatteryLow,
-  Waves, BrainCircuit, Expand, GitCommitHorizontal, Dot, PowerOff, Cake, Moon, Pizza, Bone, Snail
-} from 'lucide-react';
-
-const iconMap: Record<string, LucideIconType> = {
-  Smile, Leaf, Angry, CloudRain, Frown, BatteryLow,
-  Waves, BrainCircuit, Expand, GitCommitHorizontal, Dot, PowerOff, Cake, Moon, Pizza, Bone, Snail
-};
-
 
 export function DailyTracker() {
   const { getLogForDate, addOrUpdateDailyLog } = useCycleData();
 
-  // Simplificado para monitorar apenas a data atual
+  // Monitora apenas a data atual
   const [selectedDate] = useState(new Date());
 
   const [selectedMood, setSelectedMood] = useState<Mood | undefined>();
@@ -51,8 +40,8 @@ export function DailyTracker() {
   
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">Como você está hoje?</h2>
+      <div className="flex justify-between items-baseline">
+        <h2 className="text-lg font-semibold">Como você se sente?</h2>
         <span className="text-sm text-muted-foreground">
           {format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
         </span>
@@ -64,19 +53,18 @@ export function DailyTracker() {
         </h3>
         <div className="flex flex-wrap gap-2">
           {MOOD_OPTIONS.map((option) => {
-            const Icon = iconMap[option.icon];
             return (
               <button
                 key={option.value}
                 onClick={() => handleMoodSelect(option.value)}
                 className={cn(
-                  'flex items-center justify-center gap-2 px-4 py-2 rounded-full border-2 transition-colors text-sm font-medium',
+                  'flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-full border-2 transition-colors text-sm font-medium',
                   selectedMood === option.value
                     ? 'bg-primary border-primary text-primary-foreground'
                     : 'bg-transparent border-input hover:bg-accent/50'
                 )}
               >
-                {Icon && <Icon className="h-4 w-4" />}
+                <span>{option.emoji}</span>
                 <span>{option.label}</span>
               </button>
             )
@@ -90,20 +78,19 @@ export function DailyTracker() {
         </h3>
         <div className="flex flex-wrap gap-2">
           {SYMPTOM_OPTIONS.map((option) => {
-            const Icon = iconMap[option.icon];
             return (
               <button
                 key={option.id}
                 onClick={() => handleSymptomSelect(option.id)}
                 className={cn(
-                  'flex items-center justify-center gap-2 px-4 py-2 rounded-full border-2 transition-colors text-sm font-medium',
+                  'flex items-center justify-center gap-2 px-3 py-2 rounded-full border-2 transition-colors text-sm font-medium',
                   selectedSymptoms.includes(option.id)
                   ? 'bg-primary border-primary text-primary-foreground'
                   : 'bg-transparent border-input hover:bg-accent/50'
                 )}
               >
-                {Icon && <Icon className="h-4 w-4" />}
-                <span>{option.label}</span>
+                 <span>{option.emoji}</span>
+                 <span>{option.label}</span>
               </button>
             )
           })}
