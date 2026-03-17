@@ -28,7 +28,8 @@ export type Mood =
   | 'ansiosa'
   | 'cansada'
   | 'triste'
-  | 'irritada';
+  | 'irritada'
+  | 'carinhosa';
 
 /**
  * Define a estrutura para um registro diário.

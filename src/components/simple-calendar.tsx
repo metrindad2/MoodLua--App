@@ -131,18 +131,18 @@ export function SimpleCalendar({
               onClick={() => onDateClick?.(date)}
               disabled={!isSameMonth(date, currentMonth) || isFuture}
               className={cn(
-                'relative flex h-10 w-full items-center justify-center transition-colors rounded-md',
+                'relative flex h-10 w-full items-center justify-center transition-colors rounded-full',
                 // Desabilita dias de outros meses
                 !isSameMonth(date, currentMonth) && 'text-muted-foreground/50 cursor-default',
                 isFuture && 'text-muted-foreground/50 cursor-not-allowed',
                 isSameMonth(date, currentMonth) && !isFuture && 'hover:bg-accent/20',
-                // Destaca o dia de hoje com uma borda
-                isToday(date) && 'border-2 border-primary rounded-full',
+                // Destaca o dia de hoje com um anel
+                isToday(date) && 'ring-1 ring-primary',
                 // Destaca o intervalo (período menstrual)
-                isDayInRange(date) && 'bg-primary text-primary-foreground rounded-full',
-                isDayInPrevisionRange(date) && 'bg-primary/30 text-primary-foreground rounded-full',
+                isDayInRange(date) && 'bg-primary text-primary-foreground',
+                isDayInPrevisionRange(date) && 'bg-primary/30 text-primary-foreground',
                 // Destaca o dia/dias selecionado(s)
-                (isSelectedByDate || isSelectedByDates) && 'bg-accent text-accent-foreground ring-2 ring-accent-foreground rounded-full'
+                (isSelectedByDate || isSelectedByDates) && 'bg-accent text-accent-foreground'
               )}
               aria-label={format(date, 'PPP', { locale: ptBR })}
             >

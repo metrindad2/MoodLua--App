@@ -1,50 +1,14 @@
 'use client';
 
 import { useCycleData } from '@/context/cycle-data-context';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { calculateCycleInfo } from '@/lib/cycle-utils';
 import { format, parseISO, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { BrainCircuit, ChevronRight } from 'lucide-react';
+import { BrainCircuit, Calendar, LineChart } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
-
-// Component to render the cycle dots visualization
-const CycleDots = ({
-  totalDays,
-  flowDays,
-  maxDots = 42,
-}: {
-  totalDays: number;
-  flowDays: number;
-  maxDots?: number;
-}) => {
-  const displayDots = Math.min(totalDays, maxDots);
-  const displayFlowDots = Math.min(flowDays, displayDots);
-
-  if (totalDays <= 0) return null;
-
-  return (
-    <div className="flex flex-wrap gap-1.5 mt-2">
-      {Array.from({ length: displayDots }).map((_, i) => (
-        <div
-          key={i}
-          className={cn(
-            'h-2 w-2 rounded-full',
-            i < displayFlowDots ? 'bg-accent' : 'bg-secondary'
-          )}
-        />
-      ))}
-    </div>
-  );
-};
 
 export default function HistoryPage() {
   const { userProfile, cycleHistory, loading } = useCycleData();
@@ -70,44 +34,42 @@ export default function HistoryPage() {
     );
   }
 
-  const currentCycleInfo = calculateCycleInfo(userProfile);
-
   // --- Data Calculation ---
-  const sortedHistory = [...cycleHistory].sort((a, b) =>
-    parseISO(b.startDate).getTime() - parseISO(a.startDate).getTime()
+  const sortedHistory = [...cycleHistory].sort(
+    (a, b) => parseISO(b.startDate).getTime() - parseISO(a.startDate).getTime()
   );
-  const lastCycle = sortedHistory.length > 0 ? sortedHistory[0] : null;
-
+  
   const cycleLengths = cycleHistory.map((c) => c.cycleLength);
-  const cycleVariation =
-    cycleLengths.length > 1
-      ? { min: Math.min(...cycleLengths), max: Math.max(...cycleLengths) }
-      : { min: userProfile.cycleLengthDays, max: userProfile.cycleLengthDays };
+  const averageCycleLength = cycleLengths.length > 0
+      ? Math.round(cycleLengths.reduce((a, b) => a + b, 0) / cycleLengths.length)
+      : userProfile.cycleLengthDays;
+  
+  const lastCycle = sortedHistory.length > 0 ? sortedHistory[0] : null;
 
   return (
     <div className="p-4 space-y-6 bg-background text-foreground">
       {/* Meus Ciclos Card */}
       <Card className="bg-card shadow-lg overflow-hidden">
         <CardHeader>
-          <CardTitle className="text-xl">Meus Ciclos</CardTitle>
+          <CardTitle className="text-xl flex items-center gap-2">
+            <LineChart className="w-6 h-6 text-primary" />
+            Estatísticas
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
           <div className="space-y-3 px-1">
-            {lastCycle ? (
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">
+                Duração média do ciclo
+              </span>
+              <span className="font-bold">{averageCycleLength} dias</span>
+            </div>
+             {lastCycle && (
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">
                   Duração do ciclo anterior
                 </span>
                 <span className="font-bold">{lastCycle.cycleLength} dias</span>
-              </div>
-            ) : (
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">
-                  Duração média do ciclo
-                </span>
-                <span className="font-bold">
-                  {userProfile.cycleLengthDays} dias
-                </span>
               </div>
             )}
             <div className="flex justify-between items-center">
@@ -118,20 +80,9 @@ export default function HistoryPage() {
                 {userProfile.flowDurationDays} dias
               </span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">
-                Variação na duração do ciclo
-              </span>
-              <span className="font-bold">
-                {cycleVariation.min === cycleVariation.max
-                  ? `${cycleVariation.min}`
-                  : `${cycleVariation.min}-${cycleVariation.max}`}{' '}
-                dias
-              </span>
-            </div>
           </div>
-
-          <div className="!mt-6 rounded-lg bg-muted/50 p-4">
+          
+          <div className="!mt-6 rounded-lg bg-secondary p-4">
             <h3 className="font-semibold flex items-center gap-2">
               <BrainCircuit className="text-primary w-5 h-5" /> Assistente de
               Saúde
@@ -146,75 +97,47 @@ export default function HistoryPage() {
               </Button>
             </Link>
           </div>
+
         </CardContent>
       </Card>
 
       {/* Histórico Card */}
-      <Card className="bg-card shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-xl">Histórico</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-1">
-          {/* Current Cycle */}
-          {currentCycleInfo && (
-            <div className="p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="font-bold">
-                    Ciclo atual: {currentCycleInfo.currentCycleDay} dias
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Começou em{' '}
-                    {format(
-                      currentCycleInfo.menstruationStartDate,
-                      "d 'de' MMMM",
-                      { locale: ptBR }
-                    )}
-                  </p>
-                </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground" />
-              </div>
-              <CycleDots
-                totalDays={currentCycleInfo.currentCycleDay}
-                flowDays={userProfile.flowDurationDays}
-              />
-            </div>
-          )}
+      <div className="space-y-3">
+        <h2 className="text-xl font-semibold px-1 flex items-center gap-2">
+            <Calendar className="w-6 h-6 text-primary" />
+            Histórico de Ciclos
+        </h2>
+        {sortedHistory.map((cycle, index) => {
+          const startDate = parseISO(cycle.startDate);
+          const endDate = addDays(startDate, cycle.cycleLength - 1);
 
-          {/* Past Cycles */}
-          {sortedHistory.map((cycle, index) => {
-            const startDate = parseISO(cycle.startDate);
-            const endDate = addDays(startDate, cycle.cycleLength - 1);
-
-            return (
-              <div
-                key={index}
-                className="p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-              >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-bold">{cycle.cycleLength} dias</p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(startDate, 'd MMM', { locale: ptBR })} -{' '}
-                      {format(endDate, 'd MMM yyyy', { locale: ptBR })}
+          return (
+            <div
+              key={index}
+              className="flex justify-between items-center p-4 rounded-xl bg-secondary text-secondary-foreground"
+            >
+              <div className="flex items-center gap-3">
+                 <Calendar className="w-5 h-5 text-muted-foreground" />
+                 <div>
+                    <p className="font-bold text-sm">
+                        {format(startDate, "d 'de' MMM", { locale: ptBR })} -{' '}
+                        {format(endDate, "d 'de' MMM yyyy", { locale: ptBR })}
                     </p>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                </div>
-                <CycleDots
-                  totalDays={cycle.cycleLength}
-                  flowDays={userProfile.flowDurationDays}
-                />
+                 </div>
               </div>
-            );
-          })}
-          {sortedHistory.length === 0 && !currentCycleInfo && (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              Nenhum histórico de ciclo encontrado.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+              <div className="text-right">
+                <p className="font-bold text-sm">{cycle.cycleLength} dias</p>
+                <p className="text-xs text-muted-foreground">Ciclo</p>
+              </div>
+            </div>
+          );
+        })}
+        {sortedHistory.length === 0 && (
+          <p className="text-sm text-muted-foreground text-center py-4">
+            Nenhum histórico de ciclo encontrado.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

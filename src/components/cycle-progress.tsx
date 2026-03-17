@@ -1,5 +1,5 @@
 'use client';
-import { Sparkles } from 'lucide-react';
+import { Flower2 } from 'lucide-react';
 
 interface CycleProgressProps {
   currentDay: number;
@@ -21,17 +21,17 @@ export function CycleProgress({
       <div
         className="relative flex h-48 w-48 items-center justify-center rounded-full"
         style={{
-          background: `conic-gradient(hsl(var(--primary)) ${progress}%, hsl(var(--muted)) ${progress}%)`,
+          background: `conic-gradient(hsl(var(--primary)) ${progress}%, hsl(var(--secondary)) ${progress}%)`,
         }}
       >
-        <div className="absolute flex h-[85%] w-[85%] items-center justify-center rounded-full bg-background">
+        <div className="absolute flex h-[88%] w-[88%] items-center justify-center rounded-full bg-background">
           <div className="text-center">
-            <Sparkles className="w-8 h-8 text-primary mx-auto mb-1" />
+            <Flower2 className="w-8 h-8 text-primary mx-auto mb-1" />
             <div className="text-4xl font-bold">Dia {currentDay}</div>
-            <div className="text-muted-foreground">{phase}</div>
+            <div className="font-semibold text-muted-foreground">{phase}</div>
             <div className="text-xs text-muted-foreground mt-1">
               {daysUntilNext >= 0
-                ? `${daysUntilNext} dias para a próxima`
+                ? `${daysUntilNext} dias p/ menstruação`
                 : 'Período atrasado'}
             </div>
           </div>
