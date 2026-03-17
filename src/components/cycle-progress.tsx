@@ -26,7 +26,7 @@ export function CycleProgress({
       >
         <div className="absolute flex h-[85%] w-[85%] items-center justify-center rounded-full bg-background">
           <div className="text-center">
-            <Leaf className="w-8 h-8 text-green-400 mx-auto mb-1" />
+            <Leaf className="w-8 h-8 text-primary mx-auto mb-1" />
             <div className="text-4xl font-bold">Dia {currentDay}</div>
             <div className="text-muted-foreground">{phase}</div>
             <div className="text-xs text-muted-foreground mt-1">

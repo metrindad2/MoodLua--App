@@ -28,8 +28,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
-        <meta name="theme-color" content="#fffaff" media="(prefers-color-scheme: light)" />
-        <meta name="theme-color" content="#1A181C" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#1c191a" media="(prefers-color-scheme: dark)" />
       </head>
       <body className={cn('min-h-screen font-body antialiased', fontSans.variable)}>
         <CycleDataProvider>

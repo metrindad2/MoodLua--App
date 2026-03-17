@@ -38,7 +38,7 @@ const CycleDots = ({
           key={i}
           className={cn(
             'h-2 w-2 rounded-full',
-            i < displayFlowDots ? 'bg-accent' : 'bg-chart-2'
+            i < displayFlowDots ? 'bg-accent' : 'bg-secondary'
           )}
         />
       ))}

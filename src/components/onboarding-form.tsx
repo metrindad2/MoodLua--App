@@ -74,7 +74,7 @@ export default function OnboardingForm() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-dvh p-4 bg-gradient-to-b from-purple-900 to-fuchsia-600 text-white">
+    <div className="flex flex-col items-center justify-center min-h-dvh p-4 bg-background text-foreground">
       <div className="flex flex-col items-center justify-center text-center pt-8 pb-4">
         <Image
           src="/logo.png"
@@ -88,8 +88,8 @@ export default function OnboardingForm() {
 
       <AppIntroCarousel />
 
-      <div className="w-full max-w-md rounded-2xl bg-white/10 backdrop-blur-lg shadow-lg border border-white/20 p-6 mt-4">
-        <p className="text-center text-white/90 mb-4 font-semibold">
+      <div className="w-full max-w-md rounded-2xl bg-card border p-6 mt-4">
+        <p className="text-center text-card-foreground/90 mb-4 font-semibold">
           Crie sua conta para começar
         </p>
         <Form {...form}>
@@ -104,7 +104,6 @@ export default function OnboardingForm() {
                       type="text"
                       placeholder="Seu nome"
                       {...field}
-                      className="bg-white/20 border-none placeholder:text-white/70"
                     />
                   </FormControl>
                   <FormMessage />
@@ -126,8 +125,8 @@ export default function OnboardingForm() {
                         <Button
                           variant={'outline'}
                           className={cn(
-                            'w-full justify-between text-left font-normal bg-white/20 border-none hover:bg-white/30',
-                            !field.value && 'text-white/70'
+                            'w-full justify-between text-left font-normal',
+                            !field.value && 'text-muted-foreground'
                           )}
                         >
                           {field.value ? (
@@ -161,7 +160,7 @@ export default function OnboardingForm() {
                 name="cycleLengthDays"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white/80 text-xs pl-1">
+                    <FormLabel className="text-muted-foreground text-xs pl-1">
                       Ciclo (dias)
                     </FormLabel>
                     <FormControl>
@@ -169,7 +168,6 @@ export default function OnboardingForm() {
                         type="number"
                         min="15"
                         {...field}
-                        className="bg-white/20 border-none placeholder:text-white/70"
                       />
                     </FormControl>
                     <FormMessage />
@@ -181,7 +179,7 @@ export default function OnboardingForm() {
                 name="flowDurationDays"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white/80 text-xs pl-1">
+                    <FormLabel className="text-muted-foreground text-xs pl-1">
                       Período (dias)
                     </FormLabel>
                     <FormControl>
@@ -189,7 +187,6 @@ export default function OnboardingForm() {
                         type="number"
                         min="1"
                         {...field}
-                        className="bg-white/20 border-none placeholder:text-white/70"
                       />
                     </FormControl>
                     <FormMessage />
@@ -208,7 +205,6 @@ export default function OnboardingForm() {
                       type="email"
                       placeholder="Email"
                       {...field}
-                      className="bg-white/20 border-none placeholder:text-white/70"
                     />
                   </FormControl>
                   <FormMessage />
@@ -226,7 +222,6 @@ export default function OnboardingForm() {
                       type="password"
                       placeholder="Senha"
                       {...field}
-                      className="bg-white/20 border-none placeholder:text-white/70"
                     />
                   </FormControl>
                   <FormMessage />
@@ -236,7 +231,7 @@ export default function OnboardingForm() {
 
             <Button
               type="submit"
-              className="w-full bg-white/30 hover:bg-white/40 text-white font-bold text-base py-6"
+              className="w-full font-bold text-base py-6"
             >
               Criar conta e começar
             </Button>
@@ -245,7 +240,7 @@ export default function OnboardingForm() {
       </div>
 
       <div className="mt-6 text-center pb-8">
-        <Link href="/login" className="text-sm text-white/80 hover:text-white">
+        <Link href="/login" className="text-sm text-primary/80 hover:text-primary">
           Já tem conta? Faça login
         </Link>
       </div>

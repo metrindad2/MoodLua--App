@@ -53,19 +53,19 @@ export function AppIntroCarousel() {
             <div className="p-1">
               <Card className="bg-transparent border-none shadow-none">
                 <CardContent className="flex h-48 flex-col items-center justify-center gap-3 p-4 text-center">
-                  <feature.icon className="h-10 w-10 text-white/90" />
-                  <h3 className="text-lg font-semibold text-white">
+                  <feature.icon className="h-10 w-10 text-primary" />
+                  <h3 className="text-lg font-semibold text-foreground">
                     {feature.title}
                   </h3>
-                  <p className="text-sm text-white/80">{feature.description}</p>
+                  <p className="text-sm text-muted-foreground">{feature.description}</p>
                 </CardContent>
               </Card>
             </div>
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious className="border-white/20 bg-white/10 text-white hover:bg-white/20 -left-2 sm:-left-4" />
-      <CarouselNext className="border-white/20 bg-white/10 text-white hover:bg-white/20 -right-2 sm:-right-4" />
+      <CarouselPrevious className="-left-2 sm:-left-4" />
+      <CarouselNext className="-right-2 sm:-right-4" />
     </Carousel>
   );
 }

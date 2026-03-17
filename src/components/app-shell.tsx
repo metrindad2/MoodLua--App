@@ -8,6 +8,7 @@ import {
   Baby,
   BrainCircuit,
   Settings,
+  Heart,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -91,9 +92,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <>
           <button
             onClick={() => setIsSosOpen(true)}
-            className="fixed bottom-[85px] right-4 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-background text-4xl shadow-lg transition-transform hover:scale-110 active:scale-100"
+            className="fixed bottom-[85px] right-4 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-110 active:scale-100"
           >
-            💜
+            <Heart className="h-8 w-8 fill-current" />
           </button>
           <SosModal open={isSosOpen} onOpenChange={setIsSosOpen} />
         </>
