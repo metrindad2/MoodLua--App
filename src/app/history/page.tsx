@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { calculateCycleInfo } from '@/lib/cycle-utils';
 import { format, parseISO, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { BrainCircuit, Calendar, History as HistoryIcon } from 'lucide-react';
+import { BrainCircuit, Calendar, History as HistoryIcon, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 
