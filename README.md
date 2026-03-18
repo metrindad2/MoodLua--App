@@ -2,7 +2,7 @@
 
 Este é um aplicativo Next.js para monitoramento do ciclo menstrual com uma função de segurança SOS, criado pelo Firebase Studio.
 
-O projeto foi estruturado para ser didático e fácil de modificar, ideal para quem está aprendendo a programar com Next.js e React
+O projeto foi estruturado para ser didático e fácil de modificar, ideal para quem está aprendendo a programar com Next.js e React.
 
 ## Como Iniciar o Projeto
 
