@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import {
-  LayoutGrid,
+  Droplet,
   History,
   Baby,
   Sparkles,
@@ -23,7 +23,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [isSosOpen, setIsSosOpen] = useState(false);
 
   const navItems = [
-    { href: '/', label: 'Ciclo', icon: LayoutGrid },
+    { href: '/', label: 'Ciclo', icon: Droplet },
     { href: '/history', label: 'Histórico', icon: History },
     { href: '/pregnancy', label: 'Gravidez', icon: Baby },
     { href: '/insights', label: 'Insights', icon: Sparkles },
@@ -65,7 +65,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      <footer className="fixed bottom-0 left-1/2 z-40 w-full max-w-md -translate-x-1/2 shrink-0 border-t bg-card/80 backdrop-blur-sm">
+      <footer className="fixed bottom-0 left-1/2 z-50 w-full max-w-md -translate-x-1/2 shrink-0 border-t bg-card/80 backdrop-blur-sm">
         <nav className="flex items-center justify-around p-1">
           {navItems.map((item) => (
             <Link
