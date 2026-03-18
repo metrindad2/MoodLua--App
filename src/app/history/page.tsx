@@ -3,8 +3,7 @@
 import { useCycleData } from '@/context/cycle-data-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
-import { calculateCycleInfo } from '@/lib/cycle-utils';
-import { format, parseISO, addDays } from 'date-fns';
+import { format, parseISO, addDays, differenceInDays, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { BrainCircuit, Calendar, History as HistoryIcon, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -34,16 +33,39 @@ export default function HistoryPage() {
     );
   }
 
-  const sortedHistory = [...cycleHistory].sort(
+  // --- Start of new logic ---
+
+  // 1. Create a representation for the current, ongoing cycle.
+  const today = startOfDay(new Date());
+  const currentCycleStartDate = parseISO(userProfile.lastMenstruationDate);
+  const currentCycleDays = differenceInDays(today, currentCycleStartDate) + 1;
+
+  const currentCycle = {
+    startDate: userProfile.lastMenstruationDate,
+    cycleLength: currentCycleDays,
+    isCurrent: true,
+  };
+
+  // 2. Combine the past (completed) cycles with the current one.
+  const allCycles = [...cycleHistory, currentCycle];
+
+  // 3. Sort all cycles to have the most recent one first.
+  const sortedHistory = allCycles.sort(
     (a, b) => parseISO(b.startDate).getTime() - parseISO(a.startDate).getTime()
   );
   
+  // 4. Calculate stats based only on completed cycles.
   const cycleLengths = cycleHistory.map((c) => c.cycleLength);
   const averageCycleLength = cycleLengths.length > 0
       ? Math.round(cycleLengths.reduce((a, b) => a + b, 0) / cycleLengths.length)
       : userProfile.cycleLengthDays;
   
-  const lastCycle = sortedHistory.length > 0 ? sortedHistory[0] : null;
+  // Find the most recent *completed* cycle for the stats card.
+  const lastCompletedCycle = cycleHistory.length > 0 
+      ? [...cycleHistory].sort((a, b) => parseISO(b.startDate).getTime() - parseISO(a.startDate).getTime())[0] 
+      : null;
+
+  // --- End of new logic ---
 
   return (
     <div className="p-4 space-y-6">
@@ -62,12 +84,12 @@ export default function HistoryPage() {
               </span>
               <span className="font-bold">{averageCycleLength} dias</span>
             </div>
-             {lastCycle && (
+             {lastCompletedCycle && ( // Use lastCompletedCycle here
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">
                   Duração do ciclo anterior
                 </span>
-                <span className="font-bold">{lastCycle.cycleLength} dias</span>
+                <span className="font-bold">{lastCompletedCycle.cycleLength} dias</span>
               </div>
             )}
             <div className="flex justify-between items-center">
@@ -110,25 +132,31 @@ export default function HistoryPage() {
             </CardContent>
            </Card>
         )}
-        {sortedHistory.map((cycle, index) => {
-        const startDate = parseISO(cycle.startDate);
-        const endDate = addDays(startDate, cycle.cycleLength - 1);
+        {sortedHistory.map((cycle) => {
+          const startDate = parseISO(cycle.startDate);
+          const isCurrentCycle = (cycle as any).isCurrent;
+          const endDate = addDays(startDate, cycle.cycleLength - 1);
 
-        return (
-            <Card key={index}>
+          return (
+            <Card key={cycle.startDate} className={isCurrentCycle ? 'border-primary/70' : ''}>
                 <CardContent className="p-4 flex justify-between items-center">
                 <div>
                     <p className="font-semibold text-sm">
                         {format(startDate, "d 'de' MMMM", { locale: ptBR })}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                        {format(endDate, "d 'de' MMMM, yyyy", { locale: ptBR })}
+                        {isCurrentCycle
+                          ? 'Em andamento'
+                          : `Terminou em ${format(endDate, "d 'de' MMMM", { locale: ptBR })}`}
                     </p>
                 </div>
-                <p className="font-bold text-lg text-primary">{cycle.cycleLength} dias</p>
+                <div className="text-right">
+                  <p className="font-bold text-lg text-primary">{cycle.cycleLength} dias</p>
+                  {isCurrentCycle && <p className="text-xs font-semibold text-primary -mt-1">Ciclo Atual</p>}
+                </div>
                 </CardContent>
             </Card>
-        );
+          );
         })}
       </div>
     </div>
