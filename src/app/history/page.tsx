@@ -33,9 +33,9 @@ export default function HistoryPage() {
     );
   }
 
-  // --- Start of new logic ---
+  // --- Lógica de cálculo movida para depois das validações ---
 
-  // 1. Create a representation for the current, ongoing cycle.
+  // 1. Cria uma representação para o ciclo atual, em andamento.
   const today = startOfDay(new Date());
   const currentCycleStartDate = parseISO(userProfile.lastMenstruationDate);
   const currentCycleDays = differenceInDays(today, currentCycleStartDate) + 1;
@@ -46,26 +46,26 @@ export default function HistoryPage() {
     isCurrent: true,
   };
 
-  // 2. Combine the past (completed) cycles with the current one.
+  // 2. Combina os ciclos passados (completos) com o atual.
   const allCycles = [...cycleHistory, currentCycle];
 
-  // 3. Sort all cycles to have the most recent one first.
+  // 3. Ordena todos os ciclos para ter o mais recente primeiro.
   const sortedHistory = allCycles.sort(
     (a, b) => parseISO(b.startDate).getTime() - parseISO(a.startDate).getTime()
   );
   
-  // 4. Calculate stats based only on completed cycles.
+  // 4. Calcula estatísticas com base apenas nos ciclos completos.
   const cycleLengths = cycleHistory.map((c) => c.cycleLength);
   const averageCycleLength = cycleLengths.length > 0
       ? Math.round(cycleLengths.reduce((a, b) => a + b, 0) / cycleLengths.length)
       : userProfile.cycleLengthDays;
   
-  // Find the most recent *completed* cycle for the stats card.
+  // Encontra o ciclo *concluído* mais recente para o card de estatísticas.
   const lastCompletedCycle = cycleHistory.length > 0 
       ? [...cycleHistory].sort((a, b) => parseISO(b.startDate).getTime() - parseISO(a.startDate).getTime())[0] 
       : null;
 
-  // --- End of new logic ---
+  // --- Fim da Lógica ---
 
   return (
     <div className="p-4 space-y-6">
@@ -84,7 +84,7 @@ export default function HistoryPage() {
               </span>
               <span className="font-bold">{averageCycleLength} dias</span>
             </div>
-             {lastCompletedCycle && ( // Use lastCompletedCycle here
+             {lastCompletedCycle && ( 
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">
                   Duração do ciclo anterior
