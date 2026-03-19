@@ -4,7 +4,6 @@ import Link from 'next/link';
 import {
   Droplet,
   Baby,
-  MessageCircle,
   Settings,
   HeartPulse,
   History,
@@ -26,7 +25,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: '/', label: 'Ciclo', icon: Droplet },
     { href: '/history', label: 'Histórico', icon: History },
     { href: '/pregnancy', label: 'Gravidez', icon: Baby },
-    { href: '/ajuda', label: 'Ajuda', icon: MessageCircle },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
 
