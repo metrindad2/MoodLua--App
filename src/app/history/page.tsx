@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/card';
 import { addDays, differenceInDays, format, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { History as HistoryIcon, Sparkles } from 'lucide-react';
+import { History as HistoryIcon } from 'lucide-react';
 import Link from 'next/link';
 
 export default function HistoryPage() {
@@ -109,21 +109,6 @@ export default function HistoryPage() {
             <CardDescription>Duração do último ciclo</CardDescription>
           </CardHeader>
         </Card>
-      </div>
-      
-      <div className="!mt-6 rounded-lg bg-accent p-4">
-        <h3 className="font-semibold flex items-center gap-2 text-accent-foreground">
-          <Sparkles className="text-primary w-5 h-5" /> Assistente de
-          Saúde
-        </h3>
-        <p className="text-xs text-accent-foreground/80 mt-1 mb-3">
-          Use seus dados para gerar insights com nossa IA.
-        </p>
-        <Link href="/insights">
-          <span className="text-sm font-semibold text-primary hover:underline">
-            Gerar Insights →
-          </span>
-        </Link>
       </div>
 
       <div className="space-y-3">
