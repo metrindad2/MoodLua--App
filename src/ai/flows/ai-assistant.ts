@@ -38,21 +38,10 @@ NUNCA forneça conselhos médicos, diagnósticos ou prescrições.
 Sempre que uma pergunta parecer de natureza médica, recomende fortemente que a usuária consulte um(a) profissional de saúde qualificado(a).
 Se a pergunta for sobre segurança pessoal ou emergências, reforce a importância de usar a função SOS do app e contatar as autoridades ou pessoas de confiança.
 Mantenha as respostas concisas e fáceis de entender.`,
-  input: { schema: AiAssistantInputSchema },
-  // O prompt principal que usa os dados de entrada (histórico e pergunta).
-  prompt: `
-Histórico da conversa:
-{{#if history}}
-  {{#each history}}
-    - {{role}}: {{{content}}}
-  {{/each}}
-{{else}}
-  Nenhuma conversa anterior.
-{{/if}}
-
-Nova pergunta da usuária: {{{question}}}
-
-Sua resposta:`,
+  // A entrada do prompt é apenas a pergunta atual.
+  input: { schema: z.object({ question: z.string() }) },
+  // O prompt principal agora é mais simples. O histórico é gerenciado pelo Genkit.
+  prompt: `{{{question}}}`,
 });
 
 // O fluxo Genkit que orquestra a chamada para a IA.
@@ -63,11 +52,19 @@ const aiAssistantFlow = ai.defineFlow(
     outputSchema: z.string(), // A saída será apenas o texto da resposta.
   },
   async (input) => {
+    // Converte o histórico do nosso app para o formato que o Genkit espera.
+    const history = input.history?.map(msg => ({
+        role: msg.role === 'assistant' ? 'model' as const : 'user' as const,
+        content: [{ text: msg.content }]
+    })) || [];
+      
     // Chama o prompt com os dados de entrada.
     const { text } = await ai.generate({
       prompt: assistantPrompt,
-      history: input.history,
-      input: input,
+      // O histórico é passado para a função `generate` para gerenciar a conversa.
+      history: history,
+      // O `input` para o prompt é apenas a pergunta.
+      input: { question: input.question },
     });
     // Retorna o texto da resposta gerada pela IA.
     return text;
