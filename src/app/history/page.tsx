@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useCycleData } from '@/context/cycle-data-context';
@@ -18,11 +17,25 @@ import {
   Droplet,
   Droplets,
   Waves,
+  Trash2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { FlowIntensity } from '@/lib/types';
 import { MOOD_OPTIONS } from '@/lib/moods';
 import { SYMPTOM_OPTIONS } from '@/lib/symptoms';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 const FLOW_OPTIONS: {
   value: FlowIntensity;
@@ -36,7 +49,9 @@ const FLOW_OPTIONS: {
 ];
 
 export default function HistoryPage() {
-  const { cycleHistory, userProfile, loading, dailyLogs } = useCycleData();
+  const { cycleHistory, userProfile, loading, dailyLogs, removeDailyLog } =
+    useCycleData();
+  const { toast } = useToast();
 
   // On first render, loading is true and userProfile is null.
   // We need to handle this loading state to prevent errors.
@@ -129,6 +144,14 @@ export default function HistoryPage() {
       new Date(b.date + 'T00:00:00').getTime() -
       new Date(a.date + 'T00:00:00').getTime()
   );
+
+  const handleDeleteLog = (date: Date) => {
+    removeDailyLog(date);
+    toast({
+      title: 'Registro excluído',
+      description: 'As anotações para este dia foram removidas.',
+    });
+  };
 
   return (
     <div className="p-4 space-y-6">
@@ -226,58 +249,95 @@ export default function HistoryPage() {
               const flow = FLOW_OPTIONS.find(
                 (f) => f.value === log.flowIntensity
               );
-              const hasData = mood || (flow && flow.value !== 'nenhum') || (symptoms && symptoms.length > 0);
+              const hasData =
+                mood ||
+                (flow && flow.value !== 'nenhum') ||
+                (symptoms && symptoms.length > 0);
 
               return (
                 <Card key={log.date}>
-                  <CardHeader className="pb-3 pt-4">
+                  <CardHeader className="pb-3 pt-4 flex flex-row justify-between items-start">
                     <CardTitle className="text-base font-semibold">
                       {format(logDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
                     </CardTitle>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Excluir este registro?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta ação é permanente e não pode ser desfeita.
+                            Todas as anotações para este dia serão apagadas.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteLog(logDate)}
+                          >
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </CardHeader>
                   <CardContent className="space-y-3 pt-0">
                     {!hasData ? (
-                       <p className="text-sm text-muted-foreground">Nenhuma informação registrada para este dia.</p>
-                    ): (
-                        <div className="space-y-3">
+                      <p className="text-sm text-muted-foreground">
+                        Nenhuma informação registrada para este dia.
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
                         {mood && (
-                        <div className="flex items-center gap-2 text-sm">
+                          <div className="flex items-center gap-2 text-sm">
                             <span className="text-lg">{mood.emoji}</span>
                             <div>
-                                <p className="font-medium text-muted-foreground">Humor</p>
-                                <p className="font-semibold">{mood.label}</p>
+                              <p className="font-medium text-muted-foreground">
+                                Humor
+                              </p>
+                              <p className="font-semibold">{mood.label}</p>
                             </div>
-                        </div>
+                          </div>
                         )}
                         {flow && flow.value !== 'nenhum' && (
-                        <div className="flex items-center gap-2 text-sm">
+                          <div className="flex items-center gap-2 text-sm">
                             <flow.Icon className="h-5 w-5 text-primary" />
-                             <div>
-                                <p className="font-medium text-muted-foreground">Fluxo</p>
-                                <p className="font-semibold">{flow.label}</p>
+                            <div>
+                              <p className="font-medium text-muted-foreground">
+                                Fluxo
+                              </p>
+                              <p className="font-semibold">{flow.label}</p>
                             </div>
-                        </div>
+                          </div>
                         )}
                         {symptoms && symptoms.length > 0 && (
-                        <div>
-                            <h4 className="font-medium text-muted-foreground text-sm mb-2">Sintomas</h4>
+                          <div>
+                            <h4 className="font-medium text-muted-foreground text-sm mb-2">
+                              Sintomas
+                            </h4>
                             <div className="flex flex-wrap gap-2">
-                            {symptoms.map(
+                              {symptoms.map(
                                 (symptom) =>
-                                symptom && (
+                                  symptom && (
                                     <div
-                                    key={symptom.id}
-                                    className="flex items-center gap-1.5 text-sm bg-muted text-muted-foreground font-medium p-2 rounded-md"
+                                      key={symptom.id}
+                                      className="flex items-center gap-1.5 text-sm bg-muted text-muted-foreground font-medium p-2 rounded-md"
                                     >
-                                    <span>{symptom.emoji}</span>
-                                    <span>{symptom.label}</span>
+                                      <span>{symptom.emoji}</span>
+                                      <span>{symptom.label}</span>
                                     </div>
-                                )
-                            )}
+                                  )
+                              )}
                             </div>
-                        </div>
+                          </div>
                         )}
-                        </div>
+                      </div>
                     )}
                   </CardContent>
                 </Card>

@@ -37,6 +37,7 @@ interface CycleDataContextType {
   removeEmergencyContact: (contactId: string) => void;
   updateSosMessage: (message: string) => void;
   logout: () => void;
+  removeDailyLog: (date: Date) => void;
 }
 
 const CycleDataContext = createContext<CycleDataContextType | undefined>(
@@ -146,6 +147,18 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  const removeDailyLog = useCallback(
+    (date: Date) => {
+      addOrUpdateDailyLog({
+        date: date,
+        mood: undefined,
+        symptoms: undefined,
+        flowIntensity: undefined,
+      });
+    },
+    [addOrUpdateDailyLog]
+  );
+
   const startNewCycle = useCallback(
     (newStartDate: Date) => {
       if (!userProfile) return;
@@ -252,6 +265,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     sosMessage,
     updateSosMessage,
     logout,
+    removeDailyLog,
   };
 
   return (
