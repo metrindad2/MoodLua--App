@@ -28,8 +28,6 @@ import { Card, CardContent } from './ui/card';
 // Esquema atualizado para o novo formulário de criação de conta
 const formSchema = z.object({
   name: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.'),
-  email: z.string().email('Por favor, insira um email válido.'),
-  password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres.'),
   lastMenstruationDate: z.date({
     required_error: 'A data da última menstruação é obrigatória.',
   }),
@@ -51,8 +49,6 @@ export default function OnboardingForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      email: '',
-      password: '',
       cycleLengthDays: 28,
       flowDurationDays: 5,
     },
@@ -61,7 +57,6 @@ export default function OnboardingForm() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     const userProfile: UserProfile = {
       name: values.name,
-      email: values.email,
       lastMenstruationDate: format(values.lastMenstruationDate, 'yyyy-MM-dd'),
       cycleLengthDays: values.cycleLengthDays,
       flowDurationDays: values.flowDurationDays,
@@ -74,7 +69,7 @@ export default function OnboardingForm() {
       <div className="flex flex-col items-center justify-center text-center pt-8 pb-4">
         <Moon className="w-14 h-14 text-primary mb-2" />
         <h1 className="text-3xl font-bold text-foreground">Bem-vinda à MoodLua</h1>
-        <p className="text-muted-foreground mt-2">Crie sua conta para começar a jornada.</p>
+        <p className="text-muted-foreground mt-2">Vamos começar sua jornada.</p>
       </div>
 
       <Card className="w-full max-w-md mt-6">
@@ -168,34 +163,8 @@ export default function OnboardingForm() {
                 />
               </div>
 
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input type="email" placeholder="Email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input type="password" placeholder="Senha" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <Button type="submit" className="w-full font-bold text-base py-6">
-                Criar conta e começar
+                Começar
               </Button>
             </form>
           </Form>
@@ -204,7 +173,7 @@ export default function OnboardingForm() {
 
       <div className="mt-6 text-center pb-8">
         <Link href="/login" className="text-sm text-primary hover:underline">
-          Já tem conta? Faça login
+          O que aconteceu com o login?
         </Link>
       </div>
     </div>
