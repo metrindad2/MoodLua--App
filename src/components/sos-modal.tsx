@@ -127,7 +127,7 @@ export function SosModal({ open, onOpenChange }: { open: boolean; onOpenChange: 
         
         <div className="mt-6 px-1">
             <Button variant="outline" className="w-full" asChild>
-                <Link href="/settings">
+                <Link href="/settings#emergency-contacts">
                     <UserPlus className="mr-2 h-4 w-4" /> Gerenciar Contatos
                 </Link>
             </Button>

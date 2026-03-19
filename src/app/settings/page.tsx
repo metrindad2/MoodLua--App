@@ -21,7 +21,9 @@ export default function SettingsPage() {
       </Card>
       
       <SosMessageManager />
-      <EmergencyContactManager />
+      <div id="emergency-contacts">
+        <EmergencyContactManager />
+      </div>
     </div>
   );
 }
