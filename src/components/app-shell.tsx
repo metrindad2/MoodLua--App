@@ -4,7 +4,7 @@ import Link from 'next/link';
 import {
   Droplet,
   Baby,
-  Sparkles,
+  MessageCircle,
   Settings,
   HeartPulse,
   History,
@@ -26,7 +26,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: '/', label: 'Ciclo', icon: Droplet },
     { href: '/history', label: 'Histórico', icon: History },
     { href: '/pregnancy', label: 'Gravidez', icon: Baby },
-    { href: '/insights', label: 'Insights', icon: Sparkles },
+    { href: '/ajuda', label: 'Ajuda', icon: MessageCircle },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
 
@@ -61,7 +61,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </Link>
       </header>
       
-      <main className="flex-1 overflow-y-auto pb-24">
+      <main className="flex-1 overflow-y-auto pb-24 z-0">
         {children}
       </main>
 

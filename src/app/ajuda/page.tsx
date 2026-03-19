@@ -1,158 +1,149 @@
 'use client';
+// Este arquivo cria a interface de chat com la IA.
+// 'use client' é necessário porque usamos hooks do React (useState, useRef)
+// para gerenciar o estado da conversa e a interação do usuário.
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Copy, MessageCircle, ShieldAlert, Smartphone, RefreshCw } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Bot, User, Send, BrainCircuit } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+// Importa a função que se comunica com a nossa IA
+import { aiAssistant } from '@/ai/flows/ai-assistant';
 
-type Geolocation = {
-  latitude: number;
-  longitude: number;
+// Define a estrutura de uma mensagem no chat
+type Message = {
+  role: 'user' | 'assistant';
+  content: string;
 };
 
 export default function AjudaPage() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [location, setLocation] = useState<Geolocation | null>(null);
-  const [message, setMessage] = useState('');
   const { toast } = useToast();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const handleRequestHelp = () => {
-    setLoading(true);
-    setError(null);
-    setLocation(null);
-    setMessage('');
-
-    if (!navigator.geolocation) {
-      setError('Geolocalização não é suportada pelo seu navegador.');
-      setLoading(false);
-      return;
-    }
-    
-    toast({
-        title: "Obtendo sua localização...",
-        description: "Por favor, aguarde. Isso pode levar alguns segundos."
-    });
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        const googleMapsLink = `https://maps.google.com/?q=${latitude},${longitude}`;
-        const helpMessage = `Preciso de ajuda. Minha localização atual é:\n${googleMapsLink}`;
-
-        setLocation({ latitude, longitude });
-        setMessage(helpMessage);
-        setLoading(false);
-        toast({
-            title: "Localização obtida com sucesso!",
-            description: "Escolha como deseja compartilhar."
-        });
-      },
-      (geoError) => {
-        let errorMessage = 'Não foi possível obter sua localização.';
-        switch (geoError.code) {
-          case geoError.PERMISSION_DENIED:
-            errorMessage = 'Permissão de localização negada. Habilite nas configurações do seu navegador para usar esta função.';
-            break;
-          case geoError.POSITION_UNAVAILABLE:
-            errorMessage = 'Sinal de localização indisponível. Tente em um local com céu aberto.';
-            break;
-          case geoError.TIMEOUT:
-            errorMessage = 'Tempo esgotado para obter localização. Verifique sua conexão e tente novamente.';
-            break;
-        }
-        setError(errorMessage);
-        setLoading(false);
-        toast({
-            title: "Erro de Localização (Cód: " + geoError.code + ")",
-            description: errorMessage,
-            variant: "destructive"
-        });
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
-    );
-  };
-
-  const handleShareWhatsApp = () => {
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/?text=${encodedMessage}`);
-  };
-
-  const handleShareSms = () => {
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`sms:?body=${encodedMessage}`);
-  };
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(message).then(() => {
-      toast({
-        title: 'Mensagem copiada!',
-        description: 'Você pode colar a mensagem onde precisar.',
+  // Efeito para rolar para a última mensagem sempre que o chat for atualizado
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTo({
+        top: scrollAreaRef.current.scrollHeight,
+        behavior: 'smooth',
       });
-    }).catch(() => {
-        toast({
-            title: 'Falha ao copiar',
-            description: 'Não foi possível copiar a mensagem automaticamente.',
-            variant: 'destructive',
-        })
-    });
+    }
+  }, [messages]);
+
+  // Função chamada quando o usuário envia uma pergunta
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || loading) return;
+
+    const userMessage: Message = { role: 'user', content: input };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput('');
+    setLoading(true);
+
+    try {
+      // Chama a função da IA, passando o histórico da conversa e a nova pergunta
+      const response = await aiAssistant({
+        history: messages,
+        question: input,
+      });
+
+      const assistantMessage: Message = { role: 'assistant', content: response };
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Erro ao chamar a IA:', error);
+      toast({
+        title: 'Erro de conexão',
+        description: 'Não foi possível se comunicar com a assistente. Tente novamente.',
+        variant: 'destructive',
+      });
+       // Remove a mensagem do usuário se a IA falhar
+      setMessages((prev) => prev.slice(0, -1));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="p-4 flex flex-col items-center justify-center h-full text-center space-y-6">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <div className="flex justify-center mb-4">
-            <ShieldAlert className="w-12 h-12 text-primary" />
+    <div className="p-4 flex flex-col h-full">
+      <Card className="flex-1 flex flex-col w-full max-w-md mx-auto bg-card/80">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-2">
+            <BrainCircuit className="w-10 h-10 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold">
-            Pedido de Ajuda
-          </CardTitle>
-          <CardDescription className="pt-2">
-            Em uma emergência, pressione o botão para obter sua localização e compartilhá-la com um contato de confiança.
-          </CardDescription>
+          <CardTitle>Assistente de Saúde</CardTitle>
+          <CardDescription>Tire suas dúvidas sobre ciclo e bem-estar.</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center gap-4">
-          
-          {location && !loading ? (
-            <div className="w-full space-y-3 animate-in fade-in-50">
-                <p className='text-sm text-muted-foreground pb-2'>Sua localização foi obtida. Escolha uma opção para pedir ajuda:</p>
-              <Button onClick={handleShareWhatsApp} className="w-full" size="lg">
-                <Smartphone className="mr-2" /> Enviar via WhatsApp
-              </Button>
-              <Button onClick={handleShareSms} className="w-full" size="lg" variant="secondary">
-                <MessageCircle className="mr-2" /> Enviar via SMS
-              </Button>
-              <Button onClick={handleCopy} className="w-full" size="lg" variant="outline">
-                <Copy className="mr-2" /> Copiar Mensagem
-              </Button>
-               <Button onClick={handleRequestHelp} variant="link" className="text-muted-foreground mt-4">
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Obter nova localização
-               </Button>
+        <CardContent className="flex-1 flex flex-col p-0">
+          <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+            <div className="space-y-4">
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    'flex items-start gap-3',
+                    message.role === 'user' ? 'justify-end' : 'justify-start'
+                  )}
+                >
+                  {message.role === 'assistant' && (
+                    <div className="bg-primary rounded-full p-2 text-primary-foreground">
+                      <Bot size={20} />
+                    </div>
+                  )}
+                  <div
+                    className={cn(
+                      'p-3 rounded-lg max-w-[80%]',
+                      message.role === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-foreground'
+                    )}
+                  >
+                    <p className="text-sm">{message.content}</p>
+                  </div>
+                   {message.role === 'user' && (
+                    <div className="bg-muted rounded-full p-2 text-foreground">
+                      <User size={20} />
+                    </div>
+                  )}
+                </div>
+              ))}
+               {loading && (
+                <div className="flex items-start gap-3 justify-start">
+                  <div className="bg-primary rounded-full p-2 text-primary-foreground">
+                    <Bot size={20} className="animate-pulse" />
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted text-foreground">
+                      <p className="text-sm italic">IA está pensando...</p>
+                  </div>
+                </div>
+              )}
+               {messages.length === 0 && !loading && (
+                <div className="text-center text-muted-foreground text-sm p-8">
+                    <p>Faça uma pergunta sobre seu ciclo, sintomas, bem-estar ou segurança. Ex: "É normal sentir cólicas antes da menstruação?"</p>
+                </div>
+               )}
             </div>
-          ) : (
-            <Button
-              onClick={handleRequestHelp}
-              disabled={loading}
-              className="w-full h-20 text-xl font-bold rounded-full shadow-lg"
-            >
-              {loading ? 'Obtendo localização...' : 'Pedir Ajuda'}
-            </Button>
-          )}
-
-          {error && !loading && <p className="text-destructive text-sm font-medium pt-4">{error}</p>}
+          </ScrollArea>
+          <div className="p-4 border-t bg-background/50">
+            <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Digite sua pergunta..."
+                disabled={loading}
+                className="flex-1"
+              />
+              <Button type="submit" disabled={loading || !input.trim()} size="icon">
+                <Send size={18} />
+              </Button>
+            </form>
+          </div>
         </CardContent>
       </Card>
     </div>

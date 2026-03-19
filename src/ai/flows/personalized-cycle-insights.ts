@@ -61,6 +61,7 @@ const PersonalizedCycleInsightsInputSchema = z.object({
             'cansada',
             'triste',
             'irritada',
+            'carinhosa',
           ])
           .optional()
           .describe('Humor neste dia.'),
