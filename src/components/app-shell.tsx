@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import {
   Droplet,
-  History,
   Baby,
   Sparkles,
   Settings,
@@ -24,7 +23,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { href: '/', label: 'Ciclo', icon: Droplet },
-    { href: '/history', label: 'Histórico', icon: History },
     { href: '/pregnancy', label: 'Gravidez', icon: Baby },
     { href: '/insights', label: 'Insights', icon: Sparkles },
     { href: '/settings', label: 'Ajustes', icon: Settings },
