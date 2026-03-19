@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 // Importa a função que se comunica com a nossa IA
 import { aiAssistant } from '@/ai/flows/ai-assistant';
 
-// Define a estrutura de uma mensagem no chat
+// Define a estrutura de uma única mensagem no chat
 type Message = {
   role: 'user' | 'assistant';
   content: string;
