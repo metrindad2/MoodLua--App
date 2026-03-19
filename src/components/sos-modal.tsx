@@ -206,7 +206,10 @@ export function SosModal({
 
         <div className="mt-6 px-1">
           <Button variant="outline" className="w-full" asChild>
-            <Link href="/settings#emergency-contacts">
+            <Link
+              href="/settings#emergency-contacts"
+              onClick={() => onOpenChange(false)}
+            >
               <UserPlus className="mr-2 h-4 w-4" /> Gerenciar Contatos
             </Link>
           </Button>
