@@ -8,6 +8,7 @@ import {
   Settings,
   HeartPulse,
   History,
+  Moon,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -15,7 +16,6 @@ import { useCycleData } from '@/context/cycle-data-context';
 import { Skeleton } from './ui/skeleton';
 import { useState } from 'react';
 import { SosModal } from './sos-modal';
-import Image from 'next/image';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -56,7 +56,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="relative mx-auto flex h-dvh max-w-md flex-col border-x border-border bg-moodlua-gradient">
       <header className="flex shrink-0 items-center justify-center p-4">
         <Link href="/" className="flex items-center gap-2">
-           <Image src="/logo.png" alt="MoodLua Logo" width={32} height={32} />
+           <Moon className="h-8 w-8 text-primary" />
            <h1 className="font-bold text-xl text-foreground">MoodLua</h1>
         </Link>
       </header>

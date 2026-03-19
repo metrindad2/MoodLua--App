@@ -15,16 +15,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { useCycleData } from '@/context/cycle-data-context';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Moon } from 'lucide-react';
 import { SimpleCalendar } from './simple-calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { UserProfile } from '@/lib/types';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent } from './ui/card';
 
 // Esquema atualizado para o novo formulário de criação de conta
 const formSchema = z.object({
@@ -73,13 +72,7 @@ export default function OnboardingForm() {
   return (
     <div className="flex flex-col items-center justify-center min-h-dvh p-4">
       <div className="flex flex-col items-center justify-center text-center pt-8 pb-4">
-        <Image
-          src="/logo.png"
-          alt="MoodLua Logo"
-          width={56}
-          height={56}
-          className="mb-2"
-        />
+        <Moon className="w-14 h-14 text-primary mb-2" />
         <h1 className="text-3xl font-bold text-foreground">Bem-vinda à MoodLua</h1>
         <p className="text-muted-foreground mt-2">Crie sua conta para começar a jornada.</p>
       </div>

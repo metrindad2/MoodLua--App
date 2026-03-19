@@ -17,7 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useCycleData } from '@/context/cycle-data-context';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Image from 'next/image';
+import { Moon } from 'lucide-react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -62,13 +62,7 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-dvh p-4">
       <div className="flex flex-col items-center justify-center text-center pt-8 pb-4">
-        <Image
-          src="/logo.png"
-          alt="MoodLua Logo"
-          width={56}
-          height={56}
-          className="mb-2"
-        />
+        <Moon className="w-14 h-14 text-primary mb-2" />
         <h1 className="text-3xl font-bold text-foreground">Bem-vinda de volta!</h1>
         <p className="text-muted-foreground mt-2">Acesse sua conta para continuar.</p>
       </div>
