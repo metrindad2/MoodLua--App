@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { addDays, differenceInDays, format, parseISO, startOfDay } from 'date-fns';
+import { addDays, differenceInDays, format, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { History as HistoryIcon, Sparkles } from 'lucide-react';
 import Link from 'next/link';
@@ -63,10 +63,14 @@ export default function HistoryPage() {
   };
 
   const allCycles = [currentCycle, ...cycleHistory].sort(
-    (a, b) => parseISO(b.startDate).getTime() - parseISO(a.startDate).getTime()
+    (a, b) => new Date(b.startDate + 'T00:00:00').getTime() - new Date(a.startDate + 'T00:00:00').getTime()
   );
 
   const completedCycles = cycleHistory.filter(c => c.cycleLength > 0);
+  
+  const sortedCompletedCycles = [...completedCycles].sort(
+    (a, b) => new Date(b.startDate + 'T00:00:00').getTime() - new Date(a.startDate + 'T00:00:00').getTime()
+  );
 
   const averageCycleLength =
     completedCycles.length > 0
@@ -76,7 +80,7 @@ export default function HistoryPage() {
         )
       : userProfile.cycleLengthDays;
         
-  const lastCycleLength = completedCycles.length > 0 ? completedCycles[0].cycleLength : null;
+  const lastCycleLength = sortedCompletedCycles.length > 0 ? sortedCompletedCycles[0].cycleLength : null;
 
   return (
     <div className="p-4 space-y-6">
@@ -124,7 +128,7 @@ export default function HistoryPage() {
 
       <div className="space-y-3">
         {allCycles.map((cycle, index) => {
-          const startDate = parseISO(cycle.startDate);
+          const startDate = startOfDay(new Date(cycle.startDate + 'T00:00:00'));
           const endDate = addDays(startDate, cycle.cycleLength - 1);
 
           return (

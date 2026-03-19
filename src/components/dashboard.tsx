@@ -6,7 +6,7 @@ import { CycleProgress } from './cycle-progress';
 import { PhaseTips } from './phase-tips';
 import { DailyTracker } from './daily-tracker';
 import { SimpleCalendar } from './simple-calendar';
-import { addDays, subDays, startOfDay, isAfter, parseISO, format } from 'date-fns';
+import { addDays, subDays, startOfDay, isAfter, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card, CardContent } from './ui/card';
 import { useState } from 'react';
@@ -68,7 +68,7 @@ export default function Dashboard() {
   };
 
   const sortedHistory = [...cycleHistory]
-    .sort((a, b) => parseISO(b.startDate).getTime() - parseISO(a.startDate).getTime())
+    .sort((a, b) => new Date(b.startDate + 'T00:00:00').getTime() - new Date(a.startDate + 'T00:00:00').getTime())
     .slice(0, 1);
 
   return (
@@ -124,7 +124,7 @@ export default function Dashboard() {
             </Link>
         </div>
          {sortedHistory.length > 0 ? sortedHistory.map((cycle, index) => {
-          const startDate = parseISO(cycle.startDate);
+          const startDate = startOfDay(new Date(cycle.startDate + 'T00:00:00'));
           const endDate = addDays(startDate, cycle.cycleLength - 1);
           return (
              <Card key={index}>
