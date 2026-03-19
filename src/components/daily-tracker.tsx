@@ -8,7 +8,7 @@ import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { MOOD_OPTIONS } from '@/lib/moods';
 import { SYMPTOM_OPTIONS } from '@/lib/symptoms';
-import { CircleSlash, Droplet, Droplets, Save, Waves } from 'lucide-react';
+import { CircleSlash, Droplet, Droplets, Save, Trash2, Waves } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -67,6 +67,13 @@ export function DailyTracker() {
     setSelectedFlow(newFlow);
   };
 
+  // Function to clear all current selections from the UI
+  const handleClearSelections = () => {
+    setSelectedMood(undefined);
+    setSelectedSymptoms([]);
+    setSelectedFlow(undefined);
+  };
+
   // Handle saving the current selections
   const handleSave = () => {
     const originalFlow = originalLog?.flowIntensity;
@@ -90,7 +97,7 @@ export function DailyTracker() {
     
     toast({
       title: 'Registros salvos!',
-      description: 'Suas anotações de hoje foram salvas com sucesso.',
+      description: 'Suas anotações de hoje foram atualizadas.',
     });
   };
 
@@ -172,10 +179,14 @@ export function DailyTracker() {
           </div>
         </div>
         
-        <div className="pt-6 border-t">
+        <div className="pt-6 border-t flex flex-col-reverse sm:flex-row gap-2">
           <Button onClick={handleSave} className="w-full font-bold">
             <Save className="mr-2 h-4 w-4" />
             Salvar Registros de Hoje
+          </Button>
+          <Button onClick={handleClearSelections} variant="outline" className="w-full sm:w-auto">
+            <Trash2 className="mr-2 h-4 w-4" />
+            Limpar
           </Button>
         </div>
       </CardContent>
