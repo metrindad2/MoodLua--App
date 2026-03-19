@@ -29,7 +29,7 @@ export type AiAssistantInput = z.infer<typeof AiAssistantInputSchema>;
 // É aqui que definimos a "personalidade" e as regras da nossa assistente.
 const assistantPrompt = ai.definePrompt({
   name: 'aiAssistantPrompt',
-  model: 'googleai/gemini-pro',
+  model: 'googleai/gemini-1.5-flash-latest',
   // O sistema é uma instrução de alto nível que a IA sempre seguirá.
   system: `Você é uma assistente de IA do aplicativo MoodLua, especializada em saúde e bem-estar feminino.
 Sua personalidade é acolhedora, empática e informativa.
@@ -59,7 +59,7 @@ const aiAssistantFlow = ai.defineFlow(
     })) || [];
       
     // Chama o prompt com os dados de entrada.
-    const { text } = await ai.generate({
+    const response = await ai.generate({
       prompt: assistantPrompt,
       // O histórico é passado para a função `generate` para gerenciar a conversa.
       history: history,
@@ -67,7 +67,7 @@ const aiAssistantFlow = ai.defineFlow(
       input: { question: input.question },
     });
     // Retorna o texto da resposta gerada pela IA.
-    return text;
+    return response.text;
   }
 );
 

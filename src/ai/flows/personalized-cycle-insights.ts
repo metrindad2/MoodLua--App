@@ -102,7 +102,7 @@ export type PersonalizedCycleInsightsOutput = z.infer<
  */
 const personalizedCycleInsightsPrompt = ai.definePrompt({
   name: 'personalizedCycleInsightsPrompt',
-  model: 'googleai/gemini-pro',
+  model: 'googleai/gemini-1.5-flash-latest',
   input: { schema: PersonalizedCycleInsightsInputSchema },
   output: { schema: PersonalizedCycleInsightsOutputSchema },
   // O texto do prompt em Handlebars. Ele usa as variáveis definidas no esquema de entrada.
@@ -131,7 +131,7 @@ Com base nessas informações, forneça:
 
 1.  **Insights Personalizados:** Observações sobre o ciclo da usuária, tendências ou padrões específicos que você identificou. Por exemplo, "Você tende a sentir cólicas mais intensas no Dia X do seu ciclo" ou "Seu humor costuma ser 'irritada' nos dias que antecedem a menstruação."
 2.  **Possíveis Correlações:** Conexões entre sintomas, humor e fases do ciclo (menstruação, folicular, ovulação, lútea/TPM). Por exemplo, "Dor de cabeça e fadiga podem estar correlacionados com o início da sua fase lútea."
-3.  **Sugestões de Bem-Estar:** Recomendações práticas e gentis para gerenciar o ciclo e melhorar o bem-estar, considerando a fase atual do ciclo e os padrões observados. Por exemplo, "Considerando que você está na fase de ovulação, atividades físicas moderadas podem ser benéficas."
+3.  **Sugestões de Bem-Estar:** Recomendações práticas e gentis para gerenciar o ciclo e melhorar o bem-estar, considerando a fase atual do ciclo e os padrões observados.
 
 Responda em português brasileiro.`,
 });
