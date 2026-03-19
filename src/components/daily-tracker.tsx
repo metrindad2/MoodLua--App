@@ -1,15 +1,17 @@
 'use client';
 
 import { useCycleData } from '@/context/cycle-data-context';
-import { Mood, FlowIntensity } from '@/lib/types';
+import { Mood, FlowIntensity, DailyLog } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { MOOD_OPTIONS } from '@/lib/moods';
 import { SYMPTOM_OPTIONS } from '@/lib/symptoms';
-import { CircleSlash, Droplet, Droplets, Waves } from 'lucide-react';
+import { CircleSlash, Droplet, Droplets, Save, Waves } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 const FLOW_OPTIONS: {
   value: FlowIntensity;
@@ -24,47 +26,72 @@ const FLOW_OPTIONS: {
 
 export function DailyTracker() {
   const { getLogForDate, addOrUpdateDailyLog, startNewCycle } = useCycleData();
+  const { toast } = useToast();
 
   const [selectedDate] = useState(new Date());
 
+  // State for current selections, to be edited by the user
   const [selectedMood, setSelectedMood] = useState<Mood | undefined>();
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [selectedFlow, setSelectedFlow] = useState<FlowIntensity | undefined>();
 
+  // State to track the originally loaded log for comparison on save
+  const [originalLog, setOriginalLog] = useState<DailyLog | undefined>();
+
+  // Load data from context and populate the form states
   useEffect(() => {
     const log = getLogForDate(selectedDate);
+    setOriginalLog(log);
     setSelectedMood(log?.mood);
     setSelectedSymptoms(log?.symptoms || []);
     setSelectedFlow(log?.flowIntensity);
   }, [selectedDate, getLogForDate]);
 
+  // Update local state for mood selection
   const handleMoodSelect = (mood: Mood) => {
     const newMood = selectedMood === mood ? undefined : mood;
     setSelectedMood(newMood);
-    addOrUpdateDailyLog({ date: selectedDate, mood: newMood });
   };
 
+  // Update local state for symptom selection
   const handleSymptomSelect = (symptomId: string) => {
     const newSymptoms = selectedSymptoms.includes(symptomId)
       ? selectedSymptoms.filter((s) => s !== symptomId)
       : [...selectedSymptoms, symptomId];
     setSelectedSymptoms(newSymptoms);
-    addOrUpdateDailyLog({ date: selectedDate, symptoms: newSymptoms });
   };
 
+  // Update local state for flow selection
   const handleFlowSelect = (flow: FlowIntensity) => {
     const newFlow = selectedFlow === flow ? undefined : flow;
-    const isStartingPeriod =
-      (!selectedFlow || selectedFlow === 'nenhum') &&
-      newFlow &&
-      newFlow !== 'nenhum';
-
     setSelectedFlow(newFlow);
-    addOrUpdateDailyLog({ date: selectedDate, flowIntensity: newFlow });
+  };
 
+  // Handle saving the current selections
+  const handleSave = () => {
+    const originalFlow = originalLog?.flowIntensity;
+    const isStartingPeriod =
+      (!originalFlow || originalFlow === 'nenhum') &&
+      selectedFlow &&
+      selectedFlow !== 'nenhum';
+
+    // Save all selections together
+    addOrUpdateDailyLog({
+      date: selectedDate,
+      mood: selectedMood,
+      symptoms: selectedSymptoms,
+      flowIntensity: selectedFlow,
+    });
+    
+    // If a new period is starting, update the cycle
     if (isStartingPeriod) {
       startNewCycle(selectedDate);
     }
+    
+    toast({
+      title: 'Registros salvos!',
+      description: 'Suas anotações de hoje foram salvas com sucesso.',
+    });
   };
 
   return (
@@ -77,7 +104,7 @@ export function DailyTracker() {
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
-          <h3 className="text-base font-semibold mb-3 text-foreground">Humor</h3>
+          <h3 className="text-base font-semibold mb-3 text-foreground">Como você se sente hoje?</h3>
           <div className="grid grid-cols-3 gap-2">
             {MOOD_OPTIONS.map((option) => {
               return (
@@ -100,7 +127,7 @@ export function DailyTracker() {
         </div>
 
         <div>
-          <h3 className="text-base font-semibold mb-3 text-foreground">Fluxo</h3>
+          <h3 className="text-base font-semibold mb-3 text-foreground">Fluxo Menstrual</h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
             {FLOW_OPTIONS.map((option) => (
               <button
@@ -143,6 +170,13 @@ export function DailyTracker() {
               );
             })}
           </div>
+        </div>
+        
+        <div className="pt-6 border-t">
+          <Button onClick={handleSave} className="w-full font-bold">
+            <Save className="mr-2 h-4 w-4" />
+            Salvar Registros de Hoje
+          </Button>
         </div>
       </CardContent>
     </Card>
