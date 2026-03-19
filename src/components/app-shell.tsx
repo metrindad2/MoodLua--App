@@ -7,6 +7,7 @@ import {
   Sparkles,
   Settings,
   HeartPulse,
+  History,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -23,6 +24,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { href: '/', label: 'Ciclo', icon: Droplet },
+    { href: '/history', label: 'Histórico', icon: History },
     { href: '/pregnancy', label: 'Gravidez', icon: Baby },
     { href: '/insights', label: 'Insights', icon: Sparkles },
     { href: '/settings', label: 'Ajustes', icon: Settings },

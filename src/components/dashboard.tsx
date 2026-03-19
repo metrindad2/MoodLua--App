@@ -119,6 +119,9 @@ export default function Dashboard() {
                 <History className="w-5 h-5 text-secondary" />
                 Histórico de Ciclos
             </h2>
+            <Link href="/history" className="text-sm font-medium text-primary hover:underline">
+              Ver tudo
+            </Link>
         </div>
          {sortedHistory.length > 0 ? sortedHistory.map((cycle, index) => {
           const startDate = parseISO(cycle.startDate);
