@@ -7,7 +7,7 @@
  * torna o código mais organizado e fácil de manter.
  */
 
-import { addDays, subDays, differenceInDays, startOfDay, formatISO } from 'date-fns';
+import { addDays, subDays, differenceInDays, startOfDay } from 'date-fns';
 import { DailyLog, UserProfile } from './types';
 
 /**
@@ -83,28 +83,5 @@ export function calculateCycleInfo(userProfile: UserProfile): CycleInfo | null {
     menstruationStartDate: lastPeriod,
     menstruationEndDate,
     isMenstruating,
-  };
-}
-
-/**
- * Prepara os dados do ciclo para serem enviados para a IA.
- * A IA requer um formato específico, e esta função garante que os dados
- * estejam corretos.
- * @param userProfile O perfil da usuária.
- * @param dailyLogs Os registros diários.
- * @returns Um objeto pronto para ser enviado para a função da IA.
- */
-export function prepareDataForAI(userProfile: UserProfile, dailyLogs: DailyLog[], cycleInfo: CycleInfo) {
-  return {
-    lastMenstruationDate: formatISO(new Date(userProfile.lastMenstruationDate + 'T00:00:00'), { representation: 'date' }),
-    flowDurationDays: userProfile.flowDurationDays,
-    cycleLengthDays: userProfile.cycleLengthDays,
-    currentCycleDay: cycleInfo.currentCycleDay,
-    loggedData: dailyLogs.map(log => ({
-      date: formatISO(new Date(log.date + 'T00:00:00'), { representation: 'date' }),
-      flowIntensity: log.flowIntensity,
-      symptoms: log.symptoms,
-      mood: log.mood
-    })),
   };
 }

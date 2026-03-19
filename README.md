@@ -17,31 +17,6 @@ Este aplicativo foi projetado para ser executado como um site, mas com a aparên
 - Após a instalação, digite o comando `npm run dev` e pressione Enter.
 - Abra o seu navegador e acesse o endereço `http://localhost:9002`. Você verá o aplicativo funcionando.
 
-## Configurando a Inteligência Artificial
-
-O aplicativo usa Inteligência Artificial para as funcionalidades de "Insights" e "Ajuda". Para que a IA funcione localmente, você precisa de uma chave de API do Google AI Studio.
-
-1.  **Obtenha sua Chave:**
-    *   Acesse o [Google AI Studio](https://aistudio.google.com/app/apikey).
-    *   Crie uma nova chave de API ("Create API key").
-
-2.  **Configure o Ambiente:**
-    *   Na raiz do projeto, crie um arquivo chamado `.env` (se ele ainda não existir).
-    *   Dentro do `.env`, adicione a seguinte linha, substituindo `<SUA_CHAVE_AQUI>` pela chave que você copiou:
-        ```
-        GEMINI_API_KEY=<SUA_CHAVE_AQUI>
-        ```
-
-3.  **Reinicie o Servidor:**
-    *   Se o seu servidor de desenvolvimento (`npm run dev`) estiver rodando, pare-o (`Ctrl+C`) e inicie-o novamente para que ele carregue a nova variável de ambiente.
-
-### Deploy no Vercel
-Para que a IA funcione após o deploy no Vercel:
-- Vá para o painel do seu projeto no Vercel.
-- Navegue até `Settings` > `Environment Variables`.
-- Adicione uma nova variável com o nome `GEMINI_API_KEY` e cole a sua chave de API no valor.
-- Salve e faça um novo deploy para aplicar as alterações.
-
 ## Como Aprender e Modificar
 
 O código foi comentado para explicar o que cada parte faz. Aqui estão os pontos principais para você começar a modificar:
