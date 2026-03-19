@@ -8,7 +8,6 @@ import {
   HeartPulse,
   History,
   Moon,
-  MessageCircle,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -25,7 +24,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: '/', label: 'Ciclo', icon: Droplet },
     { href: '/history', label: 'Histórico', icon: History },
-    { href: '/ajuda', label: 'Ajuda', icon: MessageCircle },
     { href: '/pregnancy', label: 'Gravidez', icon: Baby },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
