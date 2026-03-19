@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -16,66 +15,128 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
+import { useCycleData } from '@/context/cycle-data-context';
+import { UserProfile } from '@/lib/types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Save, User } from 'lucide-react';
 
-/**
- * Esquema de validação para o formulário de configurações.
- * Garante que os dados inseridos sejam válidos.
- */
+
 const formSchema = z.object({
   name: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.'),
+  cycleLengthDays: z.coerce
+    .number()
+    .int()
+    .min(15, 'O ciclo deve ter pelo menos 15 dias.'),
+  flowDurationDays: z.coerce
+    .number()
+    .int()
+    .min(1, 'A duração deve ser de pelo menos 1 dia.'),
 });
 
 type SettingsFormValues = z.infer<typeof formSchema>;
 
-/**
- * Formulário de Configurações.
- * Permite que a usuária personalize as informações.
- */
 export function SettingsForm() {
   const { toast } = useToast();
+  const { userProfile, updateUserProfile } = useCycleData();
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
+      name: userProfile?.name || '',
+      cycleLengthDays: userProfile?.cycleLengthDays || 28,
+      flowDurationDays: userProfile?.flowDurationDays || 5,
     },
   });
 
-  // `useEffect` para atualizar o formulário se as configurações no contexto mudarem.
   useEffect(() => {
-    form.reset({
-      name: 'Usuária',
-    });
-  }, [form]);
+    if (userProfile) {
+      form.reset({
+        name: userProfile.name,
+        cycleLengthDays: userProfile.cycleLengthDays,
+        flowDurationDays: userProfile.flowDurationDays,
+      });
+    }
+  }, [userProfile, form]);
 
   function onSubmit(values: SettingsFormValues) {
+    if (!userProfile) return;
+
+    const updatedProfile: UserProfile = {
+      ...userProfile,
+      name: values.name,
+      cycleLengthDays: values.cycleLengthDays,
+      flowDurationDays: values.flowDurationDays,
+    };
+    updateUserProfile(updatedProfile);
+
     toast({
-      title: 'Configurações Salvas!',
-      description: 'Suas informações foram atualizadas.',
+      title: 'Perfil Atualizado!',
+      description: 'Suas informações foram salvas com sucesso.',
     });
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome</FormLabel>
-              <FormControl>
-                <Input placeholder="Seu nome" {...field} disabled />
-              </FormControl>
-              <FormDescription>
-                A edição do perfil será implementada em breve.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="bg-accent text-accent-foreground hover:bg-accent/90" disabled>Salvar Alterações</Button>
-      </form>
-    </Form>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg flex items-center gap-2">
+          <User className="w-5 h-5" />
+          Perfil
+        </CardTitle>
+        <CardDescription>
+          Edite seu nome e as informações do seu ciclo.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+             <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Seu nome" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="cycleLengthDays"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Duração do Ciclo</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="15" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="flowDurationDays"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Duração da Menstruação</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="1" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <Button type="submit">
+                <Save className="mr-2 h-4 w-4" />
+                Salvar Alterações
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 }

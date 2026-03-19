@@ -23,6 +23,7 @@ interface CycleDataContextType {
   addEmergencyContact: (contact: EmergencyContact) => void;
   removeEmergencyContact: (contactId: string) => void;
   updateSosMessage: (message: string) => void;
+  logout: () => void;
 }
 
 const CycleDataContext = createContext<CycleDataContextType | undefined>(undefined);
@@ -176,6 +177,20 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     setSosMessage(message);
   }, []);
 
+  const logout = useCallback(() => {
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      setUserProfile(null);
+      setDailyLogs([]);
+      setCycleHistory([]);
+      setPregnancyLmpDate(null);
+      setEmergencyContacts([]);
+      setSosMessage(DEFAULT_SOS_MESSAGE);
+    } catch (error) {
+      console.error("Failed to clear data from localStorage", error);
+    }
+  }, []);
+
   const value = {
     userProfile,
     dailyLogs,
@@ -192,6 +207,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     removeEmergencyContact,
     sosMessage,
     updateSosMessage,
+    logout,
   };
 
   return (

@@ -21,7 +21,6 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { UserProfile } from '@/lib/types';
-import Link from 'next/link';
 import { useState } from 'react';
 import { Card, CardContent } from './ui/card';
 
@@ -170,12 +169,6 @@ export default function OnboardingForm() {
           </Form>
         </CardContent>
       </Card>
-
-      <div className="mt-6 text-center pb-8">
-        <Link href="/login" className="text-sm text-primary hover:underline">
-          O que aconteceu com o login?
-        </Link>
-      </div>
     </div>
   );
 }
