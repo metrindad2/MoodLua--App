@@ -101,6 +101,7 @@ export type PersonalizedCycleInsightsOutput = z.infer<
  */
 const personalizedCycleInsightsPrompt = ai.definePrompt({
   name: 'personalizedCycleInsightsPrompt',
+  model: 'googleai/gemini-pro',
   input: { schema: PersonalizedCycleInsightsInputSchema },
   output: { schema: PersonalizedCycleInsightsOutputSchema },
   // O texto do prompt em Handlebars. Ele usa as variáveis definidas no esquema de entrada.
