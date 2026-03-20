@@ -158,14 +158,14 @@ export function DailyTracker() {
           <h3 className="text-base font-semibold mb-3 text-foreground">
             Sintomas
           </h3>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {SYMPTOM_OPTIONS.map((option) => {
               return (
                 <button
                   key={option.id}
                   onClick={() => handleSymptomSelect(option.id)}
                   className={cn(
-                    'flex items-center justify-center gap-2 px-3 py-2 rounded-full border-2 transition-colors text-sm font-medium',
+                    'flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 transition-colors text-sm font-medium',
                     selectedSymptoms.includes(option.id)
                       ? 'bg-primary border-primary text-primary-foreground'
                       : 'bg-transparent border-input hover:bg-accent'
@@ -179,7 +179,7 @@ export function DailyTracker() {
           </div>
         </div>
         
-        <div className="pt-6 border-t flex flex-col-reverse sm:flex-row gap-2">
+        <div className="pt-6 border-t flex flex-col sm:flex-row gap-2">
           <Button onClick={handleSave} className="w-full font-bold">
             <Save className="mr-2 h-4 w-4" />
             Salvar Registros de Hoje
