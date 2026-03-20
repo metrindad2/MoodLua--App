@@ -83,7 +83,7 @@ function SosMessageButton({ contact }: { contact: EmergencyContact }) {
         }
         window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
     );
   };
 
