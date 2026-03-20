@@ -63,18 +63,19 @@ function SosMessageButton({ contact }: { contact: EmergencyContact }) {
       // Error
       (geoError) => {
         setLoading(false);
-        let errorMessage =
-          'Não foi possível obter sua localização, mas você ainda pode enviar uma mensagem de ajuda.';
-        if (geoError.code === geoError.PERMISSION_DENIED) {
-          errorMessage =
-            'Permissão de localização negada. A mensagem será enviada sem o mapa.';
-        }
-        toast({
-          title: `Erro (Cód: ${geoError.code})`,
-          description: errorMessage,
-          variant: 'destructive',
-        });
+        let title = 'Localização não encontrada';
+        let description = 'A mensagem de ajuda será enviada sem o mapa. Abrindo WhatsApp...';
 
+        if (geoError.code === geoError.PERMISSION_DENIED) {
+            title = 'Permissão de localização negada';
+            description = 'A mensagem será enviada sem o mapa. Você pode ativar a permissão no seu navegador.';
+        }
+        
+        toast({
+          title: title,
+          description: description,
+        });
+        
         const helpMessage = sosMessage;
         const encodedMessage = encodeURIComponent(helpMessage);
         let phone = contact.phone.replace(/\D/g, '');
