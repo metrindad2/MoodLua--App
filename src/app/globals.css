@@ -68,10 +68,10 @@
   }
   .bg-moodlua-gradient {
     /* Dark: Dark Purple -> Lilac */
-    @apply bg-gradient-to-b from-[hsl(280,40%,10%)] to-[hsl(280,40%,20%)];
+    @apply bg-gradient-to-b from-[hsl(280,40%,10%)] to-[hsl(280,45%,35%)];
   }
   .dark .bg-moodlua-gradient {
     /* Dark: Dark Purple -> Lilac */
-    @apply bg-gradient-to-b from-[hsl(280,40%,10%)] to-[hsl(280,40%,20%)];
+    @apply bg-gradient-to-b from-[hsl(280,40%,10%)] to-[hsl(280,45%,35%)];
   }
 }
