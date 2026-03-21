@@ -8,8 +8,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
-import { BrainCircuit, Droplet, Heart, NotebookText } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Droplet, Heart, NotebookText } from 'lucide-react';
 
 const features = [
   {
@@ -23,12 +22,6 @@ const features = [
     title: 'Registre seu Dia a Dia',
     description:
       'Anote seu humor, sintomas e fluxo para entender melhor seu corpo.',
-  },
-  {
-    icon: BrainCircuit,
-    title: 'Receba Insights com IA',
-    description:
-      'Nossa inteligência artificial analisa seus dados e gera dicas personalizadas para você.',
   },
   {
     icon: Heart,
