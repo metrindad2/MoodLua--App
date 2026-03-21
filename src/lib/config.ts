@@ -5,4 +5,4 @@ export const EMERGENCY_SERVICES = [
   { name: 'Central da Mulher', number: '180' },
 ];
 
-export const DEFAULT_SOS_MESSAGE = 'Preciso de ajuda. Esta é a minha localização:';
+export const DEFAULT_SOS_MESSAGE = 'Preciso de ajuda urgente. Esta é a minha localização:';
