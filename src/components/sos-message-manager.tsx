@@ -54,7 +54,7 @@ export function SosMessageManager() {
                         <FormLabel>Mensagem Personalizada</FormLabel>
                         <FormControl>
                             <Textarea
-                                placeholder="Ex: Preciso de ajuda urgente. Esta é a minha localização:"
+                                placeholder="Ex: 🚨 SOS – Preciso de ajuda agora!..."
                                 {...field}
                                 rows={6}
                              />
