@@ -17,57 +17,56 @@ import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { ScrollArea } from './ui/scroll-area';
 import { Card } from './ui/card';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 
 // Component for the SOS message sending logic
 function SosMessageButton({ contact }: { contact: EmergencyContact }) {
   const [loading, setLoading] = useState(false);
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [locationUrl, setLocationUrl] = useState<string | undefined>(undefined);
   const { toast } = useToast();
   const { sosMessage } = useCycleData();
-
-  const openWhatsApp = () => {
-    const message = locationUrl ? `${sosMessage}\n${locationUrl}` : sosMessage;
-    const encodedMessage = encodeURIComponent(message);
-
-    // Limpa o número de telefone, removendo tudo que não for dígito.
-    let phone = contact.phone.replace(/\D/g, '');
-
-    // Garante que o código do país (55 para o Brasil) esteja presente
-    // para números com até 11 dígitos (formato local com DDD).
-    if (phone.length <= 11) {
-      phone = `55${phone}`;
-    }
-
-    const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
-    window.location.href = whatsappUrl;
-    setIsAlertOpen(false);
-  };
 
   const handleInitialSosClick = () => {
     setLoading(true);
     toast({
       title: 'Obtendo sua localização...',
-      description: 'Por favor, aguarde. Pode ser necessário conceder permissão.',
+      description: 'Uma nova aba será aberta para o WhatsApp.',
     });
+
+    const whatsAppWindow = window.open('', '_blank');
+    if (whatsAppWindow) {
+      whatsAppWindow.document.write(
+        'Obtendo localização para enviar via WhatsApp...'
+      );
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Ação bloqueada',
+        description:
+          'Por favor, desative o bloqueador de pop-ups para usar a função SOS.',
+      });
+      setLoading(false);
+      return;
+    }
+
+    const processAndRedirect = (locationUrl?: string) => {
+      const message = locationUrl ? `${sosMessage}\n${locationUrl}` : sosMessage;
+      const encodedMessage = encodeURIComponent(message);
+      let phone = contact.phone.replace(/\D/g, '');
+      if (phone.length <= 11) {
+        phone = `55${phone}`;
+      }
+      const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
+
+      // Now update the location of the window we already opened.
+      whatsAppWindow.location.href = whatsappUrl;
+    };
 
     navigator.geolocation.getCurrentPosition(
       // Success
       (position) => {
         setLoading(false);
         const { latitude, longitude } = position.coords;
-        setLocationUrl(`https://maps.google.com/?q=${latitude},${longitude}`);
-        setIsAlertOpen(true);
+        const locationUrl = `https://maps.google.com/?q=${latitude},${longitude}`;
+        processAndRedirect(locationUrl);
       },
       // Error
       (geoError) => {
@@ -80,44 +79,20 @@ function SosMessageButton({ contact }: { contact: EmergencyContact }) {
         toast({
           variant: 'destructive',
           title: errorTitle,
-          description:
-            'Você ainda pode enviar a mensagem, mas será sem o mapa.',
+          description: 'A mensagem será enviada sem o mapa.',
         });
 
-        setLocationUrl(undefined);
-        setIsAlertOpen(true);
+        processAndRedirect(undefined);
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
   return (
-    <>
-      <Button onClick={handleInitialSosClick} disabled={loading} size="sm">
-        <MessageSquare className="mr-2 h-4 w-4" />
-        {loading ? 'Obtendo...' : 'SOS'}
-      </Button>
-
-      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar Envio de SOS?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {locationUrl
-                ? 'Sua localização foi obtida. A mensagem será enviada para '
-                : 'Não foi possível obter sua localização. A mensagem será enviada sem o mapa para '}
-              <strong className="text-foreground">{contact.name}</strong>.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={openWhatsApp}>
-              Enviar via WhatsApp
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    <Button onClick={handleInitialSosClick} disabled={loading} size="sm">
+      <MessageSquare className="mr-2 h-4 w-4" />
+      {loading ? 'Obtendo...' : 'SOS'}
+    </Button>
   );
 }
 
