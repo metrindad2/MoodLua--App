@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useCycleData } from '@/context/cycle-data-context';
 import { UserProfile } from '@/lib/types';
 import {
@@ -24,16 +24,12 @@ import {
   CardHeader,
   CardTitle,
 } from './ui/card';
-import { CalendarIcon, Save, User } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { cn } from '@/lib/utils';
+import { Save, User } from 'lucide-react';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { SimpleCalendar } from './simple-calendar';
 
 const formSchema = z.object({
   name: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.'),
-  birthDate: z.date({
+  birthDate: z.coerce.date({
     required_error: 'A data de nascimento é obrigatória.',
   }),
   cycleLengthDays: z.coerce
@@ -51,7 +47,6 @@ type SettingsFormValues = z.infer<typeof formSchema>;
 export function SettingsForm() {
   const { toast } = useToast();
   const { userProfile, updateUserProfile } = useCycleData();
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(formSchema),
@@ -129,38 +124,19 @@ export function SettingsForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Data de Nascimento</FormLabel>
-                  <Popover
-                    open={isCalendarOpen}
-                    onOpenChange={setIsCalendarOpen}
-                  >
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={'outline'}
-                          className={cn(
-                            'w-full justify-between text-left font-normal',
-                            !field.value && 'text-muted-foreground'
-                          )}
-                        >
-                          {field.value
-                            ? format(field.value, 'PPP', { locale: ptBR })
-                            : 'Sua data de nascimento'}
-                          <CalendarIcon className="h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <SimpleCalendar
-                        initialDate={field.value || new Date(2000, 0, 1)}
-                        selectedDate={field.value}
-                        onDateClick={(date) => {
-                          field.onChange(date);
-                          setIsCalendarOpen(false);
-                        }}
-                        disableFutureDates
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <FormControl>
+                    <Input
+                      type="date"
+                      {...field}
+                      value={
+                        field.value instanceof Date
+                          ? format(field.value, 'yyyy-MM-dd')
+                          : typeof field.value === 'string'
+                          ? field.value
+                          : ''
+                      }
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

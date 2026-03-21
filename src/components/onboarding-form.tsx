@@ -27,7 +27,7 @@ import { Card, CardContent } from './ui/card';
 // Esquema atualizado para o novo formulário de criação de conta
 const formSchema = z.object({
   name: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.'),
-  birthDate: z.date({
+  birthDate: z.coerce.date({
     required_error: 'A data de nascimento é obrigatória.',
   }),
   lastMenstruationDate: z.date({
@@ -45,7 +45,6 @@ const formSchema = z.object({
 
 export default function OnboardingForm() {
   const { updateUserProfile } = useCycleData();
-  const [isBirthDateCalendarOpen, setIsBirthDateCalendarOpen] = useState(false);
   const [isLastMenstruationCalendarOpen, setIsLastMenstruationCalendarOpen] =
     useState(false);
 
@@ -101,38 +100,20 @@ export default function OnboardingForm() {
                 name="birthDate"
                 render={({ field }) => (
                   <FormItem>
-                    <Popover
-                      open={isBirthDateCalendarOpen}
-                      onOpenChange={setIsBirthDateCalendarOpen}
-                    >
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={'outline'}
-                            className={cn(
-                              'w-full justify-between text-left font-normal',
-                              !field.value && 'text-muted-foreground'
-                            )}
-                          >
-                            {field.value
-                              ? format(field.value, 'PPP', { locale: ptBR })
-                              : 'Sua data de nascimento'}
-                            <CalendarIcon className="h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <SimpleCalendar
-                          initialDate={field.value || new Date(2000, 0, 1)}
-                          selectedDate={field.value}
-                          onDateClick={(date) => {
-                            field.onChange(date);
-                            setIsBirthDateCalendarOpen(false);
-                          }}
-                          disableFutureDates
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <FormLabel>Data de Nascimento</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        {...field}
+                        value={
+                          field.value instanceof Date
+                            ? format(field.value, 'yyyy-MM-dd')
+                            : typeof field.value === 'string'
+                            ? field.value
+                            : ''
+                        }
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
