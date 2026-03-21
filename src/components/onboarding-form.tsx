@@ -14,11 +14,12 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useCycleData } from '@/context/cycle-data-context';
-import { Moon } from 'lucide-react';
+import { MapPin, Moon } from 'lucide-react';
 import { format } from 'date-fns';
 import { UserProfile } from '@/lib/types';
 import { Card, CardContent } from './ui/card';
 import { AppIntroCarousel } from './app-intro-carousel';
+import { useToast } from '@/hooks/use-toast';
 
 // Esquema atualizado para o novo formulário de criação de conta
 const formSchema = z.object({
@@ -48,6 +49,7 @@ const formSchema = z.object({
 
 export default function OnboardingForm() {
   const { updateUserProfile } = useCycleData();
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,6 +71,27 @@ export default function OnboardingForm() {
     updateUserProfile(userProfile);
   }
 
+  const handleLocationPermission = () => {
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        toast({
+          title: 'Permissão concedida!',
+          description: 'Sua localização poderá ser usada na função SOS.',
+        });
+      },
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          toast({
+            variant: 'destructive',
+            title: 'Permissão negada',
+            description:
+              'Para usar o SOS com mapa, ative a localização nas configurações do seu navegador.',
+          });
+        }
+      }
+    );
+  };
+
   return (
     <div className="flex flex-col items-center justify-center w-full">
       <div className="flex flex-col items-center justify-center text-center pb-4">
@@ -82,6 +105,21 @@ export default function OnboardingForm() {
       </div>
 
       <AppIntroCarousel />
+
+      <div className="text-center mt-6 mb-4 max-w-sm space-y-3 px-4">
+        <p className="text-muted-foreground text-sm">
+          Para que a função SOS funcione com um mapa, precisamos da sua permissão
+          para acessar a localização.
+        </p>
+        <Button
+          onClick={handleLocationPermission}
+          variant="outline"
+          className="w-full max-w-xs mx-auto"
+        >
+          <MapPin className="mr-2" />
+          Permitir Localização
+        </Button>
+      </div>
 
       <p className="text-muted-foreground text-center mt-6 mb-4 max-w-sm">
         Agora, vamos configurar seu perfil para uma experiência personalizada.
