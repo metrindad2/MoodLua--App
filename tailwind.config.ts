@@ -85,48 +85,10 @@ export default {
             height: '0',
           },
         },
-        'background-pan': {
-          '0%': { backgroundPosition: '0% 50%' },
-          '50%': { backgroundPosition: '100% 50%' },
-          '100%': { backgroundPosition: '0% 50%' },
-        },
-        'moon-bouncy-enter': {
-          '0%': { transform: 'scale(0.5) rotate(-30deg)', opacity: '0' },
-          '60%': { transform: 'scale(1.1) rotate(5deg)', opacity: '1' },
-          '80%': { transform: 'scale(0.95) rotate(0deg)', opacity: '1' },
-          '100%': { transform: 'scale(1) rotate(0deg)', opacity: '1' },
-        },
-        'text-reveal': {
-          '0%': { opacity: '0', transform: 'translateY(10px)', letterSpacing: '0.1em' },
-          '100%': { opacity: '1', transform: 'translateY(0)', letterSpacing: 'normal' },
-        },
-        'slogan-fade-in': {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        'star-twinkle': {
-          '0%, 100%': { opacity: '0.5', transform: 'scale(0.8)' },
-          '50%': { opacity: '1', transform: 'scale(1)' },
-        },
-        orbit: {
-          from: { transform: 'rotate(0deg)' },
-          to: { transform: 'rotate(360deg)' },
-        },
-        'planet-glow': {
-          '0%, 100%': { boxShadow: '0 0 4px #fff' },
-          '50%': { boxShadow: '0 0 12px #fff' },
-        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'background-pan': 'background-pan 15s ease infinite',
-        'moon-bouncy-enter': 'moon-bouncy-enter 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards',
-        'text-reveal': 'text-reveal 1s cubic-bezier(0.22, 1, 0.36, 1) 0.8s forwards',
-        'slogan-fade-in': 'slogan-fade-in 0.8s ease-out 1.4s forwards',
-        'star-twinkle': 'star-twinkle 3s ease-in-out infinite alternate',
-        'orbit': 'orbit 10s linear infinite',
-        'planet-glow': 'planet-glow 5s ease-in-out infinite alternate',
       },
     },
   },

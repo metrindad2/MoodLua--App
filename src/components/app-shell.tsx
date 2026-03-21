@@ -13,29 +13,13 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useCycleData } from '@/context/cycle-data-context';
 import { Skeleton } from './ui/skeleton';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { SosModal } from './sos-modal';
-import { SplashScreen } from './splash-screen';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { userProfile, loading } = useCycleData();
   const [isSosOpen, setIsSosOpen] = useState(false);
-  const [isSplashActive, setIsSplashActive] = useState(true);
-
-  // This effect runs only once on the client to check if the splash has been shown.
-  useEffect(() => {
-    const hasBeenShown = sessionStorage.getItem('splashShown');
-    if (hasBeenShown) {
-      setIsSplashActive(false);
-    } else {
-      sessionStorage.setItem('splashShown', 'true');
-    }
-  }, []);
-
-  if (isSplashActive) {
-    return <SplashScreen onFinished={() => setIsSplashActive(false)} />;
-  }
 
   if (loading) {
     return (
