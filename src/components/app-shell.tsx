@@ -58,6 +58,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
+  const navItems = [
+    { href: '/', label: 'Hoje', icon: Droplet },
+    { href: '/history', label: 'Histórico', icon: History },
+    { href: '/pregnancy', label: 'Gravidez', icon: Baby },
+    { href: '/settings', label: 'Ajustes', icon: Settings },
+  ];
+
   // Full app shell for logged-in users.
   return (
     <div className="relative mx-auto flex h-dvh max-w-md flex-col border-x border-border bg-moodlua-gradient">
