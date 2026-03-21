@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 280 40% 10%;
-    --foreground: 280 100% 98%;
-    --card: 280 40% 14%;
-    --card-foreground: 280 100% 98%;
-    --popover: 280 40% 10%;
-    --popover-foreground: 280 100% 98%;
-    --primary: 280 100% 74%; /* Lilás Claro: #C77DFF */
-    --primary-foreground: 280 61% 10%;
-    --secondary: 335 92% 65%; /* Lighter Pink for dark mode */
-    --secondary-foreground: 335 92% 10%;
-    --muted: 280 40% 18%;
-    --muted-foreground: 280 20% 70%;
-    --accent: 335 50% 30%; /* Dark Pink for hover */
-    --accent-foreground: 0 0% 98%;
+    --background: 280 100% 97%; /* Lilac White */
+    --foreground: 280 20% 15%; /* Dark Purple Text */
+    --card: 280 100% 99%; /* Almost White Card */
+    --card-foreground: 280 20% 15%;
+    --popover: 280 100% 99%;
+    --popover-foreground: 280 20% 15%;
+    --primary: 280 61% 49%; /* Roxo Principal: #7B2CBF */
+    --primary-foreground: 280 100% 98%;
+    --secondary: 335 92% 53%; /* Rosa Destaque: #F72585 */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 280 80% 94%;
+    --muted-foreground: 280 20% 45%;
+    --accent: 280 100% 92%; /* Light lilac for hover */
+    --accent-foreground: 280 20% 10%;
     --destructive: 0 62.8% 50.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 280 40% 30%;
-    --input: 280 40% 30%;
-    --ring: 280 100% 74%;
+    --border: 280 40% 88%;
+    --input: 280 40% 88%;
+    --ring: 280 61% 49%;
     --radius: 1rem;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
@@ -67,8 +67,8 @@
     @apply text-foreground bg-background;
   }
   .bg-moodlua-gradient {
-    /* Dark: Dark Purple -> Lilac */
-    @apply bg-gradient-to-b from-[hsl(280,40%,10%)] to-[hsl(280,45%,35%)];
+    /* Light: Lilac White -> Lighter Purple */
+    @apply bg-gradient-to-b from-[hsl(280,100%,97%)] to-[hsl(280,80%,94%)];
   }
   .dark .bg-moodlua-gradient {
     /* Dark: Dark Purple -> Lilac */
