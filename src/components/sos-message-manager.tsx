@@ -11,6 +11,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
+import { DEFAULT_SOS_MESSAGE } from '@/lib/config';
 
 const messageSchema = z.object({
   message: z.string().min(10, 'A mensagem deve ter pelo menos 10 caracteres.').max(350, 'A mensagem não pode ter mais de 350 caracteres.'),
@@ -54,7 +55,7 @@ export function SosMessageManager() {
                         <FormLabel>Mensagem Personalizada</FormLabel>
                         <FormControl>
                             <Textarea
-                                placeholder="Ex: 🚨 SOS – Preciso de ajuda agora!..."
+                                placeholder={DEFAULT_SOS_MESSAGE}
                                 {...field}
                                 rows={6}
                              />
