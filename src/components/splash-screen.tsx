@@ -1,6 +1,6 @@
 'use client';
 
-import { Moon } from 'lucide-react';
+import { Moon, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -19,12 +19,12 @@ export function SplashScreen({ onFinished }: SplashScreenProps) {
     // Este timer iniciará a animação de fade-out
     const exitTimer = setTimeout(() => {
       setIsExiting(true);
-    }, 2500); // Um pouco mais de tempo para apreciar a animação
+    }, 2800); // A animação principal dura ~2s, 2.8s é seguro.
 
     // Este timer chamará o callback onFinished para desmontar o componente
     const finishTimer = setTimeout(() => {
       onFinished();
-    }, 3000); // Duração deve ser exitTimer + duração da transição
+    }, 3300); // Deve ser exitTimer + duração da transição (500ms)
 
     // Função de limpeza para limpar os timers se o componente for desmontado antes
     return () => {
@@ -36,23 +36,34 @@ export function SplashScreen({ onFinished }: SplashScreenProps) {
   return (
     <div
       className={cn(
-        'fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-b from-[#6d28d9] via-[#a855f7] to-[#ec4899] text-white transition-opacity duration-500',
+        'fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-b from-[#6d28d9] via-[#a855f7] to-[#ec4899] text-white transition-opacity duration-500 bg-[length:200%_200%] animate-background-pan',
         isExiting ? 'opacity-0' : 'opacity-100'
       )}
     >
-      <div className="text-center">
-        <Moon
-          className={cn(
-            'mx-auto h-24 w-24 animate-moon-pulse transition-opacity duration-1000',
-            isRendered ? 'opacity-100' : 'opacity-0'
-          )}
-        />
+      <div className="relative flex flex-col items-center justify-center">
+        {/* Partículas de Estrelas */}
+        <Star className="absolute top-[-20px] left-[-60px] h-4 w-4 text-yellow-300/80 animate-star-twinkle [animation-delay:0.2s]" />
+        <Star className="absolute top-[50px] left-[-70px] h-3 w-3 text-yellow-300/60 animate-star-twinkle [animation-delay:0.8s]" />
+        <Star className="absolute top-[0px] right-[-60px] h-5 w-5 text-yellow-300/90 animate-star-twinkle [animation-delay:0.5s]" />
+        <Star className="absolute top-[60px] right-[-50px] h-2 w-2 text-yellow-300/50 animate-star-twinkle [animation-delay:1.2s]" />
+
+        {/* A classe 'opacity-0' esconde o elemento antes da animação começar */}
+        <div
+          className={cn('opacity-0', isRendered && 'animate-moon-enter')}
+        >
+          <Moon
+            className={cn(
+              'h-24 w-24 text-white',
+              // Efeito de brilho mágico
+              '[filter:drop-shadow(0_0_10px_rgba(255,255,255,0.7))]'
+            )}
+          />
+        </div>
+
         <h1
           className={cn(
-            'mt-4 text-6xl font-bold transition-all duration-700',
-            isRendered
-              ? 'opacity-100 translate-y-0 delay-300'
-              : 'opacity-0 translate-y-4'
+            'mt-4 text-6xl font-bold opacity-0',
+            isRendered && 'animate-text-enter'
           )}
           style={{ fontFamily: 'cursive' }}
         >
@@ -60,10 +71,8 @@ export function SplashScreen({ onFinished }: SplashScreenProps) {
         </h1>
         <p
           className={cn(
-            'mt-2 text-lg tracking-wider transition-all duration-700',
-            isRendered
-              ? 'opacity-100 translate-y-0 delay-500'
-              : 'opacity-0 translate-y-4'
+            'mt-2 text-lg tracking-wider opacity-0',
+            isRendered && 'animate-slogan-enter'
           )}
         >
           Seu ciclo, seu astral.

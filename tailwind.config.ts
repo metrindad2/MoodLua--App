@@ -85,15 +85,36 @@ export default {
             height: '0',
           },
         },
-        'moon-pulse': {
-          '0%, 100%': { transform: 'scale(1)', opacity: '0.8' },
-          '50%': { transform: 'scale(1.1)', opacity: '1' },
+        'background-pan': {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
+        'moon-enter': {
+          '0%': { transform: 'scale(0.5) rotate(-30deg)', opacity: '0' },
+          '100%': { transform: 'scale(1) rotate(0deg)', opacity: '1' },
+        },
+        'text-enter': {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'slogan-enter': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        'star-twinkle': {
+          '0%, 100%': { opacity: '0.5', transform: 'scale(0.8)' },
+          '50%': { opacity: '1', transform: 'scale(1)' },
         },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'moon-pulse': 'moon-pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'background-pan': 'background-pan 15s ease infinite',
+        'moon-enter': 'moon-enter 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s forwards',
+        'text-enter': 'text-enter 0.8s ease-out 1s forwards',
+        'slogan-enter': 'slogan-enter 0.8s ease-out 1.5s forwards',
+        'star-twinkle': 'star-twinkle 2s ease-in-out infinite',
       },
     },
   },
