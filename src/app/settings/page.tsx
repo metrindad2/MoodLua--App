@@ -5,6 +5,7 @@ import { EmergencyContactManager } from '@/components/emergency-contact-manager'
 import { SosMessageManager } from '@/components/sos-message-manager';
 import { SettingsForm } from '@/components/settings-form';
 import { AppDataManager } from '@/components/app-data-manager';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 
 export default function SettingsPage() {
   return (
@@ -18,6 +19,9 @@ export default function SettingsPage() {
             Gerencie as preferências, segurança e dados do seu aplicativo.
         </p>
       </div>
+
+      {/* Theme Settings */}
+      <ThemeSwitcher />
 
       {/* Profile Settings */}
       <SettingsForm />
