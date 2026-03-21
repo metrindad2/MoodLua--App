@@ -41,12 +41,10 @@ import {
   Edit,
   Trash2,
   UserPlus,
-  Phone,
   Users,
   User as UserIcon,
 } from 'lucide-react';
 import { Label } from './ui/label';
-import { Separator } from './ui/separator';
 
 const contactSchema = z.object({
   name: z.string().min(1, 'O nome é obrigatório.'),
@@ -78,16 +76,37 @@ export function EmergencyContactManager() {
     setIsDialogOpen(true);
   };
 
-  const onSubmit = (values: z.infer<typeof contactSchema>) => {
-    if (editingContact) {
-      updateSosContact({ ...editingContact, ...values });
-      toast({ title: 'Contato atualizado!' });
-    } else {
-      addSosContact(values);
-      toast({ title: 'Contato adicionado!' });
+  const onSubmit = async (values: z.infer<typeof contactSchema>) => {
+    try {
+      if (editingContact) {
+        await updateSosContact({ ...editingContact, ...values });
+        toast({ title: 'Contato atualizado!' });
+      } else {
+        await addSosContact(values);
+        toast({ title: 'Contato adicionado!' });
+      }
+      setIsDialogOpen(false);
+      setEditingContact(null);
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao salvar',
+        description: 'Não foi possível salvar o contato. Tente novamente.',
+      });
     }
-    setIsDialogOpen(false);
-    setEditingContact(null);
+  };
+  
+  const handleDelete = async (contactId: string) => {
+    try {
+      await removeSosContact(contactId);
+      toast({ title: 'Contato removido.' });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao remover',
+        description: 'Não foi possível remover o contato. Tente novamente.',
+      });
+    }
   };
 
   return (
@@ -95,14 +114,12 @@ export function EmergencyContactManager() {
       <div>
         <Label className="text-base font-semibold flex items-center gap-2 mb-2">
           <Users className="w-5 h-5 text-primary" />
-          Contatos de Emergência
+          Contatos Pessoais
         </Label>
         <p className="text-sm text-muted-foreground">
           Pessoas que você confia para receber seus alertas de SOS.
         </p>
       </div>
-
-      <Separator />
 
       <div className="space-y-3">
         {sosContacts.length > 0 ? (
@@ -147,7 +164,7 @@ export function EmergencyContactManager() {
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancelar</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => removeSosContact(contact.id)}
+                        onClick={() => handleDelete(contact.id)}
                       >
                         Excluir
                       </AlertDialogAction>
@@ -159,7 +176,7 @@ export function EmergencyContactManager() {
           ))
         ) : (
           <p className="text-sm text-center text-muted-foreground py-4">
-            Nenhum contato de emergência adicionado.
+            Nenhum contato pessoal adicionado.
           </p>
         )}
       </div>
@@ -172,7 +189,7 @@ export function EmergencyContactManager() {
             onClick={() => handleOpenDialog(null)}
           >
             <UserPlus className="mr-2" />
-            Adicionar Contato
+            Adicionar Contato Pessoal
           </Button>
         </DialogTrigger>
         <DialogContent>

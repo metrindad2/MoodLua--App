@@ -9,20 +9,32 @@ import { MessageCircle, Save } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export function SosMessageManager() {
-  const { sosMessage, updateSosMessage } = useCycleData();
-  const [message, setMessage] = useState(sosMessage);
+  const { userProfile, updateUserProfile } = useCycleData();
+  const [message, setMessage] = useState(userProfile?.sosMessage || '');
   const { toast } = useToast();
 
   useEffect(() => {
-    setMessage(sosMessage);
-  }, [sosMessage]);
+    if (userProfile?.sosMessage) {
+      setMessage(userProfile.sosMessage);
+    }
+  }, [userProfile?.sosMessage]);
 
-  const handleSave = () => {
-    updateSosMessage(message);
-    toast({
-      title: 'Mensagem de SOS salva!',
-      description: 'Sua mensagem padrão foi atualizada.',
-    });
+  const handleSave = async () => {
+    if (!userProfile) return;
+
+    try {
+      await updateUserProfile({ ...userProfile, sosMessage: message });
+      toast({
+        title: 'Mensagem de SOS salva!',
+        description: 'Sua mensagem padrão foi atualizada.',
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao salvar',
+        description: 'Não foi possível salvar a mensagem. Tente novamente.',
+      });
+    }
   };
 
   return (
@@ -36,8 +48,8 @@ export function SosMessageManager() {
           Mensagem de Emergência
         </Label>
         <p className="text-sm text-muted-foreground">
-          Personalize a mensagem que será enviada aos seus contatos. A sua
-          localização será adicionada automaticamente.
+          Personalize a mensagem que será enviada. A sua localização será
+          adicionada automaticamente.
         </p>
       </div>
 
@@ -47,6 +59,7 @@ export function SosMessageManager() {
         onChange={(e) => setMessage(e.target.value)}
         rows={8}
         className="text-base"
+        placeholder="Digite sua mensagem de emergência aqui..."
       />
       <Button onClick={handleSave}>
         <Save className="mr-2" />

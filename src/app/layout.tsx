@@ -6,6 +6,7 @@ import { CycleDataProvider } from '@/context/cycle-data-context';
 import { Toaster } from '@/components/ui/toaster';
 import { AppShell } from '@/components/app-shell';
 import { ThemeProvider } from '@/components/theme-provider';
+import { FirebaseClientProvider } from '@/firebase';
 
 const fontSans = Inter({
   subsets: ['latin'],
@@ -39,12 +40,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <CycleDataProvider>
-            <AppShell>
-              {children}
-            </AppShell>
-            <Toaster />
-          </CycleDataProvider>
+          <FirebaseClientProvider>
+            <CycleDataProvider>
+              <AppShell>
+                {children}
+              </AppShell>
+              <Toaster />
+            </CycleDataProvider>
+          </FirebaseClientProvider>
         </ThemeProvider>
       </body>
     </html>

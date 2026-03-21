@@ -1,13 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {
-  Droplet,
-  Baby,
-  Settings,
-  History,
-  Moon,
-} from 'lucide-react';
+import { Droplet, Baby, Settings, History, Moon, LogIn } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useCycleData } from '@/context/cycle-data-context';
@@ -15,27 +9,29 @@ import { Skeleton } from './ui/skeleton';
 import { useState, useEffect } from 'react';
 import { SplashScreen } from './splash-screen';
 import { SosModal } from './sos-modal';
+import { Button } from './ui/button';
+import { useAuth } from '@/firebase';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [isSplashing, setIsSplashing] = useState(true);
   const pathname = usePathname();
-  const { userProfile, loading } = useCycleData();
+  const { userProfile, loading: isDataLoading, signInWithGoogle } = useCycleData();
+  const { user, loading: isAuthLoading } = useAuth();
 
   useEffect(() => {
-    // This effect runs once on mount to control the splash screen duration.
     const splashTimer = setTimeout(() => {
       setIsSplashing(false);
-    }, 3500); // Show splash for 3.5 seconds
-
+    }, 2500); 
     return () => clearTimeout(splashTimer);
   }, []);
 
-  // Render Splash Screen first
   if (isSplashing) {
     return <SplashScreen />;
   }
+  
+  const isLoading = isAuthLoading || (user && isDataLoading);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="relative flex h-dvh w-full flex-col items-center justify-center bg-background p-4">
         <div className="w-full max-w-md space-y-4 p-4">
@@ -46,6 +42,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
+  
+  if (!user) {
+     return (
+       <div className="relative flex h-dvh w-full flex-col items-center justify-center bg-moodlua-gradient p-4 text-center">
+         <Moon className="h-16 w-16 text-primary" />
+         <h1 className="mt-4 text-3xl font-bold">Bem-vinda à MoodLua</h1>
+         <p className="mt-2 text-muted-foreground">
+           Faça login para salvar seus dados e acessar todas as funcionalidades.
+         </p>
+         <Button onClick={signInWithGoogle} className="mt-8">
+           <LogIn className="mr-2 h-4 w-4" />
+           Entrar com Google
+         </Button>
+       </div>
+     );
+  }
+
 
   // Onboarding/login view without the main app shell.
   if (!userProfile) {
@@ -68,11 +81,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="relative flex h-dvh w-full flex-col bg-moodlua-gradient">
       <header className="flex shrink-0 items-center justify-center p-4">
         <Link href="/" className="flex items-center gap-2">
-           <Moon className="h-8 w-8 text-primary" />
-           <h1 className="font-bold text-xl text-foreground">MoodLua</h1>
+          <Moon className="h-8 w-8 text-primary" />
+          <h1 className="font-bold text-xl text-foreground">MoodLua</h1>
         </Link>
       </header>
-      
+
       <main className="w-full flex-1 overflow-y-auto pb-24 z-0">
         {children}
       </main>

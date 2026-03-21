@@ -1,11 +1,14 @@
 'use client';
 
 import { useCycleData } from '@/context/cycle-data-context';
-import { Moon } from 'lucide-react';
+import { Moon, LogIn } from 'lucide-react';
 import Link from 'next/link';
+import { useUser } from '@/firebase';
+import { Button } from '@/components/ui/button';
 
 export default function LoginPage() {
-  const { userProfile, loading } = useCycleData();
+  const { signInWithGoogle } = useCycleData();
+  const { user, loading } = useUser();
 
   if (loading) {
     return (
@@ -15,7 +18,7 @@ export default function LoginPage() {
     );
   }
 
-  if (userProfile) {
+  if (user) {
     return (
       <div className="flex flex-col items-center justify-center h-dvh p-4 text-center">
         <p>Você já está logado.</p>
@@ -27,15 +30,16 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="text-center">
-      <Moon className="w-14 h-14 text-primary mb-2 inline-block" />
-      <h1 className="text-3xl font-bold text-foreground">Bem-vinda de volta!</h1>
-      <p className="text-muted-foreground mt-2 mb-8">
-        Como os dados são salvos localmente, não há necessidade de login.
+    <div className="relative flex h-dvh w-full flex-col items-center justify-center bg-moodlua-gradient p-4 text-center">
+      <Moon className="h-16 w-16 text-primary" />
+      <h1 className="mt-4 text-3xl font-bold">Bem-vinda à MoodLua</h1>
+      <p className="mt-2 text-muted-foreground">
+        Faça login para salvar seus dados e acessar todas as funcionalidades.
       </p>
-      <Link href="/" className="text-primary hover:underline">
-        Ir para a tela inicial para começar
-      </Link>
+      <Button onClick={signInWithGoogle} className="mt-8">
+        <LogIn className="mr-2 h-4 w-4" />
+        Entrar com Google
+      </Button>
     </div>
   );
 }

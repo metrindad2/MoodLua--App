@@ -1,19 +1,10 @@
 'use client';
 
-import { Settings as SettingsIcon, ShieldAlert } from 'lucide-react';
+import { Settings as SettingsIcon } from 'lucide-react';
 import { SettingsForm } from '@/components/settings-form';
 import { AppDataManager } from '@/components/app-data-manager';
 import { ThemeSwitcher } from '@/components/theme-switcher';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { SosMessageManager } from '@/components/sos-message-manager';
-import { EmergencyContactManager } from '@/components/emergency-contact-manager';
-import { Separator } from '@/components/ui/separator';
+import { SosManager } from '@/components/sos-manager';
 
 export default function SettingsPage() {
   return (
@@ -32,22 +23,7 @@ export default function SettingsPage() {
       <ThemeSwitcher />
 
       {/* SOS Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <ShieldAlert className="w-5 h-5 text-destructive" />
-            Chamadas de Emergência
-          </CardTitle>
-          <CardDescription>
-            Gerencie seus contatos e sua mensagem de SOS.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <SosMessageManager />
-          <Separator />
-          <EmergencyContactManager />
-        </CardContent>
-      </Card>
+      <SosManager />
 
       {/* Profile Settings */}
       <SettingsForm />

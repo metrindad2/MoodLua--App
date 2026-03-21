@@ -20,6 +20,7 @@ import { UserProfile } from '@/lib/types';
 import { Card, CardContent } from './ui/card';
 import { AppIntroCarousel } from './app-intro-carousel';
 import { useToast } from '@/hooks/use-toast';
+import { DEFAULT_SOS_MESSAGE } from '@/lib/config';
 
 // Esquema atualizado para o novo formulário de criação de conta
 const formSchema = z.object({
@@ -60,15 +61,28 @@ export default function OnboardingForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const userProfile: UserProfile = {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const userProfile: Omit<UserProfile, 'uid'> = {
       name: values.name,
       birthDate: format(values.birthDate, 'yyyy-MM-dd'),
       lastMenstruationDate: format(values.lastMenstruationDate, 'yyyy-MM-dd'),
       cycleLengthDays: values.cycleLengthDays,
       flowDurationDays: values.flowDurationDays,
+      sosMessage: DEFAULT_SOS_MESSAGE,
     };
-    updateUserProfile(userProfile);
+    try {
+      await updateUserProfile(userProfile);
+      toast({
+        title: 'Bem-vinda!',
+        description: 'Seu perfil foi criado com sucesso.',
+      });
+    } catch (error) {
+       toast({
+        variant: 'destructive',
+        title: 'Erro ao criar perfil',
+        description: 'Não foi possível salvar seu perfil. Tente novamente.',
+      });
+    }
   }
 
   return (

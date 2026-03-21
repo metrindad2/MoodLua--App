@@ -25,7 +25,7 @@ import {
   CardTitle,
 } from './ui/card';
 import { Save, User } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 const formSchema = z.object({
   name: z.string().min(1, 'O nome é obrigatório.'),
@@ -55,45 +55,41 @@ export function SettingsForm() {
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: userProfile?.name || '',
-      birthDate: userProfile?.birthDate
-        ? new Date(userProfile.birthDate + 'T00:00:00')
-        : undefined,
-      cycleLengthDays: userProfile?.cycleLengthDays || 28,
-      flowDurationDays: userProfile?.flowDurationDays || 5,
-    },
   });
 
   useEffect(() => {
     if (userProfile) {
       form.reset({
         name: userProfile.name,
-        birthDate: userProfile.birthDate
-          ? new Date(userProfile.birthDate + 'T00:00:00')
-          : undefined,
+        birthDate: userProfile.birthDate ? parseISO(userProfile.birthDate) : undefined,
         cycleLengthDays: userProfile.cycleLengthDays,
         flowDurationDays: userProfile.flowDurationDays,
       });
     }
   }, [userProfile, form]);
+  
+  if (!userProfile) return null;
 
-  function onSubmit(values: SettingsFormValues) {
-    if (!userProfile) return;
-
-    const updatedProfile: UserProfile = {
-      ...userProfile,
+  async function onSubmit(values: SettingsFormValues) {
+    const updatedProfile: Partial<UserProfile> = {
       name: values.name,
       birthDate: format(values.birthDate, 'yyyy-MM-dd'),
       cycleLengthDays: values.cycleLengthDays,
       flowDurationDays: values.flowDurationDays,
     };
-    updateUserProfile(updatedProfile);
-
-    toast({
-      title: 'Perfil Atualizado!',
-      description: 'Suas informações foram salvas com sucesso.',
-    });
+    try {
+      await updateUserProfile(updatedProfile);
+      toast({
+        title: 'Perfil Atualizado!',
+        description: 'Suas informações foram salvas com sucesso.',
+      });
+    } catch(error) {
+       toast({
+        variant: "destructive",
+        title: 'Erro ao salvar!',
+        description: 'Não foi possível atualizar suas informações.',
+      });
+    }
   }
 
   return (
@@ -136,10 +132,9 @@ export function SettingsForm() {
                       value={
                         field.value instanceof Date
                           ? format(field.value, 'yyyy-MM-dd')
-                          : typeof field.value === 'string'
-                          ? field.value
                           : ''
                       }
+                       onChange={(e) => field.onChange(parseISO(e.target.value))}
                     />
                   </FormControl>
                   <FormMessage />
@@ -154,7 +149,7 @@ export function SettingsForm() {
                   <FormItem>
                     <FormLabel>Duração do Ciclo</FormLabel>
                     <FormControl>
-                      <Input type="number" min="15" {...field} />
+                      <Input type="number" min="15" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -167,7 +162,7 @@ export function SettingsForm() {
                   <FormItem>
                     <FormLabel>Duração da Menstruação</FormLabel>
                     <FormControl>
-                      <Input type="number" min="1" {...field} />
+                      <Input type="number" min="1" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))}/>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
