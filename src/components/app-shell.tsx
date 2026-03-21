@@ -13,13 +13,29 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useCycleData } from '@/context/cycle-data-context';
 import { Skeleton } from './ui/skeleton';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SosModal } from './sos-modal';
+import { SplashScreen } from './splash-screen';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const [isSplashing, setIsSplashing] = useState(true);
   const pathname = usePathname();
   const { userProfile, loading } = useCycleData();
   const [isSosOpen, setIsSosOpen] = useState(false);
+
+  useEffect(() => {
+    // This effect runs once on mount to control the splash screen duration.
+    const splashTimer = setTimeout(() => {
+      setIsSplashing(false);
+    }, 3500); // Show splash for 3.5 seconds
+
+    return () => clearTimeout(splashTimer);
+  }, []);
+
+  // Render Splash Screen first
+  if (isSplashing) {
+    return <SplashScreen />;
+  }
 
   if (loading) {
     return (
