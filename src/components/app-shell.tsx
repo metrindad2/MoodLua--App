@@ -15,17 +15,11 @@ import { useCycleData } from '@/context/cycle-data-context';
 import { Skeleton } from './ui/skeleton';
 import { useState } from 'react';
 import { SosModal } from './sos-modal';
-import { SplashScreen } from './splash-screen';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { userProfile, loading } = useCycleData();
   const [isSosOpen, setIsSosOpen] = useState(false);
-  const [isSplashing, setIsSplashing] = useState(true);
-
-  if (isSplashing) {
-    return <SplashScreen onFinished={() => setIsSplashing(false)} />;
-  }
 
   if (loading) {
     return (

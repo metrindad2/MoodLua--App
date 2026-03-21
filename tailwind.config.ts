@@ -86,46 +86,10 @@ export default {
             height: '0',
           },
         },
-        'background-pan': {
-          '0%': { backgroundPosition: '0% 50%' },
-          '50%': { backgroundPosition: '100% 50%' },
-          '100%': { backgroundPosition: '0% 50%' },
-        },
-        'star-twinkle': {
-          '0%, 100%': { opacity: '0.5', transform: 'scale(0.8)' },
-          '50%': { opacity: '1', transform: 'scale(1.2)' },
-        },
-        'moon-reveal': {
-          '0%': { opacity: '0', transform: 'scale(0.7)' },
-          '100%': { opacity: '1', transform: 'scale(1)' },
-        },
-        orbit: {
-          '0%': { transform: 'rotate(0deg) translateX(70px) rotate(0deg)' },
-          '100%': { transform: 'rotate(360deg) translateX(70px) rotate(-360deg)' },
-        },
-        'planet-glow': {
-          '0%, 100%': { boxShadow: '0 0 5px 1px rgba(255, 255, 255, 0.7)' },
-          '50%': { boxShadow: '0 0 10px 3px rgba(255, 255, 255, 1)' },
-        },
-        'text-reveal': {
-          '0%': { opacity: '0', transform: 'translateY(20px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        'slogan-fade-in': {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'background-pan': 'background-pan 15s ease infinite',
-        'star-twinkle': 'star-twinkle 4s ease-in-out infinite',
-        'moon-reveal': 'moon-reveal 1.5s cubic-bezier(0.25, 1, 0.5, 1) 0.5s forwards',
-        orbit: 'orbit 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'planet-glow': 'planet-glow 2s ease-in-out infinite',
-        'text-reveal': 'text-reveal 1s cubic-bezier(0.25, 1, 0.5, 1) 1.5s forwards',
-        'slogan-fade-in': 'slogan-fade-in 1s ease-out 1.8s forwards',
       },
     },
   },
