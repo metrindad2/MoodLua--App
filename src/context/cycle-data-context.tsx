@@ -13,10 +13,8 @@ import {
   DailyLog,
   MoodLuaData,
   CycleLog,
-  EmergencyContact,
 } from '@/lib/types';
 import { format, addDays, differenceInDays, startOfDay } from 'date-fns';
-import { DEFAULT_SOS_MESSAGE } from '@/lib/config';
 
 const LOCAL_STORAGE_KEY = 'moodLuaData';
 
@@ -25,17 +23,12 @@ interface CycleDataContextType {
   dailyLogs: DailyLog[];
   cycleHistory: CycleLog[];
   pregnancyLmpDate: string | null;
-  emergencyContacts: EmergencyContact[];
-  sosMessage: string;
   loading: boolean;
   updateUserProfile: (profile: UserProfile) => void;
   addOrUpdateDailyLog: (log: Omit<DailyLog, 'date'> & { date: Date }) => void;
   getLogForDate: (date: Date) => DailyLog | undefined;
   startNewCycle: (startDate: Date) => void;
   updatePregnancyLmpDate: (date: string | null) => void;
-  addEmergencyContact: (contact: EmergencyContact) => void;
-  removeEmergencyContact: (contactId: string) => void;
-  updateSosMessage: (message: string) => void;
   logout: () => void;
   removeDailyLog: (date: Date) => void;
 }
@@ -49,10 +42,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
   const [cycleHistory, setCycleHistory] = useState<CycleLog[]>([]);
   const [pregnancyLmpDate, setPregnancyLmpDate] = useState<string | null>(null);
-  const [emergencyContacts, setEmergencyContacts] = useState<
-    EmergencyContact[]
-  >([]);
-  const [sosMessage, setSosMessage] = useState<string>(DEFAULT_SOS_MESSAGE);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -65,9 +54,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         if (data.dailyLogs) setDailyLogs(data.dailyLogs);
         if (data.cycleHistory) setCycleHistory(data.cycleHistory);
         if (data.pregnancyLmpDate) setPregnancyLmpDate(data.pregnancyLmpDate);
-        if (data.emergencyContacts)
-          setEmergencyContacts(data.emergencyContacts);
-        if (data.sosMessage) setSosMessage(data.sosMessage);
       }
     } catch (error) {
       console.error('Failed to load data from localStorage', error);
@@ -83,8 +69,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         dailyLogs,
         cycleHistory,
         pregnancyLmpDate,
-        emergencyContacts,
-        sosMessage,
       };
       try {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
@@ -97,8 +81,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     dailyLogs,
     cycleHistory,
     pregnancyLmpDate,
-    emergencyContacts,
-    sosMessage,
     loading,
   ]);
 
@@ -221,18 +203,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     [dailyLogs]
   );
 
-  const addEmergencyContact = useCallback((contact: EmergencyContact) => {
-    setEmergencyContacts((prev) => [...prev, contact]);
-  }, []);
-
-  const removeEmergencyContact = useCallback((contactId: string) => {
-    setEmergencyContacts((prev) => prev.filter((c) => c.id !== contactId));
-  }, []);
-
-  const updateSosMessage = useCallback((message: string) => {
-    setSosMessage(message);
-  }, []);
-
   const logout = useCallback(() => {
     try {
       localStorage.removeItem(LOCAL_STORAGE_KEY);
@@ -240,8 +210,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
       setDailyLogs([]);
       setCycleHistory([]);
       setPregnancyLmpDate(null);
-      setEmergencyContacts([]);
-      setSosMessage(DEFAULT_SOS_MESSAGE);
       router.push('/');
     } catch (error) {
       console.error('Failed to clear data from localStorage', error);
@@ -253,17 +221,12 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     dailyLogs,
     cycleHistory,
     pregnancyLmpDate,
-    emergencyContacts,
     loading,
     updateUserProfile,
     addOrUpdateDailyLog,
     getLogForDate,
     startNewCycle,
     updatePregnancyLmpDate,
-    addEmergencyContact,
-    removeEmergencyContact,
-    sosMessage,
-    updateSosMessage,
     logout,
     removeDailyLog,
   };

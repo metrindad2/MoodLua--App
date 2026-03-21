@@ -56,15 +56,6 @@ export type CycleLog = {
 };
 
 /**
- * Define um contato de emergência.
- */
-export type EmergencyContact = {
-  id: string;
-  name: string;
-  phone: string;
-};
-
-/**
  * Agrupa todos os dados do aplicativo em uma única estrutura.
  * Isso é útil para salvar e carregar todo o estado do app de uma só vez,
  * por exemplo, no \`localStorage\`.
@@ -74,6 +65,4 @@ export type MoodLuaData = {
   dailyLogs: DailyLog[];
   cycleHistory: CycleLog[];
   pregnancyLmpDate: string | null;
-  emergencyContacts?: EmergencyContact[];
-  sosMessage?: string;
 };

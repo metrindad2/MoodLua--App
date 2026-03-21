@@ -5,7 +5,6 @@ import {
   Droplet,
   Baby,
   Settings,
-  HeartPulse,
   History,
   Moon,
 } from 'lucide-react';
@@ -14,14 +13,12 @@ import { cn } from '@/lib/utils';
 import { useCycleData } from '@/context/cycle-data-context';
 import { Skeleton } from './ui/skeleton';
 import { useState, useEffect } from 'react';
-import { SosModal } from './sos-modal';
 import { SplashScreen } from './splash-screen';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [isSplashing, setIsSplashing] = useState(true);
   const pathname = usePathname();
   const { userProfile, loading } = useCycleData();
-  const [isSosOpen, setIsSosOpen] = useState(false);
 
   useEffect(() => {
     // This effect runs once on mount to control the splash screen duration.
@@ -75,10 +72,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </Link>
       </header>
       
-      <main className="flex-1 overflow-y-auto pb-24 z-0">
-        <div className="mx-auto w-full max-w-md">
-          {children}
-        </div>
+      <main className="w-full flex-1 overflow-y-auto pb-24 z-0">
+        {children}
       </main>
 
       <footer className="fixed bottom-0 z-50 w-full shrink-0 border-t bg-card/80 backdrop-blur-sm">
@@ -100,19 +95,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
       </footer>
-      
-      {userProfile && (
-        <>
-          <button
-            onClick={() => setIsSosOpen(true)}
-            className="fixed bottom-[85px] right-4 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-110 active:scale-100"
-          >
-            <HeartPulse className="h-8 w-8" />
-            <span className="sr-only">Botão de Emergência</span>
-          </button>
-          <SosModal open={isSosOpen} onOpenChange={setIsSosOpen} />
-        </>
-      )}
     </div>
   );
 }

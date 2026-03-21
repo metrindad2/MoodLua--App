@@ -1,8 +1,6 @@
 'use client';
 
 import { Settings as SettingsIcon } from 'lucide-react';
-import { EmergencyContactManager } from '@/components/emergency-contact-manager';
-import { SosMessageManager } from '@/components/sos-message-manager';
 import { SettingsForm } from '@/components/settings-form';
 import { AppDataManager } from '@/components/app-data-manager';
 import { ThemeSwitcher } from '@/components/theme-switcher';
@@ -16,7 +14,7 @@ export default function SettingsPage() {
             Configurações
         </h1>
         <p className="text-muted-foreground text-sm">
-            Gerencie as preferências, segurança e dados do seu aplicativo.
+            Gerencie as preferências e dados do seu aplicativo.
         </p>
       </div>
 
@@ -25,12 +23,6 @@ export default function SettingsPage() {
 
       {/* Profile Settings */}
       <SettingsForm />
-
-      {/* Security Settings */}
-      <SosMessageManager />
-      <div id="emergency-contacts">
-        <EmergencyContactManager />
-      </div>
 
       {/* App Data Settings */}
       <AppDataManager />
