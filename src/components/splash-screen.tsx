@@ -50,7 +50,7 @@ export function SplashScreen({ onFinished }: SplashScreenProps) {
         <Star className="absolute bottom-[-30px] right-[20px] h-4 w-4 text-yellow-300/80 animate-star-twinkle [animation-delay:1.8s]" />
 
         {/* Central Element: Moon with an orbiting "planet" */}
-        <div className={cn('relative h-36 w-36 opacity-0', isRendered && 'animate-moon-bouncy-enter')}>
+        <div className={cn('relative h-36 w-36 opacity-0', isRendered && 'animate-moon-reveal')}>
           {/* The container that rotates to create the orbit */}
           <div className="absolute inset-0 animate-orbit" style={{ animationDelay: '1s' }}>
             {/* The "planet" (a light point) positioned on the edge of the container */}
