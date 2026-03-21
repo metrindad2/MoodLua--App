@@ -24,31 +24,17 @@ function SosMessageButton({ contact }: { contact: EmergencyContact }) {
   const { toast } = useToast();
   const { sosMessage } = useCycleData();
 
-  const handleInitialSosClick = () => {
+  const handleSendSos = () => {
     setLoading(true);
     toast({
       title: 'Obtendo sua localização...',
-      description: 'Uma nova aba será aberta para o WhatsApp.',
+      description: 'O WhatsApp será aberto em seguida.',
     });
 
-    const whatsAppWindow = window.open('', '_blank');
-    if (whatsAppWindow) {
-      whatsAppWindow.document.write(
-        'Obtendo localização para enviar via WhatsApp...'
-      );
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'Ação bloqueada',
-        description:
-          'Por favor, desative o bloqueador de pop-ups para usar a função SOS.',
-      });
-      setLoading(false);
-      return;
-    }
-
-    const processAndRedirect = (locationUrl?: string) => {
-      const message = locationUrl ? `${sosMessage}\n${locationUrl}` : sosMessage;
+    const sendToWhatsApp = (locationUrl?: string) => {
+      const message = locationUrl
+        ? `${sosMessage}\n\n${locationUrl}`
+        : sosMessage;
       const encodedMessage = encodeURIComponent(message);
       let phone = contact.phone.replace(/\D/g, '');
       if (phone.length <= 11) {
@@ -56,21 +42,19 @@ function SosMessageButton({ contact }: { contact: EmergencyContact }) {
       }
       const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
 
-      // Now update the location of the window we already opened.
-      whatsAppWindow.location.href = whatsappUrl;
+      // Redirect current page to WhatsApp
+      window.location.href = whatsappUrl;
     };
 
     navigator.geolocation.getCurrentPosition(
       // Success
       (position) => {
-        setLoading(false);
         const { latitude, longitude } = position.coords;
         const locationUrl = `https://maps.google.com/?q=${latitude},${longitude}`;
-        processAndRedirect(locationUrl);
+        sendToWhatsApp(locationUrl);
       },
       // Error
       (geoError) => {
-        setLoading(false);
         let errorTitle = 'Localização não encontrada';
         if (geoError.code === geoError.PERMISSION_DENIED) {
           errorTitle = 'Permissão de localização negada';
@@ -82,14 +66,15 @@ function SosMessageButton({ contact }: { contact: EmergencyContact }) {
           description: 'A mensagem será enviada sem o mapa.',
         });
 
-        processAndRedirect(undefined);
+        // Redirect immediately
+        sendToWhatsApp(undefined);
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
   return (
-    <Button onClick={handleInitialSosClick} disabled={loading} size="sm">
+    <Button onClick={handleSendSos} disabled={loading} size="sm">
       <MessageSquare className="mr-2 h-4 w-4" />
       {loading ? 'Obtendo...' : 'SOS'}
     </Button>
