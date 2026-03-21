@@ -18,6 +18,7 @@ import { Moon } from 'lucide-react';
 import { format } from 'date-fns';
 import { UserProfile } from '@/lib/types';
 import { Card, CardContent } from './ui/card';
+import { AppIntroCarousel } from './app-intro-carousel';
 
 // Esquema atualizado para o novo formulário de criação de conta
 const formSchema = z.object({
@@ -69,16 +70,24 @@ export default function OnboardingForm() {
   }
 
   return (
-    <>
+    <div className="flex flex-col items-center justify-center w-full">
       <div className="flex flex-col items-center justify-center text-center pb-4">
         <Moon className="w-14 h-14 text-primary mb-2" />
         <h1 className="text-3xl font-bold text-foreground">
           Bem-vinda à MoodLua
         </h1>
-        <p className="text-muted-foreground mt-2">Vamos começar sua jornada.</p>
+        <p className="text-muted-foreground mt-2">
+          Conheça o que podemos fazer por você.
+        </p>
       </div>
 
-      <Card className="w-full max-w-md mt-6">
+      <AppIntroCarousel />
+
+      <p className="text-muted-foreground text-center mt-6 mb-4 max-w-sm">
+        Agora, vamos configurar seu perfil para uma experiência personalizada.
+      </p>
+
+      <Card className="w-full max-w-md">
         <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -126,7 +135,7 @@ export default function OnboardingForm() {
                   <FormItem>
                     <FormLabel>Data da Última Menstruação</FormLabel>
                     <FormControl>
-                       <Input
+                      <Input
                         type="date"
                         {...field}
                         value={
@@ -183,6 +192,6 @@ export default function OnboardingForm() {
           </Form>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 }
