@@ -14,14 +14,9 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useCycleData } from '@/context/cycle-data-context';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { CalendarIcon, Moon } from 'lucide-react';
-import { SimpleCalendar } from './simple-calendar';
+import { Moon } from 'lucide-react';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
 import { UserProfile } from '@/lib/types';
-import { useState } from 'react';
 import { Card, CardContent } from './ui/card';
 
 // Esquema atualizado para o novo formulário de criação de conta
@@ -30,12 +25,13 @@ const formSchema = z.object({
   birthDate: z.coerce.date({
     required_error: 'A data de nascimento é obrigatória.',
   }),
-  lastMenstruationDate: z.date({
+  lastMenstruationDate: z.coerce.date({
     required_error: 'A data da última menstruação é obrigatória.',
   }),
   cycleLengthDays: z.coerce
     .number({
       invalid_type_error: 'Deve ser um número válido.',
+      required_error: 'A duração do ciclo é obrigatória.',
     })
     .int()
     .min(1, 'A duração do ciclo é obrigatória.')
@@ -43,6 +39,7 @@ const formSchema = z.object({
   flowDurationDays: z.coerce
     .number({
       invalid_type_error: 'Deve ser um número válido.',
+      required_error: 'A duração da menstruação é obrigatória.',
     })
     .int()
     .min(1, 'A duração da menstruação é obrigatória.'),
@@ -50,8 +47,6 @@ const formSchema = z.object({
 
 export default function OnboardingForm() {
   const { updateUserProfile } = useCycleData();
-  const [isLastMenstruationCalendarOpen, setIsLastMenstruationCalendarOpen] =
-    useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -129,38 +124,20 @@ export default function OnboardingForm() {
                 name="lastMenstruationDate"
                 render={({ field }) => (
                   <FormItem>
-                    <Popover
-                      open={isLastMenstruationCalendarOpen}
-                      onOpenChange={setIsLastMenstruationCalendarOpen}
-                    >
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={'outline'}
-                            className={cn(
-                              'w-full justify-between text-left font-normal',
-                              !field.value && 'text-muted-foreground'
-                            )}
-                          >
-                            {field.value
-                              ? format(field.value, 'PPP', { locale: ptBR })
-                              : 'Data da última menstruação'}
-                            <CalendarIcon className="h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <SimpleCalendar
-                          initialDate={field.value || new Date()}
-                          selectedDate={field.value}
-                          onDateClick={(date) => {
-                            field.onChange(date);
-                            setIsLastMenstruationCalendarOpen(false);
-                          }}
-                          disableFutureDates
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <FormLabel>Data da Última Menstruação</FormLabel>
+                    <FormControl>
+                       <Input
+                        type="date"
+                        {...field}
+                        value={
+                          field.value instanceof Date
+                            ? format(field.value, 'yyyy-MM-dd')
+                            : typeof field.value === 'string'
+                            ? field.value
+                            : ''
+                        }
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
