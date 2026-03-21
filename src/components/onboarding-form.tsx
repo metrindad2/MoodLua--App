@@ -26,7 +26,7 @@ import { Card, CardContent } from './ui/card';
 
 // Esquema atualizado para o novo formulário de criação de conta
 const formSchema = z.object({
-  name: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.'),
+  name: z.string().min(1, 'O nome é obrigatório.'),
   birthDate: z.coerce.date({
     required_error: 'A data de nascimento é obrigatória.',
   }),
@@ -34,13 +34,18 @@ const formSchema = z.object({
     required_error: 'A data da última menstruação é obrigatória.',
   }),
   cycleLengthDays: z.coerce
-    .number()
+    .number({
+      invalid_type_error: 'Deve ser um número válido.',
+    })
     .int()
-    .min(15, 'O ciclo deve ter pelo menos 15 dias.'),
+    .min(1, 'A duração do ciclo é obrigatória.')
+    .gte(15, 'O ciclo deve ter pelo menos 15 dias.'),
   flowDurationDays: z.coerce
-    .number()
+    .number({
+      invalid_type_error: 'Deve ser um número válido.',
+    })
     .int()
-    .min(1, 'A duração deve ser de pelo menos 1 dia.'),
+    .min(1, 'A duração da menstruação é obrigatória.'),
 });
 
 export default function OnboardingForm() {
