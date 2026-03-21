@@ -62,7 +62,7 @@ export default function OnboardingForm() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const userProfile: Omit<UserProfile, 'uid'> = {
+    const userProfile: Partial<Omit<UserProfile, 'uid'>> = {
       name: values.name,
       birthDate: format(values.birthDate, 'yyyy-MM-dd'),
       lastMenstruationDate: format(values.lastMenstruationDate, 'yyyy-MM-dd'),

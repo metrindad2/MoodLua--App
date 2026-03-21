@@ -10,7 +10,6 @@ import React, {
 import {
   UserProfile,
   DailyLog,
-  MoodLuaData,
   CycleLog,
   EmergencyContact,
 } from '@/lib/types';
@@ -18,8 +17,11 @@ import { format, differenceInDays, startOfDay } from 'date-fns';
 import { DEFAULT_SOS_MESSAGE } from '@/lib/config';
 
 // Combined data structure for localStorage
-interface MoodLuaLocalData extends MoodLuaData {
+interface MoodLuaLocalData {
   userProfile: UserProfile | null;
+  dailyLogs: DailyLog[];
+  cycleHistory: CycleLog[];
+  pregnancyLmpDate: string | null;
   sosContacts: EmergencyContact[];
 }
 
@@ -106,7 +108,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         if (!prevProfile) {
             return {
                 uid: new Date().toISOString(), // Use a simple unique ID for local
-                sosMessage: DEFAULT_SOS_MESSAGE,
                 ...profileUpdate,
             } as UserProfile;
         }

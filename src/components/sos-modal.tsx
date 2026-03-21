@@ -56,6 +56,7 @@ export function SosModal() {
         const fullMessage = `${sosMessage}\n\n${mapsLink}`;
         const whatsappUrl = `https://wa.me/${contact.phone}?text=${encodeURIComponent(fullMessage)}`;
         
+        // Redirect the current tab to the WhatsApp URL
         window.location.href = whatsappUrl;
 
         setIsOpen(false);

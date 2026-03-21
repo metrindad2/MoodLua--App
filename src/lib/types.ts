@@ -9,7 +9,7 @@
  * Define a estrutura para o perfil básico da usuária.
  */
 export type UserProfile = {
-  uid: string; // Adicionado para identificar o usuário no Firebase
+  uid: string;
   name: string;
   birthDate: string; // Armazenado como string no formato "YYYY-MM-DD"
   lastMenstruationDate: string; // Armazenado como string no formato "YYYY-MM-DD"
@@ -68,10 +68,11 @@ export type EmergencyContact = {
 
 /**
  * Agrupa todos os dados do aplicativo em uma única estrutura para o localStorage.
- * Os dados do Firebase (perfil, contatos SOS) são gerenciados separadamente.
  */
 export type MoodLuaData = {
+  userProfile: UserProfile | null;
   dailyLogs: DailyLog[];
   cycleHistory: CycleLog[];
   pregnancyLmpDate: string | null;
+  sosContacts: EmergencyContact[];
 };

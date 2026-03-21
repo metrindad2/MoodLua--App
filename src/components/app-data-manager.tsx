@@ -24,8 +24,8 @@ export function AppDataManager() {
   const handleLogout = () => {
     logout();
     toast({
-      title: 'Você saiu!',
-      description: 'Seus dados locais foram limpos. Faça login para continuar.',
+      title: 'Dados Limpos!',
+      description: 'Todos os dados do aplicativo foram removidos deste dispositivo.',
     });
   };
 
@@ -45,24 +45,24 @@ export function AppDataManager() {
           <AlertDialogTrigger asChild>
             <Button variant="destructive" className="w-full sm:w-auto">
               <LogOut className="mr-2 h-4 w-4" />
-              Sair e Limpar Dados
+              Limpar Todos os Dados
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
               <AlertDialogDescription>
-                Esta ação desconectará sua conta Google e apagará todos os dados de ciclo e logs diários salvos <span className="font-bold">neste dispositivo</span>. Seus contatos de emergência e mensagem SOS permanecerão salvos na sua conta na nuvem.
+                Esta ação apagará permanentemente todos os dados do aplicativo, incluindo seu perfil, histórico de ciclo, logs e contatos de emergência salvos <span className="font-bold">neste dispositivo</span>. Esta ação não pode ser desfeita.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={handleLogout}>Confirmar e Sair</AlertDialogAction>
+              <AlertDialogAction onClick={handleLogout}>Confirmar e Limpar</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
         <p className="text-xs text-muted-foreground mt-3">
-            Ao sair, seus dados de ciclo e logs diários salvos neste navegador serão apagados. Seus dados de emergência continuarão salvos na sua conta.
+            Ao limpar, você terá que configurar o aplicativo do zero novamente.
         </p>
       </CardContent>
     </Card>

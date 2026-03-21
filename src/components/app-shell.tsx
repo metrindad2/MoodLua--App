@@ -57,16 +57,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Full app shell for logged-in users.
   return (
     <div className="relative flex h-dvh w-full flex-col bg-moodlua-gradient">
-      <header className="flex shrink-0 items-center justify-center p-4">
-        <Link href="/" className="flex items-center gap-2">
-          <Moon className="h-8 w-8 text-primary" />
-          <h1 className="font-bold text-xl text-foreground">MoodLua</h1>
-        </Link>
-      </header>
+      <div className="mx-auto w-full max-w-md flex-1 flex flex-col">
+        <header className="flex shrink-0 items-center justify-center p-4">
+          <Link href="/" className="flex items-center gap-2">
+            <Moon className="h-8 w-8 text-primary" />
+            <h1 className="font-bold text-xl text-foreground">MoodLua</h1>
+          </Link>
+        </header>
 
-      <main className="w-full flex-1 overflow-y-auto pb-24 z-0">
-        {children}
-      </main>
+        <main className="w-full flex-1 overflow-y-auto pb-24 z-0">
+          {children}
+        </main>
+      </div>
 
       {/* SOS Button, globally available */}
       <SosModal />
