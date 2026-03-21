@@ -13,8 +13,10 @@ import {
   DailyLog,
   MoodLuaData,
   CycleLog,
+  EmergencyContact,
 } from '@/lib/types';
 import { format, addDays, differenceInDays, startOfDay } from 'date-fns';
+import { DEFAULT_SOS_MESSAGE } from '@/lib/config';
 
 const LOCAL_STORAGE_KEY = 'moodLuaData';
 
@@ -23,6 +25,8 @@ interface CycleDataContextType {
   dailyLogs: DailyLog[];
   cycleHistory: CycleLog[];
   pregnancyLmpDate: string | null;
+  sosContacts: EmergencyContact[];
+  sosMessage: string;
   loading: boolean;
   updateUserProfile: (profile: UserProfile) => void;
   addOrUpdateDailyLog: (log: Omit<DailyLog, 'date'> & { date: Date }) => void;
@@ -31,6 +35,10 @@ interface CycleDataContextType {
   updatePregnancyLmpDate: (date: string | null) => void;
   logout: () => void;
   removeDailyLog: (date: Date) => void;
+  addSosContact: (contact: Omit<EmergencyContact, 'id'>) => void;
+  updateSosContact: (contact: EmergencyContact) => void;
+  removeSosContact: (contactId: string) => void;
+  updateSosMessage: (message: string) => void;
 }
 
 const CycleDataContext = createContext<CycleDataContextType | undefined>(
@@ -42,6 +50,8 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
   const [cycleHistory, setCycleHistory] = useState<CycleLog[]>([]);
   const [pregnancyLmpDate, setPregnancyLmpDate] = useState<string | null>(null);
+  const [sosContacts, setSosContacts] = useState<EmergencyContact[]>([]);
+  const [sosMessage, setSosMessage] = useState<string>(DEFAULT_SOS_MESSAGE);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -54,6 +64,8 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         if (data.dailyLogs) setDailyLogs(data.dailyLogs);
         if (data.cycleHistory) setCycleHistory(data.cycleHistory);
         if (data.pregnancyLmpDate) setPregnancyLmpDate(data.pregnancyLmpDate);
+        if (data.sosContacts) setSosContacts(data.sosContacts);
+        if (data.sosMessage) setSosMessage(data.sosMessage);
       }
     } catch (error) {
       console.error('Failed to load data from localStorage', error);
@@ -69,6 +81,8 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         dailyLogs,
         cycleHistory,
         pregnancyLmpDate,
+        sosContacts,
+        sosMessage,
       };
       try {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
@@ -81,6 +95,8 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     dailyLogs,
     cycleHistory,
     pregnancyLmpDate,
+    sosContacts,
+    sosMessage,
     loading,
   ]);
 
@@ -102,7 +118,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
           const updatedLogs = [...prevLogs];
           const currentLog = updatedLogs[existingLogIndex];
 
-          // Merge fields, but if a field is explicitly set to undefined, remove it.
           const mergedLog = { ...currentLog, ...newLog };
           for (const key in mergedLog) {
             if (mergedLog[key as keyof typeof mergedLog] === undefined) {
@@ -111,14 +126,12 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
           }
           updatedLogs[existingLogIndex] = mergedLog;
 
-          // If the log is now empty (except for date), remove it.
           if (Object.keys(mergedLog).length <= 1) {
             return updatedLogs.filter((_, index) => index !== existingLogIndex);
           }
 
           return updatedLogs;
         } else {
-          // Don't add a log if it only contains the date
           if (Object.keys(newLog).length <= 1) {
             return prevLogs;
           }
@@ -145,23 +158,19 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     (newStartDate: Date) => {
       if (!userProfile) return;
 
-      // 1. Coleta todas as datas de início de ciclo conhecidas, incluindo a nova.
       const allKnownStartDates = [
         ...cycleHistory.map((c) => c.startDate),
         userProfile.lastMenstruationDate,
         format(newStartDate, 'yyyy-MM-dd'),
       ];
 
-      // 2. Remove duplicatas e ordena as datas cronologicamente.
       const uniqueSortedDates = [...new Set(allKnownStartDates)]
         .map((dateStr) => startOfDay(new Date(`${dateStr}T00:00:00`)))
         .sort((a, b) => a.getTime() - b.getTime());
 
-      // 3. A data da última menstruação (LMP) no perfil é sempre a mais recente.
       const newLmpDate = uniqueSortedDates[uniqueSortedDates.length - 1];
       const newLmpDateStr = format(newLmpDate, 'yyyy-MM-dd');
 
-      // 4. Reconstrói o histórico de ciclos com base nas datas ordenadas.
       const newCycleHistory: CycleLog[] = [];
       for (let i = 0; i < uniqueSortedDates.length - 1; i++) {
         const cycleStartDate = uniqueSortedDates[i];
@@ -171,7 +180,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
           cycleStartDate
         );
 
-        // Adiciona ao histórico apenas se for um ciclo com duração plausível.
         if (cycleLength > 10) {
           newCycleHistory.push({
             startDate: format(cycleStartDate, 'yyyy-MM-dd'),
@@ -180,7 +188,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // 5. Atualiza os estados do perfil e do histórico.
       setCycleHistory(newCycleHistory);
       setUserProfile((prevProfile) =>
         prevProfile
@@ -203,6 +210,28 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     [dailyLogs]
   );
 
+  const addSosContact = useCallback(
+    (contact: Omit<EmergencyContact, 'id'>) => {
+      const newContact = { ...contact, id: Date.now().toString() };
+      setSosContacts((prev) => [...prev, newContact]);
+    },
+    []
+  );
+
+  const updateSosContact = useCallback((contact: EmergencyContact) => {
+    setSosContacts((prev) =>
+      prev.map((c) => (c.id === contact.id ? contact : c))
+    );
+  }, []);
+
+  const removeSosContact = useCallback((contactId: string) => {
+    setSosContacts((prev) => prev.filter((c) => c.id !== contactId));
+  }, []);
+
+  const updateSosMessage = useCallback((message: string) => {
+    setSosMessage(message);
+  }, []);
+
   const logout = useCallback(() => {
     try {
       localStorage.removeItem(LOCAL_STORAGE_KEY);
@@ -210,6 +239,8 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
       setDailyLogs([]);
       setCycleHistory([]);
       setPregnancyLmpDate(null);
+      setSosContacts([]);
+      setSosMessage(DEFAULT_SOS_MESSAGE);
       router.push('/');
     } catch (error) {
       console.error('Failed to clear data from localStorage', error);
@@ -221,6 +252,8 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     dailyLogs,
     cycleHistory,
     pregnancyLmpDate,
+    sosContacts,
+    sosMessage,
     loading,
     updateUserProfile,
     addOrUpdateDailyLog,
@@ -229,6 +262,10 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     updatePregnancyLmpDate,
     logout,
     removeDailyLog,
+    addSosContact,
+    updateSosContact,
+    removeSosContact,
+    updateSosMessage,
   };
 
   return (

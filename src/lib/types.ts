@@ -7,7 +7,6 @@
 
 /**
  * Define a estrutura para o perfil básico da usuária.
- * Estes são os dados coletados no primeiro acesso.
  */
 export type UserProfile = {
   name: string;
@@ -56,13 +55,24 @@ export type CycleLog = {
 };
 
 /**
+ * Define a estrutura para um contato de emergência.
+ */
+export type EmergencyContact = {
+  id: string;
+  name: string;
+  phone: string;
+};
+
+/**
  * Agrupa todos os dados do aplicativo em uma única estrutura.
  * Isso é útil para salvar e carregar todo o estado do app de uma só vez,
- * por exemplo, no \`localStorage\`.
+ * por exemplo, no `localStorage`.
  */
 export type MoodLuaData = {
   userProfile: UserProfile | null;
   dailyLogs: DailyLog[];
   cycleHistory: CycleLog[];
   pregnancyLmpDate: string | null;
+  sosContacts?: EmergencyContact[];
+  sosMessage?: string;
 };

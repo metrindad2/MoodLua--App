@@ -14,6 +14,7 @@ import { useCycleData } from '@/context/cycle-data-context';
 import { Skeleton } from './ui/skeleton';
 import { useState, useEffect } from 'react';
 import { SplashScreen } from './splash-screen';
+import { SosModal } from './sos-modal';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [isSplashing, setIsSplashing] = useState(true);
@@ -75,6 +76,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="w-full flex-1 overflow-y-auto pb-24 z-0">
         {children}
       </main>
+
+      {/* SOS Button, globally available */}
+      <SosModal />
 
       <footer className="fixed bottom-0 z-50 w-full shrink-0 border-t bg-card/80 backdrop-blur-sm">
         <nav className="mx-auto flex max-w-md items-center justify-around p-1">
