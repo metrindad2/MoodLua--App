@@ -3,7 +3,7 @@
 import { useCycleData } from '@/context/cycle-data-context';
 import { Moon, LogIn } from 'lucide-react';
 import Link from 'next/link';
-import { useUser } from '@/firebase';
+import { useUser } from '../../firebase';
 import { Button } from '@/components/ui/button';
 
 export default function LoginPage() {

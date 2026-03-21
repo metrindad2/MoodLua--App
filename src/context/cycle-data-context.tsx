@@ -23,8 +23,7 @@ import {
   useUser,
   useDoc,
   useCollection,
-  getFirestore,
-  getFirebaseApp,
+  useFirestore,
 } from '@/firebase';
 import {
   doc,
@@ -61,15 +60,15 @@ const CycleDataContext = createContext<CycleDataContextType | undefined>(
 
 export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   const { user } = useUser();
-  const firestore = getFirestore();
-  const auth = useAuth().auth;
+  const firestore = useFirestore();
+  const auth = useAuth();
   const router = useRouter();
   
   // --- Firebase State ---
-  const userProfileDoc = useMemo(() => user ? doc(firestore, 'users', user.uid) : null, [user, firestore]);
+  const userProfileDoc = useMemo(() => user && firestore ? doc(firestore, 'users', user.uid) : null, [user, firestore]);
   const { data: userProfile, loading: profileLoading } = useDoc<UserProfile>(userProfileDoc);
 
-  const sosContactsCollection = useMemo(() => user ? collection(firestore, 'users', user.uid, 'sosContacts') : null, [user, firestore]);
+  const sosContactsCollection = useMemo(() => user && firestore ? collection(firestore, 'users', user.uid, 'sosContacts') : null, [user, firestore]);
   const { data: sosContacts, loading: contactsLoading } = useCollection<EmergencyContact>(sosContactsCollection);
 
 

@@ -10,13 +10,13 @@ import { useState, useEffect } from 'react';
 import { SplashScreen } from './splash-screen';
 import { SosModal } from './sos-modal';
 import { Button } from './ui/button';
-import { useAuth } from '@/firebase';
+import { useUser } from '@/firebase';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [isSplashing, setIsSplashing] = useState(true);
   const pathname = usePathname();
   const { userProfile, loading: isDataLoading, signInWithGoogle } = useCycleData();
-  const { user, loading: isAuthLoading } = useAuth();
+  const { user, loading: isAuthLoading } = useUser();
 
   useEffect(() => {
     const splashTimer = setTimeout(() => {
