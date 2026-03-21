@@ -20,7 +20,7 @@ const Star = ({ className, style }: { className?: string; style?: React.CSSPrope
 
 export function SplashScreen() {
   return (
-    <div className="relative mx-auto flex h-dvh max-w-md flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-purple-900 via-purple-600 to-purple-400 text-white animate-background-pan bg-[length:400%_400%]">
+    <div className="relative flex h-dvh w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-purple-900 via-purple-600 to-purple-400 text-white animate-background-pan bg-[length:400%_400%]">
       {/* Stars */}
       <Star className="absolute top-[15%] left-[15%] h-4 w-4 text-yellow-300/80 animate-twinkle" style={{ animationDelay: '0.5s' }} />
       <Star className="absolute top-[20%] right-[20%] h-6 w-6 text-yellow-300 animate-twinkle" style={{ animationDelay: '0.2s' }} />
