@@ -10,19 +10,23 @@ interface SplashScreenProps {
 
 export function SplashScreen({ onFinished }: SplashScreenProps) {
   const [isExiting, setIsExiting] = useState(false);
+  const [isRendered, setIsRendered] = useState(false);
 
   useEffect(() => {
-    // This timer will start the fade-out animation
+    // Garante que as animações comecem após a montagem do componente.
+    setIsRendered(true);
+
+    // Este timer iniciará a animação de fade-out
     const exitTimer = setTimeout(() => {
       setIsExiting(true);
-    }, 2200);
+    }, 2500); // Um pouco mais de tempo para apreciar a animação
 
-    // This timer will call the onFinished callback to unmount the component
+    // Este timer chamará o callback onFinished para desmontar o componente
     const finishTimer = setTimeout(() => {
       onFinished();
-    }, 2700); // Duration should be exitTimer + transition duration
+    }, 3000); // Duração deve ser exitTimer + duração da transição
 
-    // Cleanup function to clear timers if the component unmounts early
+    // Função de limpeza para limpar os timers se o componente for desmontado antes
     return () => {
       clearTimeout(exitTimer);
       clearTimeout(finishTimer);
@@ -36,15 +40,34 @@ export function SplashScreen({ onFinished }: SplashScreenProps) {
         isExiting ? 'opacity-0' : 'opacity-100'
       )}
     >
-      <div className="animate-fade-in-scale text-center">
-        <Moon className="mx-auto h-24 w-24" />
+      <div className="text-center">
+        <Moon
+          className={cn(
+            'mx-auto h-24 w-24 animate-moon-pulse transition-opacity duration-1000',
+            isRendered ? 'opacity-100' : 'opacity-0'
+          )}
+        />
         <h1
-          className="mt-4 text-6xl font-bold"
+          className={cn(
+            'mt-4 text-6xl font-bold transition-all duration-700',
+            isRendered
+              ? 'opacity-100 translate-y-0 delay-300'
+              : 'opacity-0 translate-y-4'
+          )}
           style={{ fontFamily: 'cursive' }}
         >
           MoodLua
         </h1>
-        <p className="mt-2 text-lg tracking-wider">Seu ciclo, seu astral.</p>
+        <p
+          className={cn(
+            'mt-2 text-lg tracking-wider transition-all duration-700',
+            isRendered
+              ? 'opacity-100 translate-y-0 delay-500'
+              : 'opacity-0 translate-y-4'
+          )}
+        >
+          Seu ciclo, seu astral.
+        </p>
       </div>
     </div>
   );
