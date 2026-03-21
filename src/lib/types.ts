@@ -11,6 +11,7 @@
  */
 export type UserProfile = {
   name: string;
+  birthDate: string; // Armazenado como string no formato "YYYY-MM-DD"
   lastMenstruationDate: string; // Armazenado como string no formato "YYYY-MM-DD"
   flowDurationDays: number;
   cycleLengthDays: number;

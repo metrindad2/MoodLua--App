@@ -27,6 +27,9 @@ import { Card, CardContent } from './ui/card';
 // Esquema atualizado para o novo formulário de criação de conta
 const formSchema = z.object({
   name: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.'),
+  birthDate: z.date({
+    required_error: 'A data de nascimento é obrigatória.',
+  }),
   lastMenstruationDate: z.date({
     required_error: 'A data da última menstruação é obrigatória.',
   }),
@@ -42,7 +45,9 @@ const formSchema = z.object({
 
 export default function OnboardingForm() {
   const { updateUserProfile } = useCycleData();
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isBirthDateCalendarOpen, setIsBirthDateCalendarOpen] = useState(false);
+  const [isLastMenstruationCalendarOpen, setIsLastMenstruationCalendarOpen] =
+    useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,6 +61,7 @@ export default function OnboardingForm() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     const userProfile: UserProfile = {
       name: values.name,
+      birthDate: format(values.birthDate, 'yyyy-MM-dd'),
       lastMenstruationDate: format(values.lastMenstruationDate, 'yyyy-MM-dd'),
       cycleLengthDays: values.cycleLengthDays,
       flowDurationDays: values.flowDurationDays,
@@ -67,7 +73,9 @@ export default function OnboardingForm() {
     <div className="flex flex-col items-center justify-center min-h-dvh p-4">
       <div className="flex flex-col items-center justify-center text-center pt-8 pb-4">
         <Moon className="w-14 h-14 text-primary mb-2" />
-        <h1 className="text-3xl font-bold text-foreground">Bem-vinda à MoodLua</h1>
+        <h1 className="text-3xl font-bold text-foreground">
+          Bem-vinda à MoodLua
+        </h1>
         <p className="text-muted-foreground mt-2">Vamos começar sua jornada.</p>
       </div>
 
@@ -90,12 +98,54 @@ export default function OnboardingForm() {
 
               <FormField
                 control={form.control}
+                name="birthDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <Popover
+                      open={isBirthDateCalendarOpen}
+                      onOpenChange={setIsBirthDateCalendarOpen}
+                    >
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={'outline'}
+                            className={cn(
+                              'w-full justify-between text-left font-normal',
+                              !field.value && 'text-muted-foreground'
+                            )}
+                          >
+                            {field.value
+                              ? format(field.value, 'PPP', { locale: ptBR })
+                              : 'Sua data de nascimento'}
+                            <CalendarIcon className="h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <SimpleCalendar
+                          initialDate={field.value || new Date(2000, 0, 1)}
+                          selectedDate={field.value}
+                          onDateClick={(date) => {
+                            field.onChange(date);
+                            setIsBirthDateCalendarOpen(false);
+                          }}
+                          disableFutureDates
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="lastMenstruationDate"
                 render={({ field }) => (
                   <FormItem>
                     <Popover
-                      open={isCalendarOpen}
-                      onOpenChange={setIsCalendarOpen}
+                      open={isLastMenstruationCalendarOpen}
+                      onOpenChange={setIsLastMenstruationCalendarOpen}
                     >
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -119,8 +169,9 @@ export default function OnboardingForm() {
                           selectedDate={field.value}
                           onDateClick={(date) => {
                             field.onChange(date);
-                            setIsCalendarOpen(false);
+                            setIsLastMenstruationCalendarOpen(false);
                           }}
+                          disableFutureDates
                         />
                       </PopoverContent>
                     </Popover>
