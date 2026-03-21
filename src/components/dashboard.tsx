@@ -9,26 +9,15 @@ import { SimpleCalendar } from './simple-calendar';
 import { addDays, subDays, startOfDay, isAfter, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card, CardContent } from './ui/card';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from './ui/button';
 import { PeriodRegistrationModal } from './period-registration-modal';
 import { History } from 'lucide-react';
 import Link from 'next/link';
-import { WelcomeModal } from './welcome-modal';
 
 export default function Dashboard() {
   const { userProfile, dailyLogs, cycleHistory } = useCycleData();
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
-  const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false);
-
-  useEffect(() => {
-    // Check if the welcome message has been shown before.
-    const welcomeShown = localStorage.getItem('welcomeModalShown');
-    if (!welcomeShown) {
-      setIsWelcomeModalOpen(true);
-      localStorage.setItem('welcomeModalShown', 'true');
-    }
-  }, []);
 
   if (!userProfile) return null;
 
@@ -84,7 +73,6 @@ export default function Dashboard() {
 
   return (
     <>
-      <WelcomeModal open={isWelcomeModalOpen} onOpenChange={setIsWelcomeModalOpen} />
       <div className="p-4 space-y-8">
         <CycleProgress
           currentDay={cycleInfo.currentCycleDay}
