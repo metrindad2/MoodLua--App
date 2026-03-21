@@ -29,13 +29,13 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
-        <meta name="theme-color" content="#F5EFFF" media="(prefers-color-scheme: light)" />
-        <meta name="theme-color" content="#211529" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="#FBF5FF" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#2A0E3F" media="(prefers-color-scheme: dark)" />
       </head>
       <body className={cn('min-h-screen font-body antialiased', fontSans.variable)}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >

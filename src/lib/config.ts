@@ -30,10 +30,4 @@ export const PREDEFINED_CONTACTS = [
     phone: '180',
     isPredefined: true,
   },
-  {
-    id: 'predefined-197',
-    name: 'Polícia Civil',
-    phone: '197',
-    isPredefined: true,
-  },
 ];
