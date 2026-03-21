@@ -35,56 +35,61 @@ function SosMessageButton({ contact }: { contact: EmergencyContact }) {
   const { toast } = useToast();
   const { sosMessage } = useCycleData();
 
+  const openWhatsApp = (locationLink?: string) => {
+    const message = locationLink ? `${sosMessage}\n${locationLink}` : sosMessage;
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Limpa o número de telefone, removendo tudo que não for dígito.
+    let phone = contact.phone.replace(/\D/g, '');
+
+    // Garante que o código do país (55 para o Brasil) esteja presente
+    // para números com até 11 dígitos (formato local com DDD).
+    // Números que já incluem o código do país (ex: +5511...) terão mais de 11 dígitos.
+    if (phone.length <= 11) {
+      phone = `55${phone}`;
+    }
+
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
+    
+    // Navega para a URL do WhatsApp na mesma aba.
+    // Isso tem maior probabilidade de funcionar em navegadores mobile
+    // e contornar bloqueadores de pop-up.
+    window.location.href = whatsappUrl;
+  };
+
   const handleSos = () => {
     setLoading(true);
-    toast({ title: 'Obtendo sua localização...' });
+    toast({ 
+      title: 'Enviando SOS...',
+      description: 'Estamos obtendo sua localização. O WhatsApp será aberto em seguida.'
+    });
 
     navigator.geolocation.getCurrentPosition(
       // Success
       (position) => {
+        setLoading(false);
         const { latitude, longitude } = position.coords;
         const googleMapsLink = `https://maps.google.com/?q=${latitude},${longitude}`;
-        const helpMessage = `${sosMessage}\n${googleMapsLink}`;
-        const encodedMessage = encodeURIComponent(helpMessage);
-
-        let phone = contact.phone.replace(/\D/g, '');
-        if (phone.length <= 11) {
-          // Assume BR number without country code
-          phone = `55${phone}`;
-        }
-
-        setLoading(false);
-        toast({
-          title: 'Localização obtida!',
-          description: 'Abrindo WhatsApp...',
-        });
-        window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
+        openWhatsApp(googleMapsLink);
       },
       // Error
       (geoError) => {
         setLoading(false);
-        let title = 'Localização não encontrada';
-        let description = 'A mensagem de ajuda será enviada sem o mapa. Abrindo WhatsApp...';
-
+        let errorTitle = 'Localização não encontrada';
         if (geoError.code === geoError.PERMISSION_DENIED) {
-            title = 'Permissão de localização negada';
-            description = 'A mensagem será enviada sem o mapa. Você pode ativar a permissão no seu navegador.';
+          errorTitle = 'Permissão de localização negada';
         }
         
         toast({
-          title: title,
-          description: description,
+          variant: 'destructive',
+          title: errorTitle,
+          description: 'A mensagem será enviada sem o mapa. Abrindo WhatsApp...',
         });
         
-        const helpMessage = sosMessage;
-        const encodedMessage = encodeURIComponent(helpMessage);
-        let phone = contact.phone.replace(/\D/g, '');
-        if (phone.length <= 11) {
-          phone = `55${phone}`;
-        }
-        window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
+        openWhatsApp(); // Envia a mensagem sem o link do mapa
       },
-      { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
+      // Geolocation options
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
