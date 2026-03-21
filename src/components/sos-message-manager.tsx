@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
 
 const messageSchema = z.object({
-  message: z.string().min(10, 'A mensagem deve ter pelo menos 10 caracteres.').max(200, 'A mensagem não pode ter mais de 200 caracteres.'),
+  message: z.string().min(10, 'A mensagem deve ter pelo menos 10 caracteres.').max(350, 'A mensagem não pode ter mais de 350 caracteres.'),
 });
 
 export function SosMessageManager() {
@@ -56,7 +56,7 @@ export function SosMessageManager() {
                             <Textarea
                                 placeholder="Ex: Preciso de ajuda urgente. Esta é a minha localização:"
                                 {...field}
-                                rows={2}
+                                rows={6}
                              />
                         </FormControl>
                          <FormDescription>
