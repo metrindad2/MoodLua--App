@@ -59,7 +59,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   const navItems = [
-    { href: '/', label: 'Hoje', icon: Droplet },
+    { href: '/', label: 'Ciclo', icon: Droplet },
     { href: '/history', label: 'Histórico', icon: History },
     { href: '/pregnancy', label: 'Gravidez', icon: Baby },
     { href: '/settings', label: 'Ajustes', icon: Settings },
