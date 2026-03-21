@@ -2,20 +2,26 @@
 
 import { useState } from 'react';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from '@/components/ui/dialog';
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from '@/components/ui/sheet';
+import {
+    Card,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Button } from './ui/button';
-import { Heart, Phone, MessageSquare } from 'lucide-react';
+import { Heart, Phone, MessageSquare, Shield, UserPlus } from 'lucide-react';
 import { useCycleData } from '@/context/cycle-data-context';
 import { useToast } from '@/hooks/use-toast';
 import { EmergencyContact } from '@/lib/types';
 import Link from 'next/link';
-import { Separator } from './ui/separator';
 import { PREDEFINED_CONTACTS } from '@/lib/config';
 
 export function SosModal() {
@@ -56,7 +62,6 @@ export function SosModal() {
         const fullMessage = `${sosMessage}\n\n${mapsLink}`;
         const whatsappUrl = `https://wa.me/${contact.phone}?text=${encodeURIComponent(fullMessage)}`;
         
-        // Redirect the current tab to the WhatsApp URL
         window.location.href = whatsappUrl;
 
         setIsOpen(false);
@@ -80,62 +85,67 @@ export function SosModal() {
   const allContacts = [...PREDEFINED_CONTACTS, ...sosContacts];
 
   return (
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogTrigger asChild>
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <SheetTrigger asChild>
           <Button
             variant="default"
             className="fixed bottom-24 right-4 z-50 h-16 w-16 rounded-full shadow-lg bg-primary hover:bg-primary/90 animate-pulse"
+            aria-label="Abrir menu de emergência"
           >
             <Heart className="h-8 w-8 text-primary-foreground" />
           </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-2xl text-center text-primary">
-              Chamada de Emergência
-            </DialogTitle>
-            <DialogDescription className="text-center">
-              Ligue ou envie um alerta para seus contatos.
-            </DialogDescription>
-          </DialogHeader>
+        </SheetTrigger>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] bg-background p-4">
+          <SheetHeader className="flex flex-row items-center justify-between mb-4 px-2">
+            <SheetTitle className="flex items-center gap-2 text-xl font-bold">
+              <Shield className="w-6 h-6 text-primary" />
+              Chamada Rápida
+            </SheetTitle>
+            <SheetClose asChild>
+                <Button variant="ghost" className="text-sm">Fechar</Button>
+            </SheetClose>
+          </SheetHeader>
 
-          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
-            {allContacts.length > 0 ? (
-              allContacts.map((contact, index) => (
-                <div key={contact.id}>
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="font-semibold text-lg">{contact.name}</p>
-                    <div className="flex gap-2">
-                      <a href={`tel:${contact.phone}`}>
-                        <Button size="icon" aria-label={`Ligar para ${contact.name}`}>
-                          <Phone />
-                        </Button>
-                      </a>
-                      {!contact.isPredefined && (
-                         <Button
-                            size="icon"
-                            variant="secondary"
-                            onClick={() => handleWhatsAppSend(contact)}
-                            aria-label={`Mandar WhatsApp para ${contact.name}`}
-                          >
-                            <MessageSquare />
-                          </Button>
-                      )}
-                    </div>
-                  </div>
-                  {index < allContacts.length - 1 && <Separator className="mt-4" />}
-                </div>
-              ))
-            ) : (
-              <div className="text-center text-muted-foreground space-y-4">
-                <p>Nenhum contato de emergência adicionado ainda.</p>
-                <Button asChild variant="outline" onClick={() => setIsOpen(false)}>
-                  <Link href="/settings">Adicionar Contatos</Link>
-                </Button>
-              </div>
-            )}
+          <div className="space-y-4 overflow-y-auto">
+             <div className="grid grid-cols-2 gap-3">
+                {allContacts.map((contact) => (
+                    <Card key={contact.id} className="bg-accent/50 text-center shadow-none border-none">
+                        <CardHeader className="p-3 pb-2">
+                            <CardTitle className="text-lg font-bold truncate">{contact.phone}</CardTitle>
+                            <CardDescription className="text-sm">{contact.name}</CardDescription>
+                        </CardHeader>
+                        <CardFooter className="flex gap-2 p-3 pt-0">
+                            <Button asChild size="sm" className="w-full font-semibold">
+                                <a href={`tel:${contact.phone}`}>
+                                  <Phone /> Ligar
+                                </a>
+                            </Button>
+                            {!contact.isPredefined && (
+                                <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    onClick={() => handleWhatsAppSend(contact)}
+                                    className="w-full font-semibold"
+                                >
+                                    <MessageSquare /> SOS
+                                </Button>
+                            )}
+                        </CardFooter>
+                    </Card>
+                ))}
+             </div>
+              
+            <Button asChild variant="outline" className="w-full border-dashed border-2" onClick={() => setIsOpen(false)}>
+                <Link href="/settings">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Adicionar contato
+                </Link>
+            </Button>
+
+            <p className="text-xs text-center text-muted-foreground pt-2">Toque para ligar imediatamente</p>
+
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
   );
 }
