@@ -13,20 +13,20 @@ export function SplashScreen({ onFinished }: SplashScreenProps) {
   const [isRendered, setIsRendered] = useState(false);
 
   useEffect(() => {
-    // Garante que as animações comecem após a montagem do componente.
+    // Ensures animations start after component mount for smooth transitions.
     setIsRendered(true);
 
-    // Este timer iniciará a animação de fade-out
+    // This timer will trigger the fade-out animation
     const exitTimer = setTimeout(() => {
       setIsExiting(true);
-    }, 2800); // A animação principal dura ~2s, 2.8s é seguro.
+    }, 3300); // Main animation is ~2.8s, this gives a moment before fading out.
 
-    // Este timer chamará o callback onFinished para desmontar o componente
+    // This timer will call the onFinished callback to unmount the component
     const finishTimer = setTimeout(() => {
       onFinished();
-    }, 3300); // Deve ser exitTimer + duração da transição (500ms)
+    }, 3800); // Must be exitTimer + transition duration (500ms)
 
-    // Função de limpeza para limpar os timers se o componente for desmontado antes
+    // Cleanup function to clear timers if the component unmounts early
     return () => {
       clearTimeout(exitTimer);
       clearTimeout(finishTimer);
@@ -41,7 +41,7 @@ export function SplashScreen({ onFinished }: SplashScreenProps) {
       )}
     >
       <div className="relative flex flex-col items-center justify-center">
-        {/* Partículas de Estrelas de fundo */}
+        {/* Background Star Particles */}
         <Star className="absolute top-[-20px] left-[-80px] h-4 w-4 text-yellow-300/80 animate-star-twinkle [animation-delay:0.2s]" />
         <Star className="absolute top-[50px] left-[-90px] h-3 w-3 text-yellow-300/60 animate-star-twinkle [animation-delay:0.8s]" />
         <Star className="absolute top-[0px] right-[-80px] h-5 w-5 text-yellow-300/90 animate-star-twinkle [animation-delay:0.5s]" />
@@ -49,15 +49,15 @@ export function SplashScreen({ onFinished }: SplashScreenProps) {
         <Star className="absolute bottom-[-40px] left-[20px] h-3 w-3 text-yellow-300/70 animate-star-twinkle [animation-delay:1.5s]" />
         <Star className="absolute bottom-[-30px] right-[20px] h-4 w-4 text-yellow-300/80 animate-star-twinkle [animation-delay:1.8s]" />
 
-        {/* Elemento central: Lua com um "planeta" orbitando */}
+        {/* Central Element: Moon with an orbiting "planet" */}
         <div className={cn('relative h-36 w-36 opacity-0', isRendered && 'animate-moon-bouncy-enter')}>
-          {/* O container que rotaciona para criar a órbita */}
-          <div className="absolute inset-0 animate-orbit">
-            {/* O "planeta" (um ponto de luz) posicionado na borda do container */}
+          {/* The container that rotates to create the orbit */}
+          <div className="absolute inset-0 animate-orbit" style={{ animationDelay: '1s' }}>
+            {/* The "planet" (a light point) positioned on the edge of the container */}
             <div className="absolute -left-1 -top-1 h-3 w-3 rounded-full bg-white animate-planet-glow" />
           </div>
 
-          {/* A Lua no centro, que não rotaciona */}
+          {/* The Moon in the center, which doesn't rotate */}
           <div className="absolute inset-0 flex items-center justify-center">
             <Moon
               className={cn(
@@ -68,7 +68,7 @@ export function SplashScreen({ onFinished }: SplashScreenProps) {
           </div>
         </div>
 
-        {/* Textos que aparecem após a animação principal */}
+        {/* Texts that appear after the main animation */}
         <h1
           className={cn(
             'mt-4 text-6xl font-bold opacity-0',
