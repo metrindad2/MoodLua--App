@@ -6,7 +6,7 @@ import { CycleDataProvider } from '@/context/cycle-data-context';
 import { Toaster } from '@/components/ui/toaster';
 import { AppShell } from '@/components/app-shell';
 import { ThemeProvider } from '@/components/theme-provider';
-import { FirebaseClientProvider } from '@/firebase';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 const fontSans = Inter({
   subsets: ['latin'],

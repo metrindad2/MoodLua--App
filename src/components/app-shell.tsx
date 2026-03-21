@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react';
 import { SplashScreen } from './splash-screen';
 import { SosModal } from './sos-modal';
 import { Button } from './ui/button';
-import { useUser } from '@/firebase';
+import { useUser } from '@/firebase/auth/use-user';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [isSplashing, setIsSplashing] = useState(true);

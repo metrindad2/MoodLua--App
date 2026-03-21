@@ -18,13 +18,10 @@ import {
 } from '@/lib/types';
 import { format, differenceInDays, startOfDay } from 'date-fns';
 import { DEFAULT_SOS_MESSAGE } from '@/lib/config';
-import {
-  useAuth,
-  useUser,
-  useDoc,
-  useCollection,
-  useFirestore,
-} from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase/provider';
+import { useUser } from '@/firebase/auth/use-user';
+import { useDoc } from '@/firebase/firestore/use-doc';
+import { useCollection } from '@/firebase/firestore/use-collection';
 import {
   doc,
   setDoc,
