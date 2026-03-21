@@ -21,6 +21,16 @@ import { Card, CardContent } from './ui/card';
 import { AppIntroCarousel } from './app-intro-carousel';
 import { useToast } from '@/hooks/use-toast';
 import { DEFAULT_SOS_MESSAGE } from '@/lib/config';
+import { useState } from 'react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 // Esquema atualizado para o novo formulário de criação de conta
 const formSchema = z.object({
@@ -51,6 +61,10 @@ const formSchema = z.object({
 export default function OnboardingForm() {
   const { updateUserProfile } = useCycleData();
   const { toast } = useToast();
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [formData, setFormData] = useState<z.infer<typeof formSchema> | null>(
+    null
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -62,15 +76,22 @@ export default function OnboardingForm() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    setFormData(values);
+    setShowConfirmation(true);
+  }
+
+  function handleConfirmAndSave() {
+    if (!formData) return;
+
     const userProfile: Partial<Omit<UserProfile, 'uid'>> = {
-      name: values.name,
-      birthDate: format(values.birthDate, 'yyyy-MM-dd'),
-      lastMenstruationDate: format(values.lastMenstruationDate, 'yyyy-MM-dd'),
-      cycleLengthDays: values.cycleLengthDays,
-      flowDurationDays: values.flowDurationDays,
+      name: formData.name,
+      birthDate: format(formData.birthDate, 'yyyy-MM-dd'),
+      lastMenstruationDate: format(formData.lastMenstruationDate, 'yyyy-MM-dd'),
+      cycleLengthDays: formData.cycleLengthDays,
+      flowDurationDays: formData.flowDurationDays,
       sosMessage: DEFAULT_SOS_MESSAGE,
     };
-    
+
     updateUserProfile(userProfile);
     toast({
       title: 'Bem-vinda!',
@@ -79,128 +100,153 @@ export default function OnboardingForm() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center w-full">
-      <div className="flex flex-col items-center justify-center text-center pb-4">
-        <Moon className="w-14 h-14 text-primary mb-2" />
-        <h1 className="text-3xl font-bold text-foreground">
-          Bem-vinda à MoodLua
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Conheça o que podemos fazer por você.
+    <>
+      <div className="flex flex-col items-center justify-center w-full">
+        <div className="flex flex-col items-center justify-center text-center pb-4">
+          <Moon className="w-14 h-14 text-primary mb-2" />
+          <h1 className="text-3xl font-bold text-foreground">
+            Bem-vinda à MoodLua
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Conheça o que podemos fazer por você.
+          </p>
+        </div>
+
+        <AppIntroCarousel />
+
+        <p className="text-muted-foreground text-center mt-6 mb-4 max-w-sm">
+          Agora, vamos configurar seu perfil para uma experiência personalizada.
         </p>
+
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input type="text" placeholder="Seu nome" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="birthDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data de Nascimento</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          {...field}
+                          value={
+                            field.value instanceof Date
+                              ? format(field.value, 'yyyy-MM-dd')
+                              : typeof field.value === 'string'
+                              ? field.value
+                              : ''
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="lastMenstruationDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data da Última Menstruação</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          {...field}
+                          value={
+                            field.value instanceof Date
+                              ? format(field.value, 'yyyy-MM-dd')
+                              : typeof field.value === 'string'
+                              ? field.value
+                              : ''
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="cycleLengthDays"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-muted-foreground text-xs pl-1">
+                          Duração do Ciclo (dias)
+                        </FormLabel>
+                        <FormControl>
+                          <Input type="number" min="15" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="flowDurationDays"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-muted-foreground text-xs pl-1">
+                          Duração da Menstruação
+                        </FormLabel>
+                        <FormControl>
+                          <Input type="number" min="1" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full font-bold text-base py-6"
+                >
+                  Começar
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
       </div>
 
-      <AppIntroCarousel />
-
-      <p className="text-muted-foreground text-center mt-6 mb-4 max-w-sm">
-        Agora, vamos configurar seu perfil para uma experiência personalizada.
-      </p>
-
-      <Card className="w-full max-w-md">
-        <CardContent className="pt-6">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input type="text" placeholder="Seu nome" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="birthDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Data de Nascimento</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        value={
-                          field.value instanceof Date
-                            ? format(field.value, 'yyyy-MM-dd')
-                            : typeof field.value === 'string'
-                            ? field.value
-                            : ''
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="lastMenstruationDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Data da Última Menstruação</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        value={
-                          field.value instanceof Date
-                            ? format(field.value, 'yyyy-MM-dd')
-                            : typeof field.value === 'string'
-                            ? field.value
-                            : ''
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="cycleLengthDays"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-muted-foreground text-xs pl-1">
-                        Duração do Ciclo (dias)
-                      </FormLabel>
-                      <FormControl>
-                        <Input type="number" min="15" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="flowDurationDays"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-muted-foreground text-xs pl-1">
-                        Duração da Menstruação
-                      </FormLabel>
-                      <FormControl>
-                        <Input type="number" min="1" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <Button type="submit" className="w-full font-bold text-base py-6">
-                Começar
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+      <AlertDialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Bem-vinda, {formData?.name}!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Seu perfil está pronto. Ao continuar, você será direcionada para o
+              painel principal, onde poderá começar a acompanhar seu ciclo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={handleConfirmAndSave}>
+              Continuar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
