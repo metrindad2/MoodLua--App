@@ -50,11 +50,11 @@ export function SplashScreen({ onFinished }: SplashScreenProps) {
         <Star className="absolute bottom-[-30px] right-[20px] h-4 w-4 text-yellow-300/80 animate-star-twinkle [animation-delay:1.8s]" />
 
         {/* Elemento central: Lua com um "planeta" orbitando */}
-        <div className={cn('relative h-36 w-36 opacity-0', isRendered && 'animate-moon-enter')}>
+        <div className={cn('relative h-36 w-36 opacity-0', isRendered && 'animate-moon-bouncy-enter')}>
           {/* O container que rotaciona para criar a órbita */}
-          <div className="absolute inset-0 animate-orbit" style={{ animationDuration: '8s' }}>
+          <div className="absolute inset-0 animate-orbit">
             {/* O "planeta" (um ponto de luz) posicionado na borda do container */}
-            <div className="absolute -left-1 -top-1 h-3 w-3 rounded-full bg-white [filter:drop-shadow(0_0_6px_#fff)]" />
+            <div className="absolute -left-1 -top-1 h-3 w-3 rounded-full bg-white animate-planet-glow" />
           </div>
 
           {/* A Lua no centro, que não rotaciona */}
@@ -72,7 +72,7 @@ export function SplashScreen({ onFinished }: SplashScreenProps) {
         <h1
           className={cn(
             'mt-4 text-6xl font-bold opacity-0',
-            isRendered && 'animate-text-enter'
+            isRendered && 'animate-text-reveal'
           )}
           style={{ fontFamily: 'cursive' }}
         >
@@ -81,7 +81,7 @@ export function SplashScreen({ onFinished }: SplashScreenProps) {
         <p
           className={cn(
             'mt-2 text-lg tracking-wider opacity-0',
-            isRendered && 'animate-slogan-enter'
+            isRendered && 'animate-slogan-fade-in'
           )}
         >
           Seu ciclo, seu astral.
