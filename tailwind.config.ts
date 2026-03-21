@@ -106,6 +106,10 @@ export default {
           '0%, 100%': { opacity: '0.5', transform: 'scale(0.8)' },
           '50%': { opacity: '1', transform: 'scale(1)' },
         },
+        orbit: {
+          from: { transform: 'rotate(0deg)' },
+          to: { transform: 'rotate(360deg)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -115,6 +119,7 @@ export default {
         'text-enter': 'text-enter 0.8s ease-out 1s forwards',
         'slogan-enter': 'slogan-enter 0.8s ease-out 1.5s forwards',
         'star-twinkle': 'star-twinkle 2s ease-in-out infinite',
+        orbit: 'orbit 6s linear infinite',
       },
     },
   },
