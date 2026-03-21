@@ -27,8 +27,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-dvh p-4 text-center">
-      <Moon className="w-14 h-14 text-primary mb-2" />
+    <div className="text-center">
+      <Moon className="w-14 h-14 text-primary mb-2 inline-block" />
       <h1 className="text-3xl font-bold text-foreground">Bem-vinda de volta!</h1>
       <p className="text-muted-foreground mt-2 mb-8">
         Como os dados são salvos localmente, não há necessidade de login.

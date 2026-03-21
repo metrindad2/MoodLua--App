@@ -70,8 +70,8 @@ export default function OnboardingForm() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-dvh p-4">
-      <div className="flex flex-col items-center justify-center text-center pt-8 pb-4">
+    <>
+      <div className="flex flex-col items-center justify-center text-center pb-4">
         <Moon className="w-14 h-14 text-primary mb-2" />
         <h1 className="text-3xl font-bold text-foreground">
           Bem-vinda à MoodLua
@@ -220,6 +220,6 @@ export default function OnboardingForm() {
           </Form>
         </CardContent>
       </Card>
-    </div>
+    </>
   );
 }

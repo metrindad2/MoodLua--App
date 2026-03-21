@@ -43,8 +43,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Onboarding/login view without the main app shell.
   if (!userProfile) {
     return (
-      <div className="relative mx-auto h-dvh max-w-md bg-moodlua-gradient">
-        <main>{children}</main>
+      <div className="relative mx-auto flex h-dvh max-w-md flex-col items-center justify-center bg-moodlua-gradient p-4">
+        <main className="w-full">{children}</main>
       </div>
     );
   }
