@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useCycleData } from '@/context/cycle-data-context';
-import { Moon } from 'lucide-react';
+import { Moon, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import { UserProfile } from '@/lib/types';
 import { Card, CardContent } from './ui/card';
@@ -25,6 +25,7 @@ import { useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -61,7 +62,8 @@ const formSchema = z.object({
 export default function OnboardingForm() {
   const { updateUserProfile } = useCycleData();
   const { toast } = useToast();
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showLocationDialog, setShowLocationDialog] = useState(false);
+  const [showProfileConfirmation, setShowProfileConfirmation] = useState(false);
   const [formData, setFormData] = useState<z.infer<typeof formSchema> | null>(
     null
   );
@@ -75,11 +77,59 @@ export default function OnboardingForm() {
     },
   });
 
+  // Step 1: Form is submitted
   function onSubmit(values: z.infer<typeof formSchema>) {
     setFormData(values);
-    setShowConfirmation(true);
+    setShowLocationDialog(true); // Open location dialog first
   }
 
+  // Step 2: User interacts with location dialog
+  const handleLocationRequest = () => {
+    setShowLocationDialog(false); // Close location dialog
+
+    if (!navigator.geolocation) {
+      toast({
+        variant: 'destructive',
+        title: 'Geolocalização não suportada',
+        description: 'Seu navegador não suporta este recurso.',
+      });
+      // Proceed to next step even if not supported
+      setShowProfileConfirmation(true);
+      return;
+    }
+
+    // Request permission. The result doesn't block the next step.
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        // Success: permission granted
+        toast({
+          title: 'Permissão concedida!',
+          description: 'A localização para o SOS foi ativada.',
+        });
+        setShowProfileConfirmation(true); // Show final confirmation
+      },
+      (error) => {
+        // Error: permission denied or other error
+        if (error.code === 1) {
+          // PERMISSION_DENIED
+          toast({
+            variant: 'destructive',
+            title: 'Permissão de localização negada',
+            description:
+              'Você pode ativá-la nas configurações do navegador para usar o SOS.',
+          });
+        }
+        setShowProfileConfirmation(true); // Show final confirmation anyway
+      }
+    );
+  };
+
+  const handleSkipLocation = () => {
+    setShowLocationDialog(false);
+    setShowProfileConfirmation(true);
+  };
+
+  // Step 3: User confirms profile creation
   function handleConfirmAndSave() {
     if (!formData) return;
 
@@ -231,7 +281,42 @@ export default function OnboardingForm() {
         </Card>
       </div>
 
-      <AlertDialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+      {/* Location Permission Dialog */}
+      <AlertDialog
+        open={showLocationDialog}
+        onOpenChange={setShowLocationDialog}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex justify-center mb-2">
+              <MapPin className="w-10 h-10 text-primary" />
+            </div>
+            <AlertDialogTitle className="text-center">
+              Permissão de Localização
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              O MoodLua utiliza sua localização para o recurso de emergência
+              (SOS). Quando ativado, um link com sua posição atual é enviado aos
+              seus contatos de confiança. Seus dados de localização são privados
+              e usados apenas quando você aciona o SOS.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center">
+            <AlertDialogCancel onClick={handleSkipLocation}>
+              Pular por agora
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleLocationRequest}>
+              Permitir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Profile Confirmation Dialog */}
+      <AlertDialog
+        open={showProfileConfirmation}
+        onOpenChange={setShowProfileConfirmation}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Bem-vinda, {formData?.name}!</AlertDialogTitle>
