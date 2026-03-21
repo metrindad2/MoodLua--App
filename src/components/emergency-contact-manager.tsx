@@ -76,37 +76,21 @@ export function EmergencyContactManager() {
     setIsDialogOpen(true);
   };
 
-  const onSubmit = async (values: z.infer<typeof contactSchema>) => {
-    try {
-      if (editingContact) {
-        await updateSosContact({ ...editingContact, ...values });
-        toast({ title: 'Contato atualizado!' });
-      } else {
-        await addSosContact(values);
-        toast({ title: 'Contato adicionado!' });
-      }
-      setIsDialogOpen(false);
-      setEditingContact(null);
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao salvar',
-        description: 'Não foi possível salvar o contato. Tente novamente.',
-      });
+  const onSubmit = (values: z.infer<typeof contactSchema>) => {
+    if (editingContact) {
+      updateSosContact({ ...editingContact, ...values });
+      toast({ title: 'Contato atualizado!' });
+    } else {
+      addSosContact(values);
+      toast({ title: 'Contato adicionado!' });
     }
+    setIsDialogOpen(false);
+    setEditingContact(null);
   };
   
-  const handleDelete = async (contactId: string) => {
-    try {
-      await removeSosContact(contactId);
-      toast({ title: 'Contato removido.' });
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao remover',
-        description: 'Não foi possível remover o contato. Tente novamente.',
-      });
-    }
+  const handleDelete = (contactId: string) => {
+    removeSosContact(contactId);
+    toast({ title: 'Contato removido.' });
   };
 
   return (

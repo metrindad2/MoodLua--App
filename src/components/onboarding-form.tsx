@@ -61,7 +61,7 @@ export default function OnboardingForm() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     const userProfile: Omit<UserProfile, 'uid'> = {
       name: values.name,
       birthDate: format(values.birthDate, 'yyyy-MM-dd'),
@@ -70,19 +70,12 @@ export default function OnboardingForm() {
       flowDurationDays: values.flowDurationDays,
       sosMessage: DEFAULT_SOS_MESSAGE,
     };
-    try {
-      await updateUserProfile(userProfile);
-      toast({
-        title: 'Bem-vinda!',
-        description: 'Seu perfil foi criado com sucesso.',
-      });
-    } catch (error) {
-       toast({
-        variant: 'destructive',
-        title: 'Erro ao criar perfil',
-        description: 'Não foi possível salvar seu perfil. Tente novamente.',
-      });
-    }
+    
+    updateUserProfile(userProfile);
+    toast({
+      title: 'Bem-vinda!',
+      description: 'Seu perfil foi criado com sucesso.',
+    });
   }
 
   return (

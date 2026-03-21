@@ -70,26 +70,19 @@ export function SettingsForm() {
   
   if (!userProfile) return null;
 
-  async function onSubmit(values: SettingsFormValues) {
+  function onSubmit(values: SettingsFormValues) {
     const updatedProfile: Partial<UserProfile> = {
       name: values.name,
       birthDate: format(values.birthDate, 'yyyy-MM-dd'),
       cycleLengthDays: values.cycleLengthDays,
       flowDurationDays: values.flowDurationDays,
     };
-    try {
-      await updateUserProfile(updatedProfile);
-      toast({
-        title: 'Perfil Atualizado!',
-        description: 'Suas informações foram salvas com sucesso.',
-      });
-    } catch(error) {
-       toast({
-        variant: "destructive",
-        title: 'Erro ao salvar!',
-        description: 'Não foi possível atualizar suas informações.',
-      });
-    }
+    
+    updateUserProfile(updatedProfile);
+    toast({
+      title: 'Perfil Atualizado!',
+      description: 'Suas informações foram salvas com sucesso.',
+    });
   }
 
   return (

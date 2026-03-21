@@ -19,22 +19,14 @@ export function SosMessageManager() {
     }
   }, [userProfile?.sosMessage]);
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!userProfile) return;
 
-    try {
-      await updateUserProfile({ ...userProfile, sosMessage: message });
-      toast({
-        title: 'Mensagem de SOS salva!',
-        description: 'Sua mensagem padrão foi atualizada.',
-      });
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao salvar',
-        description: 'Não foi possível salvar a mensagem. Tente novamente.',
-      });
-    }
+    updateUserProfile({ sosMessage: message });
+    toast({
+      title: 'Mensagem de SOS salva!',
+      description: 'Sua mensagem padrão foi atualizada.',
+    });
   };
 
   return (

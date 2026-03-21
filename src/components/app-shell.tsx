@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Droplet, Baby, Settings, History, Moon, LogIn } from 'lucide-react';
+import { Droplet, Baby, Settings, History, Moon } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useCycleData } from '@/context/cycle-data-context';
@@ -9,14 +9,11 @@ import { Skeleton } from './ui/skeleton';
 import { useState, useEffect } from 'react';
 import { SplashScreen } from './splash-screen';
 import { SosModal } from './sos-modal';
-import { Button } from './ui/button';
-import { useUser } from '@/firebase/auth/use-user';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [isSplashing, setIsSplashing] = useState(true);
   const pathname = usePathname();
-  const { userProfile, loading: isDataLoading, signInWithGoogle } = useCycleData();
-  const { user, loading: isAuthLoading } = useUser();
+  const { userProfile, loading: isDataLoading } = useCycleData();
 
   useEffect(() => {
     const splashTimer = setTimeout(() => {
@@ -29,9 +26,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return <SplashScreen />;
   }
   
-  const isLoading = isAuthLoading || (user && isDataLoading);
-
-  if (isLoading) {
+  if (isDataLoading) {
     return (
       <div className="relative flex h-dvh w-full flex-col items-center justify-center bg-background p-4">
         <div className="w-full max-w-md space-y-4 p-4">
@@ -42,25 +37,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-  
-  if (!user) {
-     return (
-       <div className="relative flex h-dvh w-full flex-col items-center justify-center bg-moodlua-gradient p-4 text-center">
-         <Moon className="h-16 w-16 text-primary" />
-         <h1 className="mt-4 text-3xl font-bold">Bem-vinda à MoodLua</h1>
-         <p className="mt-2 text-muted-foreground">
-           Faça login para salvar seus dados e acessar todas as funcionalidades.
-         </p>
-         <Button onClick={signInWithGoogle} className="mt-8">
-           <LogIn className="mr-2 h-4 w-4" />
-           Entrar com Google
-         </Button>
-       </div>
-     );
-  }
 
-
-  // Onboarding/login view without the main app shell.
+  // Onboarding view without the main app shell.
   if (!userProfile) {
     return (
       <div className="relative flex h-dvh w-full flex-col items-center justify-center bg-moodlua-gradient p-4">
