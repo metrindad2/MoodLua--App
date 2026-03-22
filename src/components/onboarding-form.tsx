@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useCycleData } from '@/context/cycle-data-context';
-import { Moon, MapPin } from 'lucide-react';
+import { Moon, ShieldAlert } from 'lucide-react';
 import { format } from 'date-fns';
 import { UserProfile } from '@/lib/types';
 import { Card, CardContent } from './ui/card';
@@ -303,16 +303,17 @@ export default function OnboardingForm() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <div className="flex justify-center mb-2">
-              <MapPin className="w-10 h-10 text-primary" />
+              <ShieldAlert className="w-10 h-10 text-primary" />
             </div>
             <AlertDialogTitle className="text-center">
-              Permissão de Localização
+              Ative o Recurso de Emergência (SOS)
             </AlertDialogTitle>
             <AlertDialogDescription className="text-center">
-              O MoodLua utiliza sua localização para o recurso de emergência
-              (SOS). Quando ativado, um link com sua posição atual é enviado aos
-              seus contatos de confiança. Seus dados de localização são privados
-              e usados apenas quando você aciona o SOS.
+              O MoodLua possui um botão de SOS para sua segurança. Para que ele
+              funcione, precisamos da sua permissão para acessar a localização.
+              Quando você acionar o SOS, um link do mapa com sua posição será
+              enviado para seus contatos de confiança. Seus dados são privados e
+              usados apenas em emergências.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="sm:justify-center">
@@ -320,7 +321,7 @@ export default function OnboardingForm() {
               Pular por agora
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleLocationRequest}>
-              Permitir
+              Permitir Localização
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

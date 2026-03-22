@@ -8,7 +8,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
-import { Droplet, NotebookText } from 'lucide-react';
+import { Droplet, NotebookText, Heart } from 'lucide-react';
 
 const features = [
   {
@@ -22,6 +22,12 @@ const features = [
     title: 'Registre seu Dia a Dia',
     description:
       'Anote seu humor, sintomas e fluxo para entender melhor seu corpo.',
+  },
+  {
+    icon: Heart,
+    title: 'Botão de Emergência SOS',
+    description:
+      'Envie um alerta com sua localização para contatos de confiança em situações de risco.',
   },
 ];
 
