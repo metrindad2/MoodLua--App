@@ -205,6 +205,13 @@ export default function OnboardingForm() {
                               ? field.value
                               : ''
                           }
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? new Date(e.target.value + 'T00:00:00')
+                                : null
+                            )
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -228,6 +235,13 @@ export default function OnboardingForm() {
                               : typeof field.value === 'string'
                               ? field.value
                               : ''
+                          }
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? new Date(e.target.value + 'T00:00:00')
+                                : null
+                            )
                           }
                         />
                       </FormControl>

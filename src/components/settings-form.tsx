@@ -25,7 +25,7 @@ import {
   CardTitle,
 } from './ui/card';
 import { Save, User } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 
 const formSchema = z.object({
   name: z.string().min(1, 'O nome é obrigatório.'),
@@ -61,13 +61,15 @@ export function SettingsForm() {
     if (userProfile) {
       form.reset({
         name: userProfile.name,
-        birthDate: userProfile.birthDate ? parseISO(userProfile.birthDate) : undefined,
+        birthDate: userProfile.birthDate
+          ? new Date(userProfile.birthDate + 'T00:00:00')
+          : undefined,
         cycleLengthDays: userProfile.cycleLengthDays,
         flowDurationDays: userProfile.flowDurationDays,
       });
     }
   }, [userProfile, form]);
-  
+
   if (!userProfile) return null;
 
   function onSubmit(values: SettingsFormValues) {
@@ -77,7 +79,7 @@ export function SettingsForm() {
       cycleLengthDays: values.cycleLengthDays,
       flowDurationDays: values.flowDurationDays,
     };
-    
+
     updateUserProfile(updatedProfile);
     toast({
       title: 'Perfil Atualizado!',
@@ -127,7 +129,13 @@ export function SettingsForm() {
                           ? format(field.value, 'yyyy-MM-dd')
                           : ''
                       }
-                       onChange={(e) => field.onChange(parseISO(e.target.value))}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value
+                            ? new Date(e.target.value + 'T00:00:00')
+                            : null
+                        )
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -142,7 +150,14 @@ export function SettingsForm() {
                   <FormItem>
                     <FormLabel>Duração do Ciclo</FormLabel>
                     <FormControl>
-                      <Input type="number" min="15" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))} />
+                      <Input
+                        type="number"
+                        min="15"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value, 10))
+                        }
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -155,7 +170,14 @@ export function SettingsForm() {
                   <FormItem>
                     <FormLabel>Duração da Menstruação</FormLabel>
                     <FormControl>
-                      <Input type="number" min="1" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))}/>
+                      <Input
+                        type="number"
+                        min="1"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value, 10))
+                        }
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
