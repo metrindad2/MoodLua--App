@@ -23,17 +23,6 @@ import Link from 'next/link';
 import { FlowIntensity } from '@/lib/types';
 import { MOOD_OPTIONS } from '@/lib/moods';
 import { SYMPTOM_OPTIONS } from '@/lib/symptoms';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
@@ -260,32 +249,9 @@ export default function HistoryPage() {
                     <CardTitle className="text-base font-semibold">
                       {format(logDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
                     </CardTitle>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Excluir este registro?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Esta ação é permanente e não pode ser desfeita.
-                            Todas as anotações para este dia serão apagadas.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDeleteLog(logDate)}
-                          >
-                            Excluir
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    <Button variant="ghost" size="icon" onClick={() => handleDeleteLog(logDate)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
                   </CardHeader>
                   <CardContent className="space-y-3 pt-0">
                     {!hasData ? (
