@@ -56,7 +56,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // Full app shell for logged-in users.
   return (
-    <div className="relative flex h-dvh w-full flex-col bg-moodlua-gradient">
+    <div className="relative flex min-h-dvh w-full flex-col bg-moodlua-gradient">
       <div className="mx-auto w-full max-w-md flex-1 flex flex-col">
         <header className="flex shrink-0 items-center justify-center p-4">
           <Link href="/" className="flex items-center gap-2">
@@ -73,7 +73,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* SOS Button, globally available */}
       <SosModal />
 
-      <footer className="fixed bottom-0 z-50 w-full shrink-0 border-t bg-card/80 backdrop-blur-sm">
+      <footer className="fixed bottom-0 z-50 w-full shrink-0 border-t bg-card/80 backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
         <nav className="mx-auto flex max-w-md items-center justify-around p-1">
           {navItems.map((item) => (
             <Link

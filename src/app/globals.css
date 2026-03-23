@@ -65,6 +65,7 @@
   }
   body {
     @apply text-foreground bg-background;
+    -webkit-tap-highlight-color: transparent;
   }
   .bg-moodlua-gradient {
     /* Light: Lighter Purple -> White-ish Purple */
