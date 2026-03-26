@@ -10,18 +10,27 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { isSameDay } from 'date-fns';
+import { isSameDay, subMonths, startOfMonth, startOfDay } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { useToast } from '@/hooks/use-toast';
 import { SimpleCalendar } from './simple-calendar';
-import { startOfDay } from 'date-fns';
+import { X } from 'lucide-react';
+import { ScrollArea } from './ui/scroll-area';
 
 interface PeriodRegistrationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  previsionRange?: {
+    from: Date;
+    to: Date;
+  };
 }
 
-export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrationModalProps) {
+export function PeriodRegistrationModal({
+  open,
+  onOpenChange,
+  previsionRange,
+}: PeriodRegistrationModalProps) {
   const { dailyLogs, addOrUpdateDailyLog, startNewCycle } = useCycleData();
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
   const { toast } = useToast();
@@ -58,10 +67,15 @@ export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrati
 
     for (const day of allPotentiallyChangedDays) {
       const isNowSelected = selectedDays.some((d) => isSameDay(d, day));
-      const wasOriginallySelected = originallyLogged.some((d) => isSameDay(d, day));
+      const wasOriginallySelected = originallyLogged.some((d) =>
+        isSameDay(d, day)
+      );
 
       if (isNowSelected !== wasOriginallySelected) {
-        addOrUpdateDailyLog({ date: day, flowIntensity: isNowSelected ? 'médio' : 'nenhum' });
+        addOrUpdateDailyLog({
+          date: day,
+          flowIntensity: isNowSelected ? 'médio' : 'nenhum',
+        });
       }
     }
 
@@ -78,26 +92,51 @@ export function PeriodRegistrationModal({ open, onOpenChange }: PeriodRegistrati
     onOpenChange(false);
   };
 
+  const monthsToDisplay = Array.from({ length: 6 }).map((_, i) =>
+    startOfMonth(subMonths(new Date(), 3 - i))
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Registrar Período</DialogTitle>
+      <DialogContent className="h-dvh max-h-dvh w-screen max-w-full flex flex-col p-0 gap-0 border-0 sm:rounded-none bg-background">
+        <DialogHeader className="p-2 flex flex-row items-center border-b shrink-0">
+          <DialogClose asChild>
+            <Button variant="ghost" size="icon" className="h-10 w-10">
+              <X className="h-6 w-6" />
+            </Button>
+          </DialogClose>
+          <div className="flex-1 text-center">
+            <DialogTitle className="text-lg font-semibold">
+              Registrar Período
+            </DialogTitle>
+          </div>
+          <div className="h-10 w-10" /> {/* Spacer */}
         </DialogHeader>
 
-        <div>
-          <SimpleCalendar
-            selectedDates={selectedDays}
-            onDateClick={handleDayClick}
-            disableFutureDates
-          />
-        </div>
+        <ScrollArea className="flex-1 p-4">
+          <div className="space-y-6 pb-4">
+            {monthsToDisplay.map((month) => (
+              <SimpleCalendar
+                key={month.toISOString()}
+                initialDate={month}
+                selectedDates={selectedDays}
+                onDateClick={handleDayClick}
+                disableFutureDates
+                previsionRange={previsionRange}
+              />
+            ))}
+          </div>
+        </ScrollArea>
 
-        <DialogFooter>
+        <DialogFooter className="p-4 border-t flex-row justify-between bg-background shrink-0">
           <DialogClose asChild>
-            <Button variant="ghost">Cancelar</Button>
+            <Button variant="link" className="text-base text-primary">
+              Cancelar
+            </Button>
           </DialogClose>
-          <Button onClick={handleSave}>Salvar</Button>
+          <Button onClick={handleSave} className="text-base font-bold">
+            Salvar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

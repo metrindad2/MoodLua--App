@@ -150,6 +150,7 @@ export default function Dashboard() {
         <PeriodRegistrationModal
           open={isRegistrationOpen}
           onOpenChange={setIsRegistrationOpen}
+          previsionRange={previsionRange}
         />
       </div>
     </>
