@@ -6,7 +6,7 @@ import { CycleProgress } from './cycle-progress';
 import { PhaseTips } from './phase-tips';
 import { DailyTracker } from './daily-tracker';
 import { SimpleCalendar } from './simple-calendar';
-import { addDays, subMonths, startOfMonth, format, startOfDay } from 'date-fns';
+import { addDays, subMonths, startOfMonth, format, startOfDay, isSameMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card, CardContent } from './ui/card';
 import { useState, useEffect, useRef } from 'react';
@@ -19,7 +19,23 @@ import { ScrollArea } from './ui/scroll-area';
 export default function Dashboard() {
   const { userProfile, dailyLogs, cycleHistory } = useCycleData();
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // Refs para a funcionalidade de auto-scroll
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const currentMonthRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Rola a visualização do calendário para o mês atual na montagem do componente.
+    if (currentMonthRef.current && scrollContainerRef.current) {
+      const viewport = scrollContainerRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (viewport) {
+        const offsetTop = currentMonthRef.current.offsetTop;
+        const containerHeight = viewport.clientHeight;
+        // Centraliza o mês atual na área de rolagem.
+        viewport.scrollTop = offsetTop - (containerHeight / 2) + (currentMonthRef.current.clientHeight / 2);
+      }
+    }
+  }, []); // Executa apenas uma vez.
 
   if (!userProfile) return null;
 
@@ -55,6 +71,7 @@ export default function Dashboard() {
     .sort((a, b) => new Date(b.startDate + 'T00:00:00').getTime() - new Date(a.startDate + 'T00:00:00').getTime())
     .slice(0, 1);
 
+  // Gera uma lista de meses para a rolagem "infinita" (100 anos).
   const monthsToDisplay = Array.from({ length: 1200 }).map((_, i) =>
     startOfMonth(subMonths(new Date(), 240 - i))
   );
@@ -73,17 +90,22 @@ export default function Dashboard() {
         
         <Card>
           <CardContent className="p-0">
-            <ScrollArea className="h-[450px] w-full">
+            <ScrollArea ref={scrollContainerRef} className="h-[450px] w-full">
               <div className="p-4 space-y-6">
-                {monthsToDisplay.map((month) => (
-                    <SimpleCalendar
-                      key={month.toISOString()}
-                      initialDate={month}
-                      highlightedDates={highlightedDays}
-                      previsionRange={previsionRange}
-                      fertileWindow={fertileWindow}
-                    />
-                ))}
+                {monthsToDisplay.map((month) => {
+                  const isCurrentMonth = isSameMonth(month, new Date());
+                  return (
+                    <div key={month.toISOString()} ref={isCurrentMonth ? currentMonthRef : null}>
+                       <SimpleCalendar
+                        initialDate={month}
+                        highlightedDates={highlightedDays}
+                        previsionRange={previsionRange}
+                        fertileWindow={fertileWindow}
+                        ovulationDate={cycleInfo.ovulationDate}
+                      />
+                    </div>
+                  );
+                })}
               </div>
             </ScrollArea>
             <div className="p-4 border-t space-y-4">
@@ -99,6 +121,10 @@ export default function Dashboard() {
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-fertile"></div>
                   <span>Fértil</span>
+                </div>
+                 <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-secondary mr-1"></div>
+                  <span>Ovulação</span>
                 </div>
               </div>
               <Button

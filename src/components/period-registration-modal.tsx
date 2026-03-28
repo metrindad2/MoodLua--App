@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,7 @@ import {
   startOfDay,
   addDays,
   differenceInDays,
+  isSameMonth,
 } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { useToast } from '@/hooks/use-toast';
@@ -38,17 +39,35 @@ export function PeriodRegistrationModal({
   onOpenChange,
   previsionRange,
 }: PeriodRegistrationModalProps) {
-  const { dailyLogs, addOrUpdateDailyLog, startNewCycle, userProfile, cycleHistory } = useCycleData();
+  const { dailyLogs, addOrUpdateDailyLog, startNewCycle, userProfile } =
+    useCycleData();
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
   const { toast } = useToast();
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const currentMonthRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (open) {
-      // Carrega os dias já registrados com fluxo menstrual
       const periodDays = dailyLogs
         .filter((log) => log.flowIntensity && log.flowIntensity !== 'nenhum')
         .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
       setSelectedDays(periodDays);
+
+      // Atraso para garantir que a DOM esteja pronta antes de rolar.
+      setTimeout(() => {
+        if (currentMonthRef.current && scrollContainerRef.current) {
+          const viewport = scrollContainerRef.current.querySelector(
+            '[data-radix-scroll-area-viewport]'
+          );
+          if (viewport) {
+            const offsetTop = currentMonthRef.current.offsetTop;
+            const containerHeight = viewport.clientHeight;
+            viewport.scrollTop =
+              offsetTop - containerHeight / 2 + currentMonthRef.current.clientHeight / 2;
+          }
+        }
+      }, 100);
     }
   }, [open, dailyLogs]);
 
@@ -56,37 +75,39 @@ export function PeriodRegistrationModal({
     const dayStart = startOfDay(day);
     const flowDuration = userProfile?.flowDurationDays || 5;
 
-    const isAlreadySelected = selectedDays.some((d) =>
-      isSameDay(d, dayStart)
-    );
+    const isAlreadySelected = selectedDays.some((d) => isSameDay(d, dayStart));
 
     let newSelectedDays;
 
-    // Logica Hibrida:
-    // 1. Se nenhum dia estiver selecionado, ou se o clique for longe de uma seleção existente,
-    //    cria um novo bloco automático.
-    // 2. Se o clique for para adicionar/remover dias perto de um bloco, permite edição manual.
     if (!isAlreadySelected) {
-      const isStartingNewBlock = selectedDays.length === 0 || !selectedDays.some(d => Math.abs(differenceInDays(d, dayStart)) < 15);
-      
+      // Se nenhum dia estiver selecionado, ou se o clique for longe de uma seleção existente (>15 dias),
+      // cria um novo bloco automático. Isso facilita iniciar o registro de um novo ciclo.
+      const isStartingNewBlock =
+        selectedDays.length === 0 ||
+        !selectedDays.some(
+          (d) => Math.abs(differenceInDays(d, dayStart)) < 15
+        );
+
       if (isStartingNewBlock) {
-        // Cria um novo bloco de seleção
+        // Cria um novo bloco de seleção automático
         const newBlock = Array.from({ length: flowDuration }).map((_, i) =>
           addDays(dayStart, i)
         );
+        // Combina com seleções existentes se houver, removendo duplicados.
         newSelectedDays = [...selectedDays, ...newBlock];
-
       } else {
-        // Adiciona manualmente ao bloco existente
-         newSelectedDays = [...selectedDays, dayStart];
+        // Se o clique for próximo a um bloco existente, permite a edição manual adicionando um único dia.
+        newSelectedDays = [...selectedDays, dayStart];
       }
     } else {
-      // Remove o dia clicado
+      // Remove o dia clicado se ele já estiver selecionado.
       newSelectedDays = selectedDays.filter((d) => !isSameDay(d, dayStart));
     }
-    
-    // Remove duplicados e ordena
-    const uniqueDays = Array.from(new Set(newSelectedDays.map(d => d.getTime()))).map(t => new Date(t));
+
+    // Remove duplicados e ordena os dias para manter a consistência.
+    const uniqueDays = Array.from(
+      new Set(newSelectedDays.map((d) => d.getTime()))
+    ).map((t) => new Date(t));
     setSelectedDays(uniqueDays.sort((a, b) => a.getTime() - b.getTime()));
   };
 
@@ -98,31 +119,18 @@ export function PeriodRegistrationModal({
     const allPotentiallyChangedDays = [
       ...new Set([...originallyLogged, ...selectedDays].map((d) => d.getTime())),
     ].map((t) => new Date(t));
-
-    // Find the earliest new selected day to see if we need to start a new cycle.
-    const newPeriodStartDays = selectedDays.filter(d => !originallyLogged.some(o => isSameDay(o, d)));
-    const earliestNewDay = newPeriodStartDays.length > 0 
-      ? newPeriodStartDays.sort((a,b) => a.getTime() - b.getTime())[0]
-      : null;
-
-    // A new cycle starts if the user adds a flow day and that day is before any other logged flow day in its new block.
-    if (earliestNewDay) {
-        const isNewCycle = !cycleHistory.some(c => isSameDay(new Date(c.startDate + 'T00:00:00'), earliestNewDay));
-        if (isNewCycle) {
-            startNewCycle(earliestNewDay);
-        }
-    }
-
+    
+    // Processa cada dia que pode ter sido alterado
     for (const day of allPotentiallyChangedDays) {
       const isNowSelected = selectedDays.some((d) => isSameDay(d, day));
       const wasOriginallySelected = originallyLogged.some((d) =>
         isSameDay(d, day)
       );
-
-      // Only update if the state has changed
+      // Apenas atualiza o log se o estado do dia (selecionado/não selecionado) mudou.
       if (isNowSelected !== wasOriginallySelected) {
         addOrUpdateDailyLog({
           date: day,
+          // Define a intensidade como 'médio' para novos registros, e 'nenhum' para remoções.
           flowIntensity: isNowSelected ? 'médio' : 'nenhum',
         });
       }
@@ -136,9 +144,9 @@ export function PeriodRegistrationModal({
     onOpenChange(false);
   };
 
-  // Cria um calendário de 100 anos (1200 meses) para simular rolagem "infinita"
+  // Cria um calendário de 100 anos (20 para o passado, 80 para o futuro)
   const monthsToDisplay = Array.from({ length: 1200 }).map((_, i) =>
-    startOfMonth(subMonths(new Date(), 240 - i)) // 20 anos para trás, 80 para frente
+    startOfMonth(subMonths(new Date(), 240 - i))
   );
 
   return (
@@ -158,18 +166,25 @@ export function PeriodRegistrationModal({
           <div className="h-10 w-10" /> {/* Spacer */}
         </DialogHeader>
 
-        <ScrollArea className="flex-1 p-4">
+        <ScrollArea ref={scrollContainerRef} className="flex-1 p-4">
           <div className="space-y-6 pb-4">
-            {monthsToDisplay.map((month) => (
-              <SimpleCalendar
-                key={month.toISOString()}
-                initialDate={month}
-                selectedDates={selectedDays}
-                onDateClick={handleDayClick}
-                disableFutureDates
-                previsionRange={previsionRange}
-              />
-            ))}
+            {monthsToDisplay.map((month) => {
+              const isCurrentMonth = isSameMonth(month, new Date());
+              return (
+                 <div
+                  key={month.toISOString()}
+                  ref={isCurrentMonth ? currentMonthRef : null}
+                >
+                  <SimpleCalendar
+                    initialDate={month}
+                    selectedDates={selectedDays}
+                    onDateClick={handleDayClick}
+                    disableFutureDates
+                    previsionRange={previsionRange}
+                  />
+                </div>
+              );
+            })}
           </div>
         </ScrollArea>
 

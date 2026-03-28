@@ -42,8 +42,6 @@ export default function HistoryPage() {
     useCycleData();
   const { toast } = useToast();
 
-  // On first render, loading is true and userProfile is null.
-  // We need to handle this loading state to prevent errors.
   if (loading) {
     return (
       <div className="p-4 space-y-6 animate-pulse">
@@ -65,16 +63,10 @@ export default function HistoryPage() {
             </CardHeader>
           </Card>
         </div>
-        <div className="space-y-3">
-          <div className="h-16 w-full bg-muted rounded-lg"></div>
-          <div className="h-16 w-full bg-muted rounded-lg"></div>
-          <div className="h-16 w-full bg-muted rounded-lg"></div>
-        </div>
       </div>
     );
   }
 
-  // After loading, if there's still no profile, show a message.
   if (!userProfile) {
     return (
       <div className="p-4 text-center">
@@ -93,40 +85,24 @@ export default function HistoryPage() {
   const lastMenstruationDate = startOfDay(
     new Date(userProfile.lastMenstruationDate + 'T00:00:00')
   );
-  const currentCycleLength = differenceInDays(today, lastMenstruationDate) + 1;
+  const currentCycleDay = differenceInDays(today, lastMenstruationDate) + 1;
 
+  // O ciclo atual é dinâmico e não faz parte do histórico salvo.
   const currentCycle = {
     startDate: userProfile.lastMenstruationDate,
-    cycleLength: currentCycleLength,
+    cycleLength: currentCycleDay,
     isCurrent: true,
   };
 
+  // O histórico vem diretamente do contexto, já calculado.
   const allCycles = [currentCycle, ...cycleHistory].sort(
     (a, b) =>
       new Date(b.startDate + 'T00:00:00').getTime() -
       new Date(a.startDate + 'T00:00:00').getTime()
   );
 
-  const completedCycles = cycleHistory.filter((c) => c.cycleLength > 0);
-
-  const sortedCompletedCycles = [...completedCycles].sort(
-    (a, b) =>
-      new Date(b.startDate + 'T00:00:00').getTime() -
-      new Date(a.startDate + 'T00:00:00').getTime()
-  );
-
-  const averageCycleLength =
-    completedCycles.length > 0
-      ? Math.round(
-          completedCycles.reduce((acc, c) => acc + c.cycleLength, 0) /
-            completedCycles.length
-        )
-      : userProfile.cycleLengthDays;
-
-  const lastCycleLength =
-    sortedCompletedCycles.length > 0
-      ? sortedCompletedCycles[0].cycleLength
-      : null;
+  const averageCycleLength = userProfile.cycleLengthDays;
+  const lastCompletedCycle = cycleHistory.length > 0 ? cycleHistory[0] : null;
 
   const sortedLogs = [...dailyLogs].sort(
     (a, b) =>
@@ -166,7 +142,7 @@ export default function HistoryPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">
-              {lastCycleLength ?? '--'} dias
+              {lastCompletedCycle?.cycleLength ?? '--'} dias
             </CardTitle>
             <CardDescription>Duração do último ciclo</CardDescription>
           </CardHeader>
@@ -193,7 +169,7 @@ export default function HistoryPage() {
                   </p>
                   {cycle.isCurrent && (
                     <p className="text-xs font-medium text-primary">
-                      Ciclo Atual
+                      Ciclo Atual (Dia {currentCycleDay})
                     </p>
                   )}
                 </div>
@@ -206,7 +182,7 @@ export default function HistoryPage() {
         })}
       </div>
 
-      {/* Daily Log History Section */}
+      {/* Seção de Histórico de Logs Diários */}
       <div className="space-y-3 pt-6">
         <CardHeader className="p-0 mb-4">
           <CardTitle className="flex items-center gap-2">
@@ -247,7 +223,7 @@ export default function HistoryPage() {
                 <Card key={log.date}>
                   <CardHeader className="pb-3 pt-4 flex flex-row justify-between items-start">
                     <CardTitle className="text-base font-semibold">
-                      {format(logDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
+                      {format(logDate, "EEEE, d 'de' MMMM, yyyy", { locale: ptBR })}
                     </CardTitle>
                     <Button variant="ghost" size="icon" onClick={() => handleDeleteLog(logDate)}>
                       <Trash2 className="h-4 w-4 text-destructive" />

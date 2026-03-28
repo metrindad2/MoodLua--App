@@ -8,7 +8,7 @@
  */
 
 import { addDays, subDays, differenceInDays, startOfDay } from 'date-fns';
-import { DailyLog, UserProfile } from './types';
+import { UserProfile } from './types';
 
 /**
  * Representa os resultados dos cálculos do ciclo.
@@ -37,19 +37,18 @@ export interface CycleInfo {
  * @returns {CycleInfo | null} Um objeto com todas as informações calculadas do ciclo, ou null se o perfil for inválido.
  */
 export function calculateCycleInfo(userProfile: UserProfile): CycleInfo | null {
-  if (!userProfile?.lastMenstruationDate || !userProfile.cycleLengthDays) {
+  if (!userProfile?.lastMenstruationDate || !userProfile.cycleLengthDays || userProfile.cycleLengthDays <= 0) {
     return null;
   }
 
   const today = startOfDay(new Date());
-  // Correção: Adicionar 'T00:00:00' para garantir que a data seja interpretada no fuso horário local
-  // e não em UTC, o que causava o erro de "um dia antes".
+  // Garante que a data seja interpretada no fuso horário local, evitando erros de "um dia a menos".
   const lastPeriod = startOfDay(new Date(userProfile.lastMenstruationDate + 'T00:00:00'));
 
   // O dia atual do ciclo é a diferença de dias desde a última menstruação + 1.
   const currentCycleDay = differenceInDays(today, lastPeriod) + 1;
 
-  // Previsão da próxima menstruação
+  // Previsão da próxima menstruação, com base na duração do ciclo aprendida ou informada.
   const nextPeriodStartDate = addDays(lastPeriod, userProfile.cycleLengthDays);
   const daysUntilNextPeriod = differenceInDays(nextPeriodStartDate, today);
   const menstruationEndDate = addDays(lastPeriod, userProfile.flowDurationDays);
@@ -66,7 +65,7 @@ export function calculateCycleInfo(userProfile: UserProfile): CycleInfo | null {
   const fertileWindowStartDate = subDays(ovulationDate, 5);
   const fertileWindowEndDate = addDays(ovulationDate, 1);
   const isFertile = today >= fertileWindowStartDate && today <= fertileWindowEndDate;
-  const isOvulating = differenceInDays(today, ovulationDate) === 0;
+  const isOvulating = isSameDay(today, ovulationDate);
 
   return {
     currentCycleDay,

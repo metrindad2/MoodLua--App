@@ -15,6 +15,7 @@ import {
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { Check } from 'lucide-react';
 
 interface SimpleCalendarProps {
   initialDate?: Date;
@@ -23,6 +24,7 @@ interface SimpleCalendarProps {
   highlightedDates?: Date[];
   previsionRange?: { from: Date; to: Date };
   fertileWindow?: { from: Date; to: Date };
+  ovulationDate?: Date;
   disableFutureDates?: boolean;
 }
 
@@ -33,6 +35,7 @@ export function SimpleCalendar({
   highlightedDates,
   previsionRange,
   fertileWindow,
+  ovulationDate,
   disableFutureDates,
 }: SimpleCalendarProps) {
   const monthStart = startOfMonth(initialDate);
@@ -49,6 +52,7 @@ export function SimpleCalendar({
   }
 
   const weekdays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+  const isRegistrationMode = !!onDateClick;
 
   const isDayInPrevisionRange = (day: Date) => {
     if (!previsionRange) return false;
@@ -70,8 +74,6 @@ export function SimpleCalendar({
     if (!highlightedDates) return false;
     return highlightedDates.some((d) => isSameDay(d, day));
   };
-
-  const isRegistrationMode = !!onDateClick;
 
   return (
     <div className="text-card-foreground">
@@ -97,6 +99,7 @@ export function SimpleCalendar({
           const isDayInCurrentMonth = isSameMonth(date, monthStart);
           const isCurrentToday = isToday(date);
 
+          // Modo de Registro: Lógica para seleção de dias.
           if (isRegistrationMode) {
             if (!isDayInCurrentMonth) {
               return <div key={i} className="h-12" />;
@@ -117,16 +120,13 @@ export function SimpleCalendar({
                   className={cn(
                     'relative flex h-8 w-8 items-center justify-center rounded-full transition-colors text-sm disabled:cursor-not-allowed disabled:opacity-50',
                     'border border-input',
-                    isSelected &&
-                      'bg-primary text-primary-foreground border-primary'
+                     isSelected && 'bg-primary text-primary-foreground border-primary'
                   )}
                   aria-label={format(date, 'PPP', { locale: ptBR })}
                 >
                   <span
                     className={cn(
-                      isSelected
-                        ? 'text-primary-foreground'
-                        : 'text-foreground',
+                      isSelected ? 'text-primary-foreground' : 'text-foreground',
                       isCurrentToday && !isSelected && 'text-primary font-bold'
                     )}
                   >
@@ -141,34 +141,35 @@ export function SimpleCalendar({
               </div>
             );
           }
-
-          // Dashboard Mode
+          
+          // Modo de Dashboard: Lógica para exibir informações.
           const isHighlighted = isDayHighlighted(date);
           const isInPrevision = isDayInPrevisionRange(date);
           const isFertile = isDayInFertileWindow(date);
+          const isOvulation = ovulationDate && isSameDay(date, ovulationDate);
+
+          const dayClasses = cn(
+            'relative flex h-10 w-full items-center justify-center rounded-full',
+            // Ordem de prioridade visual:
+            // 1. Fundo para período fértil (pode ser combinado com outros)
+            isFertile && !isHighlighted && 'bg-fertile',
+            // 2. Anel para o dia atual
+            isCurrentToday && !isHighlighted && 'ring-2 ring-ring',
+            // 3. Borda para previsão
+            isInPrevision && !isHighlighted && 'border-2 border-dashed border-secondary',
+            // 4. Destaque máximo para período registrado (sobrescreve outros)
+            isHighlighted && 'bg-primary text-primary-foreground'
+          );
 
           return (
-            <div
-              key={i}
-              className={cn(
-                'relative flex h-10 w-full items-center justify-center rounded-full',
-                isCurrentToday && !isHighlighted && 'ring-2 ring-primary',
-                isFertile &&
-                  !isHighlighted &&
-                  !isInPrevision &&
-                  'bg-fertile',
-                isInPrevision &&
-                  !isHighlighted &&
-                  'border-2 border-dashed border-secondary',
-                isHighlighted && 'bg-primary text-primary-foreground'
-              )}
-              aria-label={format(date, 'PPP', { locale: ptBR })}
-            >
-              <span
-                className={cn(!isDayInCurrentMonth && 'text-muted-foreground/50')}
-              >
+            <div key={i} className={dayClasses} aria-label={format(date, 'PPP', { locale: ptBR })}>
+              <span className={cn(!isDayInCurrentMonth && 'text-muted-foreground/50')}>
                 {format(date, 'd')}
               </span>
+              {/* Indicador de ovulação (um ponto) */}
+              {isOvulation && !isHighlighted && (
+                <div className="absolute bottom-1.5 h-1.5 w-1.5 rounded-full bg-secondary" />
+              )}
             </div>
           );
         })}
