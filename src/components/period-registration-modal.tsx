@@ -111,9 +111,9 @@ export function PeriodRegistrationModal({
     onOpenChange(false);
   };
 
-  // Cria um calendário de 10 anos (120 meses) para simular rolagem "infinita"
-  const monthsToDisplay = Array.from({ length: 120 }).map((_, i) =>
-    startOfMonth(subMonths(new Date(), 60 - i))
+  // Cria um calendário de 20 anos (240 meses) para simular rolagem "infinita"
+  const monthsToDisplay = Array.from({ length: 240 }).map((_, i) =>
+    startOfMonth(subMonths(new Date(), 120 - i))
   );
 
   return (
