@@ -16,6 +16,7 @@ import {
   startOfMonth,
   startOfDay,
   addDays,
+  differenceInDays,
 } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { useToast } from '@/hooks/use-toast';
@@ -59,25 +60,34 @@ export function PeriodRegistrationModal({
       isSameDay(d, dayStart)
     );
 
-    // Se o dia clicado NÃO estiver selecionado...
+    let newSelectedDays;
+
+    // Logica Hibrida:
+    // 1. Se nenhum dia estiver selecionado, ou se o clique for longe de uma seleção existente,
+    //    cria um novo bloco automático.
+    // 2. Se o clique for para adicionar/remover dias perto de um bloco, permite edição manual.
     if (!isAlreadySelected) {
-      // E se NENHUM dia estiver selecionado, aciona a seleção automática em bloco.
-      if (selectedDays.length === 0) {
+      const isStartingNewBlock = selectedDays.length === 0 || !selectedDays.some(d => Math.abs(differenceInDays(d, dayStart)) < 15);
+      
+      if (isStartingNewBlock) {
+        // Cria um novo bloco de seleção
         const newBlock = Array.from({ length: flowDuration }).map((_, i) =>
           addDays(dayStart, i)
         );
-        setSelectedDays(newBlock);
+        newSelectedDays = [...selectedDays, ...newBlock];
+
       } else {
-        // Se já houver dias selecionados, apenas adiciona o novo dia (edição manual).
-        const newDays = [...selectedDays, dayStart];
-        setSelectedDays(newDays.sort((a, b) => a.getTime() - b.getTime()));
+        // Adiciona manualmente ao bloco existente
+         newSelectedDays = [...selectedDays, dayStart];
       }
     } else {
-      // Se o dia clicado JÁ estiver selecionado, apenas o remove (edição manual).
-      setSelectedDays(
-        selectedDays.filter((d) => !isSameDay(d, dayStart))
-      );
+      // Remove o dia clicado
+      newSelectedDays = selectedDays.filter((d) => !isSameDay(d, dayStart));
     }
+    
+    // Remove duplicados e ordena
+    const uniqueDays = Array.from(new Set(newSelectedDays.map(d => d.getTime()))).map(t => new Date(t));
+    setSelectedDays(uniqueDays.sort((a, b) => a.getTime() - b.getTime()));
   };
 
   const handleSave = () => {
@@ -126,9 +136,9 @@ export function PeriodRegistrationModal({
     onOpenChange(false);
   };
 
-  // Cria um calendário de 40 anos (480 meses) para simular rolagem "infinita"
-  const monthsToDisplay = Array.from({ length: 480 }).map((_, i) =>
-    startOfMonth(subMonths(new Date(), 240 - i))
+  // Cria um calendário de 100 anos (1200 meses) para simular rolagem "infinita"
+  const monthsToDisplay = Array.from({ length: 1200 }).map((_, i) =>
+    startOfMonth(subMonths(new Date(), 240 - i)) // 20 anos para trás, 80 para frente
   );
 
   return (
