@@ -176,6 +176,9 @@ export function SimpleCalendar({
 
       <div className="grid grid-cols-7 text-center text-sm">
         {days.map((date, i) => {
+           const isHighlighted = isDayHighlighted(date);
+           const isInPrevision = isDayInPrevisionRange(date);
+
           return (
             <div
               key={i}
@@ -183,9 +186,10 @@ export function SimpleCalendar({
                 'relative flex h-10 w-full items-center justify-center rounded-full',
                 !isSameMonth(date, currentMonth) && 'text-muted-foreground/50',
                 isToday(date) && 'ring-1 ring-primary',
-                isDayHighlighted(date) && 'bg-primary text-primary-foreground',
-                isDayInPrevisionRange(date) &&
-                  'bg-primary/30 text-primary-foreground'
+                // Aplica o estilo de previsão apenas se o dia não for um dia real de período
+                isInPrevision && !isHighlighted && 'bg-primary/30',
+                // O estilo de período registrado (real) tem prioridade
+                isHighlighted && 'bg-primary text-primary-foreground'
               )}
               aria-label={format(date, 'PPP', { locale: ptBR })}
             >
