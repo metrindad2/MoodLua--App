@@ -53,32 +53,31 @@ export function PeriodRegistrationModal({
 
   const handleDayClick = (day: Date) => {
     const dayStart = startOfDay(day);
-    // Pega a duração do fluxo do perfil, com um valor padrão de 5 dias.
     const flowDuration = userProfile?.flowDurationDays || 5;
 
-    setSelectedDays((prevSelectedDays) => {
-      const isAlreadySelected = prevSelectedDays.some((d) =>
-        isSameDay(d, dayStart)
-      );
+    const isAlreadySelected = selectedDays.some((d) =>
+      isSameDay(d, dayStart)
+    );
 
-      // Se o dia clicado NÃO estiver selecionado...
-      if (!isAlreadySelected) {
-        // E se NENHUM dia estiver selecionado, aciona a seleção automática em bloco.
-        if (prevSelectedDays.length === 0) {
-          const newBlock = Array.from({ length: flowDuration }).map((_, i) =>
-            addDays(dayStart, i)
-          );
-          return newBlock;
-        } else {
-          // Se já houver dias selecionados, apenas adiciona o novo dia (edição manual).
-          const newDays = [...prevSelectedDays, dayStart];
-          return newDays.sort((a, b) => a.getTime() - b.getTime());
-        }
+    // Se o dia clicado NÃO estiver selecionado...
+    if (!isAlreadySelected) {
+      // E se NENHUM dia estiver selecionado, aciona a seleção automática em bloco.
+      if (selectedDays.length === 0) {
+        const newBlock = Array.from({ length: flowDuration }).map((_, i) =>
+          addDays(dayStart, i)
+        );
+        setSelectedDays(newBlock);
       } else {
-        // Se o dia clicado JÁ estiver selecionado, apenas o remove (edição manual).
-        return prevSelectedDays.filter((d) => !isSameDay(d, dayStart));
+        // Se já houver dias selecionados, apenas adiciona o novo dia (edição manual).
+        const newDays = [...selectedDays, dayStart];
+        setSelectedDays(newDays.sort((a, b) => a.getTime() - b.getTime()));
       }
-    });
+    } else {
+      // Se o dia clicado JÁ estiver selecionado, apenas o remove (edição manual).
+      setSelectedDays(
+        selectedDays.filter((d) => !isSameDay(d, dayStart))
+      );
+    }
   };
 
   const handleSave = () => {
@@ -112,8 +111,9 @@ export function PeriodRegistrationModal({
     onOpenChange(false);
   };
 
-  const monthsToDisplay = Array.from({ length: 60 }).map((_, i) =>
-    startOfMonth(subMonths(new Date(), 30 - i))
+  // Cria um calendário de 10 anos (120 meses) para simular rolagem "infinita"
+  const monthsToDisplay = Array.from({ length: 120 }).map((_, i) =>
+    startOfMonth(subMonths(new Date(), 60 - i))
   );
 
   return (
