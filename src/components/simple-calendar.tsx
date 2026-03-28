@@ -17,7 +17,7 @@ import {
   subMonths,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
 
@@ -123,7 +123,7 @@ export function SimpleCalendar({
                     isInPrevision &&
                       !isSelected &&
                       'border-dashed border-primary',
-                    // Selected style (filled with checkmark)
+                    // Selected style (filled)
                     isSelected &&
                       'bg-primary text-primary-foreground border-primary'
                   )}
@@ -136,7 +136,6 @@ export function SimpleCalendar({
                   >
                     {format(date, 'd')}
                   </span>
-                  {isSelected && <Check className="h-4 w-4" />}
                 </button>
                 {isCurrentToday && (
                   <span className="text-[9px] font-bold text-primary mt-1 select-none">

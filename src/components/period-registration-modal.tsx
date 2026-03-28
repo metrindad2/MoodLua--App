@@ -93,8 +93,8 @@ export function PeriodRegistrationModal({
     onOpenChange(false);
   };
 
-  const monthsToDisplay = Array.from({ length: 24 }).map((_, i) =>
-    startOfMonth(subMonths(new Date(), 12 - i))
+  const monthsToDisplay = Array.from({ length: 60 }).map((_, i) =>
+    startOfMonth(subMonths(new Date(), 30 - i))
   );
 
   return (
