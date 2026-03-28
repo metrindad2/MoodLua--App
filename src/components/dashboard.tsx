@@ -32,33 +32,6 @@ export default function Dashboard() {
     ? 'TPM / Lútea'
     : 'Folicular';
 
-  // --- Lógica de Destaque Dinâmico ---
-  const predictedEndDate = subDays(cycleInfo.menstruationEndDate, 1);
-
-  const periodLogs = dailyLogs.filter(log => {
-      const logDate = startOfDay(new Date(log.date + 'T00:00:00'));
-      return logDate >= cycleInfo.menstruationStartDate && log.flowIntensity && log.flowIntensity !== 'nenhum';
-  });
-
-  let lastLoggedFlowDate = null;
-  if (periodLogs.length > 0) {
-      lastLoggedFlowDate = periodLogs.reduce((latest, current) => {
-          const latestDate = startOfDay(new Date(latest.date + 'T00:00:00'));
-          const currentDate = startOfDay(new Date(current.date + 'T00:00:00'));
-          return isAfter(currentDate, latestDate) ? current : latest;
-      }).date;
-  }
-  
-  const highlightEndDate = lastLoggedFlowDate && isAfter(startOfDay(new Date(lastLoggedFlowDate + 'T00:00:00')), predictedEndDate) 
-      ? startOfDay(new Date(lastLoggedFlowDate + 'T00:00:00')) 
-      : predictedEndDate;
-
-  const highlightedRange = {
-    from: cycleInfo.menstruationStartDate,
-    to: highlightEndDate,
-  };
-  // --- Fim da Lógica de Destaque Dinâmico ---
-
   const previsionRange = {
     from: cycleInfo.nextPeriodStartDate,
     to: addDays(
@@ -66,6 +39,10 @@ export default function Dashboard() {
       userProfile.flowDurationDays - 1
     ),
   };
+  
+  const highlightedDays = dailyLogs
+    .filter((log) => log.flowIntensity && log.flowIntensity !== 'nenhum')
+    .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
 
   const sortedHistory = [...cycleHistory]
     .sort((a, b) => new Date(b.startDate + 'T00:00:00').getTime() - new Date(a.startDate + 'T00:00:00').getTime())
@@ -87,7 +64,7 @@ export default function Dashboard() {
             <CardContent className="p-2 pt-4">
               <SimpleCalendar
                 initialDate={new Date()}
-                highlightedRange={highlightedRange}
+                highlightedDates={highlightedDays}
                 previsionRange={previsionRange}
               />
               <div className="flex items-center justify-between gap-6 px-2 text-sm border-b pb-4 mb-4">

@@ -13,7 +13,7 @@ import {
   CycleLog,
   EmergencyContact,
 } from '@/lib/types';
-import { format, differenceInDays, startOfDay } from 'date-fns';
+import { format, differenceInDays, startOfDay, isSameDay, addDays } from 'date-fns';
 import { DEFAULT_SOS_MESSAGE } from '@/lib/config';
 
 // Combined data structure for localStorage
@@ -49,6 +49,58 @@ const CycleDataContext = createContext<CycleDataContextType | undefined>(
 );
 
 const LOCAL_STORAGE_KEY = 'moodLuaLocalData';
+
+// --- Helper function for cycle recalculation ---
+const _recalculateCyclesFromLogs = (
+  logs: DailyLog[],
+  currentProfile: UserProfile | null
+) => {
+  if (!currentProfile) return { newCycleHistory: [], newLmp: null };
+
+  const periodDays = logs
+    .filter((log) => log.flowIntensity && log.flowIntensity !== 'nenhum')
+    .map((log) => startOfDay(new Date(`${log.date}T00:00:00`)))
+    .sort((a, b) => a.getTime() - b.getTime());
+
+  if (periodDays.length === 0) {
+    // Se não há dias de período, retorna o LMP original para não perder a referência
+    return { newCycleHistory: [], newLmp: currentProfile.lastMenstruationDate };
+  }
+
+  const periodStartDates: Date[] = [];
+  if (periodDays.length > 0) {
+    periodStartDates.push(periodDays[0]);
+    for (let i = 1; i < periodDays.length; i++) {
+      // Se a diferença para o dia anterior for maior que 2 dias, considera um novo ciclo.
+      if (differenceInDays(periodDays[i], periodDays[i - 1]) > 2) {
+        periodStartDates.push(periodDays[i]);
+      }
+    }
+  }
+
+  const newCycleHistory: CycleLog[] = [];
+  for (let i = 0; i < periodStartDates.length - 1; i++) {
+    const cycleStartDate = periodStartDates[i];
+    const nextCycleStartDate = periodStartDates[i + 1];
+    const cycleLength = differenceInDays(nextCycleStartDate, cycleStartDate);
+
+    // Apenas adiciona ao histórico se o ciclo tiver um comprimento razoável
+    if (cycleLength > 10) {
+      newCycleHistory.push({
+        startDate: format(cycleStartDate, 'yyyy-MM-dd'),
+        cycleLength: cycleLength,
+      });
+    }
+  }
+
+  const newLmp =
+    periodStartDates.length > 0
+      ? format(periodStartDates[periodStartDates.length - 1], 'yyyy-MM-dd')
+      : currentProfile.lastMenstruationDate;
+
+  return { newCycleHistory, newLmp };
+};
+
 
 export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -87,15 +139,28 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   // Save data to localStorage whenever it changes
   useEffect(() => {
     if (!loading) {
+      // Before saving, run recalculation to ensure consistency
+      const { newCycleHistory, newLmp } = _recalculateCyclesFromLogs(dailyLogs, userProfile);
+      
+      const consistentProfile = userProfile && newLmp ? { ...userProfile, lastMenstruationDate: newLmp } : userProfile;
+
       const dataToSave: MoodLuaLocalData = {
-        userProfile,
+        userProfile: consistentProfile,
         dailyLogs,
-        cycleHistory,
+        cycleHistory: newCycleHistory,
         pregnancyLmpDate,
         sosContacts,
       };
       try {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
+        // Also update state to reflect the recalculation
+        if (JSON.stringify(newCycleHistory) !== JSON.stringify(cycleHistory)) {
+          setCycleHistory(newCycleHistory);
+        }
+        if (consistentProfile && JSON.stringify(consistentProfile) !== JSON.stringify(userProfile)) {
+          setUserProfile(consistentProfile);
+        }
+
       } catch (error) {
         console.error('Failed to save local data', error);
       }
@@ -146,32 +211,43 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         );
         const newLog = { ...log, date: dateString };
 
+        let updatedLogs;
+
         if (existingLogIndex > -1) {
-          const updatedLogs = [...prevLogs];
+          updatedLogs = [...prevLogs];
           const currentLog = updatedLogs[existingLogIndex];
           const mergedLog = { ...currentLog, ...newLog };
-          // Clean up undefined properties if a log is being cleared
+          
           for (const key in mergedLog) {
             if (mergedLog[key as keyof typeof mergedLog] === undefined) {
               delete mergedLog[key as keyof typeof mergedLog];
             }
           }
-          // If the merged log only has a date, it means all data was cleared, so remove it
+          
           if (Object.keys(mergedLog).length <= 1) {
-             return updatedLogs.filter((_, index) => index !== existingLogIndex);
+             updatedLogs = updatedLogs.filter((_, index) => index !== existingLogIndex);
+          } else {
+             updatedLogs[existingLogIndex] = mergedLog;
           }
-          updatedLogs[existingLogIndex] = mergedLog;
-          return updatedLogs;
         } else {
-          // Don't add a new log if it only contains the date (i.e., it's empty)
-           if (Object.keys(newLog).length <= 1) {
+          if (Object.keys(newLog).length <= 1) {
             return prevLogs;
           }
-          return [...prevLogs, newLog];
+          updatedLogs = [...prevLogs, newLog];
         }
+
+        // --- Recalculate cycle history after updating logs ---
+        const { newCycleHistory, newLmp } = _recalculateCyclesFromLogs(updatedLogs, userProfile);
+        setCycleHistory(newCycleHistory);
+        if (userProfile && newLmp) {
+          setUserProfile(p => p ? { ...p, lastMenstruationDate: newLmp } : null);
+        }
+        // --- End Recalculation ---
+
+        return updatedLogs;
       });
     },
-    []
+    [userProfile]
   );
 
   const removeDailyLog = useCallback(
@@ -189,41 +265,14 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   const startNewCycle = useCallback(
     (newStartDate: Date) => {
       if (!userProfile) return;
-
-      const allKnownStartDates = [
-        ...cycleHistory.map((c) => c.startDate),
-        userProfile.lastMenstruationDate,
-        format(newStartDate, 'yyyy-MM-dd'),
-      ];
-
-      const uniqueSortedDates = [...new Set(allKnownStartDates)]
-        .map((dateStr) => startOfDay(new Date(`${dateStr}T00:00:00`)))
-        .sort((a, b) => a.getTime() - b.getTime());
-
-      const newLmpDate = uniqueSortedDates[uniqueSortedDates.length - 1];
-      const newLmpDateStr = format(newLmpDate, 'yyyy-MM-dd');
-
-      const newCycleHistory: CycleLog[] = [];
-      for (let i = 0; i < uniqueSortedDates.length - 1; i++) {
-        const cycleStartDate = uniqueSortedDates[i];
-        const nextCycleStartDate = uniqueSortedDates[i + 1];
-        const cycleLength = differenceInDays(
-          nextCycleStartDate,
-          cycleStartDate
-        );
-
-        if (cycleLength > 10) {
-          newCycleHistory.push({
-            startDate: format(cycleStartDate, 'yyyy-MM-dd'),
-            cycleLength: cycleLength,
-          });
-        }
-      }
-
-      setCycleHistory(newCycleHistory);
-      updateUserProfile({ lastMenstruationDate: newLmpDateStr });
+       // Simply log the new start date as a period day.
+      // The recalculation logic inside addOrUpdateDailyLog will handle the rest.
+      addOrUpdateDailyLog({
+        date: newStartDate,
+        flowIntensity: 'médio' // Assume 'médio' as a default when starting a cycle this way
+      });
     },
-    [userProfile, cycleHistory, updateUserProfile]
+    [userProfile, addOrUpdateDailyLog]
   );
 
   const updatePregnancyLmpDate = (date: string | null) => {

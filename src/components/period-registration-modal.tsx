@@ -10,7 +10,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { addDays, isSameDay, subMonths, startOfMonth, startOfDay } from 'date-fns';
+import { isSameDay, subMonths, startOfMonth, startOfDay } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { useToast } from '@/hooks/use-toast';
 import { SimpleCalendar } from './simple-calendar';
@@ -31,7 +31,7 @@ export function PeriodRegistrationModal({
   onOpenChange,
   previsionRange,
 }: PeriodRegistrationModalProps) {
-  const { dailyLogs, addOrUpdateDailyLog, startNewCycle, userProfile } = useCycleData();
+  const { dailyLogs, addOrUpdateDailyLog } = useCycleData();
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
   const { toast } = useToast();
 
@@ -46,23 +46,20 @@ export function PeriodRegistrationModal({
   }, [open, dailyLogs]);
 
   const handleDayClick = (day: Date) => {
-    if (!userProfile) return;
-
     const dayStart = startOfDay(day);
-    const flowDuration = userProfile.flowDurationDays;
-
-    // Se clicar no primeiro dia do intervalo selecionado, limpa a seleção.
-    if (selectedDays.length > 0 && isSameDay(selectedDays[0], dayStart)) {
-      setSelectedDays([]);
-      return;
-    }
-    
-    // Caso contrário, cria um novo intervalo a partir do dia clicado.
-    const newSelectedDays = [];
-    for (let i = 0; i < flowDuration; i++) {
-      newSelectedDays.push(addDays(dayStart, i));
-    }
-    setSelectedDays(newSelectedDays);
+    setSelectedDays(prevSelectedDays => {
+      const isAlreadySelected = prevSelectedDays.some(d => isSameDay(d, dayStart));
+      let newDays;
+      if (isAlreadySelected) {
+        // Se o dia já está selecionado, remove
+        newDays = prevSelectedDays.filter(d => !isSameDay(d, dayStart));
+      } else {
+        // Se o dia não está selecionado, adiciona
+        newDays = [...prevSelectedDays, dayStart];
+      }
+      // Mantém o array de datas ordenado
+      return newDays.sort((a, b) => a.getTime() - b.getTime());
+    });
   };
 
   const handleSave = () => {
@@ -88,11 +85,6 @@ export function PeriodRegistrationModal({
       }
     }
 
-    if (selectedDays.length > 0) {
-      const newStartDate = selectedDays[0];
-      startNewCycle(newStartDate);
-    }
-
     toast({
       title: 'Período registrado!',
       description: `Seu calendário e ciclo foram atualizados.`,
@@ -101,8 +93,8 @@ export function PeriodRegistrationModal({
     onOpenChange(false);
   };
 
-  const monthsToDisplay = Array.from({ length: 6 }).map((_, i) =>
-    startOfMonth(subMonths(new Date(), 3 - i))
+  const monthsToDisplay = Array.from({ length: 24 }).map((_, i) =>
+    startOfMonth(subMonths(new Date(), 12 - i))
   );
 
   return (

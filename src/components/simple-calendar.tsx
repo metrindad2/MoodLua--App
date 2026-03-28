@@ -25,10 +25,7 @@ interface SimpleCalendarProps {
   initialDate?: Date;
   selectedDates?: Date[];
   onDateClick?: (date: Date) => void;
-  highlightedRange?: {
-    from: Date;
-    to: Date;
-  };
+  highlightedDates?: Date[];
   previsionRange?: {
     from: Date;
     to: Date;
@@ -40,7 +37,7 @@ export function SimpleCalendar({
   initialDate = new Date(),
   selectedDates,
   onDateClick,
-  highlightedRange,
+  highlightedDates,
   previsionRange,
   disableFutureDates,
 }: SimpleCalendarProps) {
@@ -72,13 +69,10 @@ export function SimpleCalendar({
   };
 
   const isDayHighlighted = (day: Date) => {
-    if (!highlightedRange) return false;
-    const from = startOfDay(highlightedRange.from);
-    const to = startOfDay(highlightedRange.to);
-    const current = startOfDay(day);
-    return current >= from && current <= to;
+    if (!highlightedDates) return false;
+    return highlightedDates.some(d => isSameDay(d, day));
   };
-
+  
   const goToNextMonth = () => setDisplayMonth(addMonths(displayMonth, 1));
   const goToPreviousMonth = () => setDisplayMonth(subMonths(displayMonth, 1));
 
