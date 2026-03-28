@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   format,
   startOfMonth,
@@ -12,10 +13,13 @@ import {
   isToday,
   startOfDay,
   isAfter,
+  addMonths,
+  subMonths,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Check } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from './ui/button';
 
 interface SimpleCalendarProps {
   initialDate?: Date;
@@ -40,7 +44,9 @@ export function SimpleCalendar({
   previsionRange,
   disableFutureDates,
 }: SimpleCalendarProps) {
-  const currentMonth = startOfMonth(initialDate);
+  const [displayMonth, setDisplayMonth] = useState(startOfMonth(initialDate));
+
+  const currentMonth = onDateClick ? startOfMonth(initialDate) : displayMonth;
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(monthStart);
@@ -71,13 +77,16 @@ export function SimpleCalendar({
     const to = startOfDay(highlightedRange.to);
     const current = startOfDay(day);
     return current >= from && current <= to;
-  }
+  };
+
+  const goToNextMonth = () => setDisplayMonth(addMonths(displayMonth, 1));
+  const goToPreviousMonth = () => setDisplayMonth(subMonths(displayMonth, 1));
 
   // A modal de registro não usa o `highlightedRange`, apenas o calendário do dashboard.
   // Se o onDateClick for fornecido, estamos no modo de seleção (modal).
   if (onDateClick) {
     return (
-       <div className="text-card-foreground">
+      <div className="text-card-foreground">
         <h2 className="text-xl font-semibold capitalize text-center mb-4">
           {format(currentMonth, 'MMMM', { locale: ptBR })}
         </h2>
@@ -97,35 +106,44 @@ export function SimpleCalendar({
             if (!isDayInCurrentMonth) {
               return <div key={i} className="h-12" />;
             }
-            
-            const isFuture = disableFutureDates && isAfter(startOfDay(date), startOfDay(new Date()));
-            const isSelected = selectedDates?.some(d => isSameDay(d, date));
+
+            const isFuture =
+              disableFutureDates && isAfter(startOfDay(date), startOfDay(new Date()));
+            const isSelected = selectedDates?.some((d) => isSameDay(d, date));
             const isInPrevision = isDayInPrevisionRange(date);
             const isCurrentToday = isToday(date);
-            
+
             return (
-              <div key={i} className="flex flex-col items-center justify-start h-12 pt-1">
-                  <button
-                    onClick={() => onDateClick?.(date)}
-                    disabled={isFuture}
+              <div
+                key={i}
+                className="flex flex-col items-center justify-start h-12 pt-1"
+              >
+                <button
+                  onClick={() => onDateClick?.(date)}
+                  disabled={isFuture}
+                  className={cn(
+                    'relative flex h-8 w-8 items-center justify-center rounded-full transition-colors text-sm disabled:cursor-not-allowed disabled:opacity-50',
+                    // Default empty circle
+                    'border border-muted-foreground',
+                    // Dotted for prevision
+                    isInPrevision &&
+                      !isSelected &&
+                      'border-dashed border-primary',
+                    // Selected style (filled with checkmark)
+                    isSelected &&
+                      'bg-primary text-primary-foreground border-primary'
+                  )}
+                  aria-label={format(date, 'PPP', { locale: ptBR })}
+                >
+                  <span
                     className={cn(
-                      'relative flex h-8 w-8 items-center justify-center rounded-full transition-colors text-sm disabled:cursor-not-allowed disabled:opacity-50',
-                      // Default empty circle
-                      'border border-muted-foreground',
-                      // Dotted for prevision
-                      isInPrevision && !isSelected && 'border-dashed border-primary',
-                      // Selected style (filled with checkmark)
-                      isSelected && 'bg-primary text-primary-foreground border-primary',
-                    )}
-                    aria-label={format(date, 'PPP', { locale: ptBR })}
-                  >
-                    <span className={cn(
                       isCurrentToday && !isSelected && 'text-primary font-bold'
-                    )}>
-                      {format(date, 'd')}
-                    </span>
-                    {isSelected && <Check className="h-4 w-4" />}
-                  </button>
+                    )}
+                  >
+                    {format(date, 'd')}
+                  </span>
+                  {isSelected && <Check className="h-4 w-4" />}
+                </button>
                 {isCurrentToday && (
                   <span className="text-[9px] font-bold text-primary mt-1 select-none">
                     HOJE
@@ -136,21 +154,27 @@ export function SimpleCalendar({
           })}
         </div>
       </div>
-    )
+    );
   }
 
-  // --- Calendário Original do Dashboard ---
+  // --- Calendário do Dashboard ---
   return (
     <div className="rounded-lg bg-card text-card-foreground">
-      <div className="flex items-center justify-center mb-4 px-2">
+      <div className="flex items-center justify-between mb-4 px-2">
+        <Button variant="ghost" size="icon" onClick={goToPreviousMonth}>
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
         <h2 className="text-lg font-semibold capitalize text-center">
           {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
         </h2>
+        <Button variant="ghost" size="icon" onClick={goToNextMonth}>
+          <ChevronRight className="h-5 w-5" />
+        </Button>
       </div>
 
       <div className="grid grid-cols-7 text-center text-sm text-muted-foreground">
-        {weekdays.map((weekday) => (
-          <div key={weekday} className="py-2 font-medium">
+        {weekdays.map((weekday, i) => (
+          <div key={i} className="py-2 font-medium">
             {weekday}
           </div>
         ))}
@@ -166,7 +190,8 @@ export function SimpleCalendar({
                 !isSameMonth(date, currentMonth) && 'text-muted-foreground/50',
                 isToday(date) && 'ring-1 ring-primary',
                 isDayHighlighted(date) && 'bg-primary text-primary-foreground',
-                isDayInPrevisionRange(date) && 'bg-primary/30 text-primary-foreground',
+                isDayInPrevisionRange(date) &&
+                  'bg-primary/30 text-primary-foreground'
               )}
               aria-label={format(date, 'PPP', { locale: ptBR })}
             >
