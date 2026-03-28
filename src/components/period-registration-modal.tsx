@@ -10,7 +10,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { isSameDay, subMonths, startOfMonth, startOfDay } from 'date-fns';
+import { addDays, isSameDay, subMonths, startOfMonth, startOfDay } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { useToast } from '@/hooks/use-toast';
 import { SimpleCalendar } from './simple-calendar';
@@ -31,7 +31,7 @@ export function PeriodRegistrationModal({
   onOpenChange,
   previsionRange,
 }: PeriodRegistrationModalProps) {
-  const { dailyLogs, addOrUpdateDailyLog, startNewCycle } = useCycleData();
+  const { dailyLogs, addOrUpdateDailyLog, startNewCycle, userProfile } = useCycleData();
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
   const { toast } = useToast();
 
@@ -46,14 +46,23 @@ export function PeriodRegistrationModal({
   }, [open, dailyLogs]);
 
   const handleDayClick = (day: Date) => {
+    if (!userProfile) return;
+
     const dayStart = startOfDay(day);
-    setSelectedDays((prev) => {
-      if (prev.some((d) => isSameDay(d, dayStart))) {
-        return prev.filter((d) => !isSameDay(d, dayStart));
-      } else {
-        return [...prev, dayStart].sort((a, b) => a.getTime() - b.getTime());
-      }
-    });
+    const flowDuration = userProfile.flowDurationDays;
+
+    // Se clicar no primeiro dia do intervalo selecionado, limpa a seleção.
+    if (selectedDays.length > 0 && isSameDay(selectedDays[0], dayStart)) {
+      setSelectedDays([]);
+      return;
+    }
+    
+    // Caso contrário, cria um novo intervalo a partir do dia clicado.
+    const newSelectedDays = [];
+    for (let i = 0; i < flowDuration; i++) {
+      newSelectedDays.push(addDays(dayStart, i));
+    }
+    setSelectedDays(newSelectedDays);
   };
 
   const handleSave = () => {
