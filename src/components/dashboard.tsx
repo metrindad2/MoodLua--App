@@ -6,18 +6,20 @@ import { CycleProgress } from './cycle-progress';
 import { PhaseTips } from './phase-tips';
 import { DailyTracker } from './daily-tracker';
 import { SimpleCalendar } from './simple-calendar';
-import { addDays, subDays, startOfDay, isAfter, format } from 'date-fns';
+import { addDays, subMonths, startOfMonth, format, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card, CardContent } from './ui/card';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from './ui/button';
 import { PeriodRegistrationModal } from './period-registration-modal';
 import { History } from 'lucide-react';
 import Link from 'next/link';
+import { ScrollArea } from './ui/scroll-area';
 
 export default function Dashboard() {
   const { userProfile, dailyLogs, cycleHistory } = useCycleData();
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   if (!userProfile) return null;
 
@@ -53,6 +55,10 @@ export default function Dashboard() {
     .sort((a, b) => new Date(b.startDate + 'T00:00:00').getTime() - new Date(a.startDate + 'T00:00:00').getTime())
     .slice(0, 1);
 
+  const monthsToDisplay = Array.from({ length: 1200 }).map((_, i) =>
+    startOfMonth(subMonths(new Date(), 240 - i))
+  );
+  
   return (
     <>
       <div className="p-4 space-y-8">
@@ -66,14 +72,22 @@ export default function Dashboard() {
         <PhaseTips phase={phase} />
         
         <Card>
-            <CardContent className="p-2 pt-4">
-              <SimpleCalendar
-                initialDate={new Date()}
-                highlightedDates={highlightedDays}
-                previsionRange={previsionRange}
-                fertileWindow={fertileWindow}
-              />
-              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 px-2 text-sm border-b pb-4 mb-4">
+          <CardContent className="p-0">
+            <ScrollArea className="h-[450px] w-full">
+              <div className="p-4 space-y-6">
+                {monthsToDisplay.map((month) => (
+                    <SimpleCalendar
+                      key={month.toISOString()}
+                      initialDate={month}
+                      highlightedDates={highlightedDays}
+                      previsionRange={previsionRange}
+                      fertileWindow={fertileWindow}
+                    />
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="p-4 border-t space-y-4">
+              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-primary"></div>
                   <span>Período</span>
@@ -87,17 +101,16 @@ export default function Dashboard() {
                   <span>Fértil</span>
                 </div>
               </div>
-              <div className="px-2 pt-2">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setIsRegistrationOpen(true)}
-                >
-                  Registrar ou Editar Período
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setIsRegistrationOpen(true)}
+              >
+                Registrar ou Editar Período
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         <DailyTracker />
 
