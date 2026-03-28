@@ -37,7 +37,7 @@ export function PeriodRegistrationModal({
   onOpenChange,
   previsionRange,
 }: PeriodRegistrationModalProps) {
-  const { dailyLogs, addOrUpdateDailyLog, userProfile } = useCycleData();
+  const { dailyLogs, addOrUpdateDailyLog, startNewCycle, userProfile, cycleHistory } = useCycleData();
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
   const { toast } = useToast();
 
@@ -89,12 +89,27 @@ export function PeriodRegistrationModal({
       ...new Set([...originallyLogged, ...selectedDays].map((d) => d.getTime())),
     ].map((t) => new Date(t));
 
+    // Find the earliest new selected day to see if we need to start a new cycle.
+    const newPeriodStartDays = selectedDays.filter(d => !originallyLogged.some(o => isSameDay(o, d)));
+    const earliestNewDay = newPeriodStartDays.length > 0 
+      ? newPeriodStartDays.sort((a,b) => a.getTime() - b.getTime())[0]
+      : null;
+
+    // A new cycle starts if the user adds a flow day and that day is before any other logged flow day in its new block.
+    if (earliestNewDay) {
+        const isNewCycle = !cycleHistory.some(c => isSameDay(new Date(c.startDate + 'T00:00:00'), earliestNewDay));
+        if (isNewCycle) {
+            startNewCycle(earliestNewDay);
+        }
+    }
+
     for (const day of allPotentiallyChangedDays) {
       const isNowSelected = selectedDays.some((d) => isSameDay(d, day));
       const wasOriginallySelected = originallyLogged.some((d) =>
         isSameDay(d, day)
       );
 
+      // Only update if the state has changed
       if (isNowSelected !== wasOriginallySelected) {
         addOrUpdateDailyLog({
           date: day,
@@ -111,9 +126,9 @@ export function PeriodRegistrationModal({
     onOpenChange(false);
   };
 
-  // Cria um calendário de 20 anos (240 meses) para simular rolagem "infinita"
-  const monthsToDisplay = Array.from({ length: 240 }).map((_, i) =>
-    startOfMonth(subMonths(new Date(), 120 - i))
+  // Cria um calendário de 40 anos (480 meses) para simular rolagem "infinita"
+  const monthsToDisplay = Array.from({ length: 480 }).map((_, i) =>
+    startOfMonth(subMonths(new Date(), 240 - i))
   );
 
   return (

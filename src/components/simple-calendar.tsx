@@ -95,7 +95,7 @@ export function SimpleCalendar({
     return (
       <div className="text-card-foreground">
         <h2 className="text-xl font-semibold capitalize text-center mb-4">
-          {format(currentMonth, 'MMMM', { locale: ptBR })}
+          {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
         </h2>
 
         <div className="grid grid-cols-7 text-center text-sm text-muted-foreground">
@@ -118,7 +118,6 @@ export function SimpleCalendar({
               disableFutureDates &&
               isAfter(startOfDay(date), startOfDay(new Date()));
             const isSelected = selectedDates?.some((d) => isSameDay(d, date));
-            const isInPrevision = isDayInPrevisionRange(date);
             const isCurrentToday = isToday(date);
 
             return (
@@ -133,10 +132,6 @@ export function SimpleCalendar({
                     'relative flex h-8 w-8 items-center justify-center rounded-full transition-colors text-sm disabled:cursor-not-allowed disabled:opacity-50',
                     // Default empty circle
                     'border border-muted-foreground',
-                    // Dotted for prevision
-                    isInPrevision &&
-                      !isSelected &&
-                      'border-dashed border-secondary',
                     // Selected style (filled)
                     isSelected && 'bg-primary text-primary-foreground border-primary'
                   )}
@@ -202,7 +197,8 @@ export function SimpleCalendar({
                   !isHighlighted &&
                   'ring-2 ring-primary',
                 // Style precedence: 1. Period, 2. Fertile, 3. Prevision
-                isFertile && !isHighlighted && 'bg-fertile', // Fertile background
+                isFertile && !isHighlighted && !isHighlighted && 'bg-fertile', // Fertile background
+                // This is the important change from previous fix
                 isHighlighted && 'bg-primary text-primary-foreground', // Menstruation (overrides fertile bg)
                 // borders on top
                 isInPrevision &&
