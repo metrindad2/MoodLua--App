@@ -44,6 +44,11 @@ export default function Dashboard() {
     .filter((log) => log.flowIntensity && log.flowIntensity !== 'nenhum')
     .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
 
+  const fertileWindow = {
+    from: cycleInfo.fertileWindowStartDate,
+    to: cycleInfo.fertileWindowEndDate,
+  };
+
   const sortedHistory = [...cycleHistory]
     .sort((a, b) => new Date(b.startDate + 'T00:00:00').getTime() - new Date(a.startDate + 'T00:00:00').getTime())
     .slice(0, 1);
@@ -66,15 +71,20 @@ export default function Dashboard() {
                 initialDate={new Date()}
                 highlightedDates={highlightedDays}
                 previsionRange={previsionRange}
+                fertileWindow={fertileWindow}
               />
-              <div className="flex items-center justify-between gap-6 px-2 text-sm border-b pb-4 mb-4">
+              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 px-2 text-sm border-b pb-4 mb-4">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-primary"></div>
                   <span>Período</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-primary/30"></div>
+                    <div className="w-3 h-3 rounded-full border-2 border-dashed border-secondary"></div>
                   <span>Previsão</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-fertile"></div>
+                  <span>Fértil</span>
                 </div>
               </div>
               <div className="px-2 pt-2">

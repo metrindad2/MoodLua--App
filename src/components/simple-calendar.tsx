@@ -30,6 +30,10 @@ interface SimpleCalendarProps {
     from: Date;
     to: Date;
   };
+  fertileWindow?: {
+    from: Date;
+    to: Date;
+  };
   disableFutureDates?: boolean;
 }
 
@@ -39,6 +43,7 @@ export function SimpleCalendar({
   onDateClick,
   highlightedDates,
   previsionRange,
+  fertileWindow,
   disableFutureDates,
 }: SimpleCalendarProps) {
   const [displayMonth, setDisplayMonth] = useState(startOfMonth(initialDate));
@@ -68,11 +73,19 @@ export function SimpleCalendar({
     return current >= from && current <= to;
   };
 
+  const isDayInFertileWindow = (day: Date) => {
+    if (!fertileWindow) return false;
+    const from = startOfDay(fertileWindow.from);
+    const to = startOfDay(fertileWindow.to);
+    const current = startOfDay(day);
+    return current >= from && current <= to;
+  };
+
   const isDayHighlighted = (day: Date) => {
     if (!highlightedDates) return false;
-    return highlightedDates.some(d => isSameDay(d, day));
+    return highlightedDates.some((d) => isSameDay(d, day));
   };
-  
+
   const goToNextMonth = () => setDisplayMonth(addMonths(displayMonth, 1));
   const goToPreviousMonth = () => setDisplayMonth(subMonths(displayMonth, 1));
 
@@ -102,7 +115,8 @@ export function SimpleCalendar({
             }
 
             const isFuture =
-              disableFutureDates && isAfter(startOfDay(date), startOfDay(new Date()));
+              disableFutureDates &&
+              isAfter(startOfDay(date), startOfDay(new Date()));
             const isSelected = selectedDates?.some((d) => isSameDay(d, date));
             const isInPrevision = isDayInPrevisionRange(date);
             const isCurrentToday = isToday(date);
@@ -122,10 +136,9 @@ export function SimpleCalendar({
                     // Dotted for prevision
                     isInPrevision &&
                       !isSelected &&
-                      'border-dashed border-primary',
+                      'border-dashed border-secondary',
                     // Selected style (filled)
-                    isSelected &&
-                      'bg-primary text-primary-foreground border-primary'
+                    isSelected && 'bg-primary text-primary-foreground border-primary'
                   )}
                   aria-label={format(date, 'PPP', { locale: ptBR })}
                 >
@@ -175,8 +188,9 @@ export function SimpleCalendar({
 
       <div className="grid grid-cols-7 text-center text-sm">
         {days.map((date, i) => {
-           const isHighlighted = isDayHighlighted(date);
-           const isInPrevision = isDayInPrevisionRange(date);
+          const isHighlighted = isDayHighlighted(date);
+          const isInPrevision = isDayInPrevisionRange(date);
+          const isFertile = isDayInFertileWindow(date);
 
           return (
             <div
@@ -184,11 +198,16 @@ export function SimpleCalendar({
               className={cn(
                 'relative flex h-10 w-full items-center justify-center rounded-full',
                 !isSameMonth(date, currentMonth) && 'text-muted-foreground/50',
-                isToday(date) && 'ring-1 ring-primary',
-                // Aplica o estilo de previsão apenas se o dia não for um dia real de período
-                isInPrevision && !isHighlighted && 'bg-primary/30',
-                // O estilo de período registrado (real) tem prioridade
-                isHighlighted && 'bg-primary text-primary-foreground'
+                isToday(date) &&
+                  !isHighlighted &&
+                  'ring-2 ring-primary',
+                // Style precedence: 1. Period, 2. Fertile, 3. Prevision
+                isFertile && !isHighlighted && 'bg-fertile', // Fertile background
+                isHighlighted && 'bg-primary text-primary-foreground', // Menstruation (overrides fertile bg)
+                // borders on top
+                isInPrevision &&
+                  !isHighlighted &&
+                  'border-2 border-dashed border-secondary' // Prevision
               )}
               aria-label={format(date, 'PPP', { locale: ptBR })}
             >

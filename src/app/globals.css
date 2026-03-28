@@ -29,6 +29,8 @@
     --chart-3: 271 62% 70%;
     --chart-4: 269 58% 80%;
     --chart-5: 270 100% 92%;
+    --fertile: 204 100% 90%;
+    --fertile-foreground: 204 100% 20%;
   }
 
   .dark {
@@ -56,6 +58,8 @@
     --chart-3: 271 62% 50%;
     --chart-4: 269 58% 40%;
     --chart-5: 270 100% 92%;
+    --fertile: 204 100% 20%;
+    --fertile-foreground: 204 100% 90%;
   }
 }
 

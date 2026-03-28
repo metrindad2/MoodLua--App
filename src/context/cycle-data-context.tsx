@@ -50,7 +50,34 @@ const CycleDataContext = createContext<CycleDataContextType | undefined>(
 
 const LOCAL_STORAGE_KEY = 'moodLuaLocalData';
 
-// --- Helper function for cycle recalculation ---
+// --- Helper Functions ---
+const _getFlowDurations = (logs: DailyLog[]): number[] => {
+  const periodDays = logs
+    .filter((log) => log.flowIntensity && log.flowIntensity !== 'nenhum')
+    .map((log) => startOfDay(new Date(`${log.date}T00:00:00`)))
+    .sort((a, b) => a.getTime() - b.getTime());
+
+  if (periodDays.length === 0) return [];
+
+  const durations: number[] = [];
+  let currentStreak = 0;
+
+  for (let i = 0; i < periodDays.length; i++) {
+    currentStreak++;
+    const isLastDay = i === periodDays.length - 1;
+    const isGap = !isLastDay && differenceInDays(periodDays[i + 1], periodDays[i]) > 2;
+    
+    if (isLastDay || isGap) {
+      if (currentStreak > 0) {
+        durations.push(currentStreak);
+      }
+      currentStreak = 0;
+    }
+  }
+
+  return durations;
+};
+
 const _recalculateCyclesFromLogs = (
   logs: DailyLog[],
   currentProfile: UserProfile | null
@@ -63,7 +90,6 @@ const _recalculateCyclesFromLogs = (
     .sort((a, b) => a.getTime() - b.getTime());
 
   if (periodDays.length === 0) {
-    // Se não há dias de período, retorna o LMP original para não perder a referência
     return { newCycleHistory: [], newLmp: currentProfile.lastMenstruationDate };
   }
 
@@ -71,7 +97,6 @@ const _recalculateCyclesFromLogs = (
   if (periodDays.length > 0) {
     periodStartDates.push(periodDays[0]);
     for (let i = 1; i < periodDays.length; i++) {
-      // Se a diferença para o dia anterior for maior que 2 dias, considera um novo ciclo.
       if (differenceInDays(periodDays[i], periodDays[i - 1]) > 2) {
         periodStartDates.push(periodDays[i]);
       }
@@ -84,7 +109,6 @@ const _recalculateCyclesFromLogs = (
     const nextCycleStartDate = periodStartDates[i + 1];
     const cycleLength = differenceInDays(nextCycleStartDate, cycleStartDate);
 
-    // Apenas adiciona ao histórico se o ciclo tiver um comprimento razoável
     if (cycleLength > 10) {
       newCycleHistory.push({
         startDate: format(cycleStartDate, 'yyyy-MM-dd'),
@@ -110,7 +134,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   const [sosContacts, setSosContacts] = useState<EmergencyContact[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load data from localStorage on initial render
   useEffect(() => {
     try {
       const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -122,7 +145,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         setPregnancyLmpDate(data.pregnancyLmpDate || null);
         setSosContacts(data.sosContacts || []);
       } else {
-        // If no data, initialize with empty/default state
          setUserProfile(null);
          setDailyLogs([]);
          setCycleHistory([]);
@@ -136,13 +158,31 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Save data to localStorage whenever it changes
   useEffect(() => {
     if (!loading) {
-      // Before saving, run recalculation to ensure consistency
       const { newCycleHistory, newLmp } = _recalculateCyclesFromLogs(dailyLogs, userProfile);
       
-      const consistentProfile = userProfile && newLmp ? { ...userProfile, lastMenstruationDate: newLmp } : userProfile;
+      let consistentProfile = userProfile && newLmp ? { ...userProfile, lastMenstruationDate: newLmp } : userProfile;
+
+      // --- LEARNING LOGIC ---
+      if (consistentProfile) {
+        const flowDurations = _getFlowDurations(dailyLogs);
+        
+        if (flowDurations.length > 1) {
+          const avgFlowDuration = Math.round(flowDurations.reduce((a, b) => a + b, 0) / flowDurations.length);
+          if (avgFlowDuration > 0 && avgFlowDuration !== consistentProfile.flowDurationDays) {
+            consistentProfile = { ...consistentProfile, flowDurationDays: avgFlowDuration };
+          }
+        }
+        
+        if (newCycleHistory.length > 1) {
+          const avgCycleLength = Math.round(newCycleHistory.reduce((acc, c) => acc + c.cycleLength, 0) / newCycleHistory.length);
+          if (avgCycleLength > 0 && avgCycleLength !== consistentProfile.cycleLengthDays) {
+            consistentProfile = { ...consistentProfile, cycleLengthDays: avgCycleLength };
+          }
+        }
+      }
+      // --- END LEARNING LOGIC ---
 
       const dataToSave: MoodLuaLocalData = {
         userProfile: consistentProfile,
@@ -153,7 +193,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
       };
       try {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
-        // Also update state to reflect the recalculation
+        
         if (JSON.stringify(newCycleHistory) !== JSON.stringify(cycleHistory)) {
           setCycleHistory(newCycleHistory);
         }
@@ -169,14 +209,12 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
 
   const updateUserProfile = useCallback((profileUpdate: Partial<Omit<UserProfile, 'uid'>>) => {
     setUserProfile((prevProfile) => {
-        // When creating a new profile
         if (!prevProfile) {
             return {
-                uid: new Date().toISOString(), // Use a simple unique ID for local
+                uid: new Date().toISOString(),
                 ...profileUpdate,
             } as UserProfile;
         }
-        // When updating an existing profile
         return {
             ...prevProfile,
             ...profileUpdate,
@@ -186,7 +224,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   
   const addSosContact = useCallback((contact: Omit<EmergencyContact, 'id' | 'isPredefined'>) => {
     const newContact: EmergencyContact = {
-      id: new Date().getTime().toString(), // Simple unique ID
+      id: new Date().getTime().toString(),
       ...contact,
     };
     setSosContacts(prev => [...prev, newContact]);
@@ -235,19 +273,10 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
           }
           updatedLogs = [...prevLogs, newLog];
         }
-
-        // --- Recalculate cycle history after updating logs ---
-        const { newCycleHistory, newLmp } = _recalculateCyclesFromLogs(updatedLogs, userProfile);
-        setCycleHistory(newCycleHistory);
-        if (userProfile && newLmp) {
-          setUserProfile(p => p ? { ...p, lastMenstruationDate: newLmp } : null);
-        }
-        // --- End Recalculation ---
-
         return updatedLogs;
       });
     },
-    [userProfile]
+    []
   );
 
   const removeDailyLog = useCallback(
@@ -265,11 +294,9 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   const startNewCycle = useCallback(
     (newStartDate: Date) => {
       if (!userProfile) return;
-       // Simply log the new start date as a period day.
-      // The recalculation logic inside addOrUpdateDailyLog will handle the rest.
       addOrUpdateDailyLog({
         date: newStartDate,
-        flowIntensity: 'médio' // Assume 'médio' as a default when starting a cycle this way
+        flowIntensity: 'médio'
       });
     },
     [userProfile, addOrUpdateDailyLog]
@@ -282,13 +309,11 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     try {
       localStorage.removeItem(LOCAL_STORAGE_KEY);
-      // Reset all state to initial values
       setUserProfile(null);
       setDailyLogs([]);
       setCycleHistory([]);
       setPregnancyLmpDate(null);
       setSosContacts([]);
-      // Force reload to ensure all components reset
       window.location.href = '/'; 
     } catch (error) {
       console.error('Failed to clear data', error);

@@ -49,6 +49,10 @@ export default {
           DEFAULT: 'hsl(var(--accent))',
           foreground: 'hsl(var(--accent-foreground))',
         },
+        fertile: {
+          DEFAULT: 'hsl(var(--fertile))',
+          foreground: 'hsl(var(--fertile-foreground))',
+        },
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
