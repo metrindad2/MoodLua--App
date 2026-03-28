@@ -7,7 +7,7 @@
  * torna o código mais organizado e fácil de manter.
  */
 
-import { addDays, subDays, differenceInDays, startOfDay } from 'date-fns';
+import { addDays, subDays, differenceInDays, startOfDay, isSameDay } from 'date-fns';
 import { UserProfile } from './types';
 
 /**
