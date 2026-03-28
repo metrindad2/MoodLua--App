@@ -33,7 +33,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon.svg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter&family=Great+Vibes&display=swap" rel="stylesheet" />
         <meta name="theme-color" content="#FBF5FF" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#2A0E3F" media="(prefers-color-scheme: dark)" />
       </head>

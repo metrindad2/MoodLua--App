@@ -31,20 +31,20 @@ export function SplashScreen() {
       <Star className="absolute bottom-[40%] right-[35%] h-4 w-4 text-yellow-300/90 animate-twinkle" style={{ animationDelay: '1.8s' }} />
 
       <div className="relative flex flex-col items-center justify-center text-center">
-        <div className="relative mb-8 flex items-center justify-center animate-moon-reveal opacity-0" style={{ animationDelay: '0.5s' }}>
-          <div className="absolute h-48 w-48 animate-orbit" style={{ animationDelay: '1s' }}>
+        <div className="relative mb-8 flex items-center justify-center animate-moon-reveal opacity-0" style={{ animationDelay: '0.3s' }}>
+          <div className="absolute h-48 w-48 animate-orbit" style={{ animationDelay: '0.3s' }}>
             {/* Planet */}
-            <div className="absolute top-1 left-1/2 -ml-2.5 h-5 w-5 rounded-full bg-purple-300 shadow-lg animate-twinkle" style={{ animationDelay: '1s' }} />
+            <div className="absolute top-1 left-1/2 -ml-2.5 h-5 w-5 rounded-full bg-purple-300 shadow-lg animate-twinkle" style={{ animationDelay: '0.3s' }} />
           </div>
           
           <Moon className="h-40 w-40 text-purple-200/90 drop-shadow-[0_0_15px_hsl(var(--primary)/0.6)]" />
         </div>
       
         <div>
-          <h1 className="font-cursive text-7xl text-white opacity-0 drop-shadow-lg animate-text-reveal" style={{ animationDelay: '1.5s' }}>
+          <h1 className="font-cursive text-7xl text-white opacity-0 drop-shadow-lg animate-text-reveal" style={{ animationDelay: '0.8s' }}>
             MoodLua
           </h1>
-          <p className="mt-2 text-lg text-white/80 opacity-0 animate-slogan-fade" style={{ animationDelay: '2.0s' }}>
+          <p className="mt-2 text-lg text-white/80 opacity-0 animate-slogan-fade" style={{ animationDelay: '1.3s' }}>
             Seu ciclo, seu astral.
           </p>
         </div>
