@@ -10,7 +10,13 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { isSameDay, subMonths, startOfMonth, startOfDay } from 'date-fns';
+import {
+  isSameDay,
+  subMonths,
+  startOfMonth,
+  startOfDay,
+  addDays,
+} from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { useToast } from '@/hooks/use-toast';
 import { SimpleCalendar } from './simple-calendar';
@@ -31,7 +37,7 @@ export function PeriodRegistrationModal({
   onOpenChange,
   previsionRange,
 }: PeriodRegistrationModalProps) {
-  const { dailyLogs, addOrUpdateDailyLog } = useCycleData();
+  const { dailyLogs, addOrUpdateDailyLog, userProfile } = useCycleData();
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
   const { toast } = useToast();
 
@@ -47,18 +53,31 @@ export function PeriodRegistrationModal({
 
   const handleDayClick = (day: Date) => {
     const dayStart = startOfDay(day);
-    setSelectedDays(prevSelectedDays => {
-      const isAlreadySelected = prevSelectedDays.some(d => isSameDay(d, dayStart));
-      let newDays;
-      if (isAlreadySelected) {
-        // Se o dia já está selecionado, remove
-        newDays = prevSelectedDays.filter(d => !isSameDay(d, dayStart));
+    // Pega a duração do fluxo do perfil, com um valor padrão de 5 dias.
+    const flowDuration = userProfile?.flowDurationDays || 5;
+
+    setSelectedDays((prevSelectedDays) => {
+      const isAlreadySelected = prevSelectedDays.some((d) =>
+        isSameDay(d, dayStart)
+      );
+
+      // Se o dia clicado NÃO estiver selecionado...
+      if (!isAlreadySelected) {
+        // E se NENHUM dia estiver selecionado, aciona a seleção automática em bloco.
+        if (prevSelectedDays.length === 0) {
+          const newBlock = Array.from({ length: flowDuration }).map((_, i) =>
+            addDays(dayStart, i)
+          );
+          return newBlock;
+        } else {
+          // Se já houver dias selecionados, apenas adiciona o novo dia (edição manual).
+          const newDays = [...prevSelectedDays, dayStart];
+          return newDays.sort((a, b) => a.getTime() - b.getTime());
+        }
       } else {
-        // Se o dia não está selecionado, adiciona
-        newDays = [...prevSelectedDays, dayStart];
+        // Se o dia clicado JÁ estiver selecionado, apenas o remove (edição manual).
+        return prevSelectedDays.filter((d) => !isSameDay(d, dayStart));
       }
-      // Mantém o array de datas ordenado
-      return newDays.sort((a, b) => a.getTime() - b.getTime());
     });
   };
 
