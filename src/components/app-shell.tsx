@@ -18,7 +18,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const splashTimer = setTimeout(() => {
       setIsSplashing(false);
-    }, 2500); 
+    }, 1800); 
     return () => clearTimeout(splashTimer);
   }, []);
 
