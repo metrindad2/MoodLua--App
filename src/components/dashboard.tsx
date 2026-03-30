@@ -118,6 +118,7 @@ export default function Dashboard() {
               previsionRange={previsionRange}
               fertileWindow={fertileWindow}
               ovulationDate={cycleInfo.ovulationDate}
+              dailyLogs={dailyLogs}
             />
           </CardContent>
           <div className="p-4 border-t space-y-4">
@@ -135,8 +136,12 @@ export default function Dashboard() {
                 <span>Fértil</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-fertile-foreground/80 mr-1"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-fertile-foreground/80"></div>
                 <span>Ovulação</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+                <span>Registro</span>
               </div>
             </div>
             <Button

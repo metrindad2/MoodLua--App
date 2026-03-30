@@ -15,7 +15,7 @@ import {
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { Check } from 'lucide-react';
+import type { DailyLog } from '@/lib/types';
 
 interface SimpleCalendarProps {
   initialDate?: Date;
@@ -26,6 +26,7 @@ interface SimpleCalendarProps {
   fertileWindow?: { from: Date; to: Date };
   ovulationDate?: Date;
   disableFutureDates?: boolean;
+  dailyLogs?: DailyLog[];
 }
 
 export function SimpleCalendar({
@@ -37,6 +38,7 @@ export function SimpleCalendar({
   fertileWindow,
   ovulationDate,
   disableFutureDates,
+  dailyLogs,
 }: SimpleCalendarProps) {
   const monthStart = startOfMonth(initialDate);
   const monthEnd = endOfMonth(monthStart);
@@ -147,6 +149,10 @@ export function SimpleCalendar({
           const isInPrevision = isDayInPrevisionRange(date);
           const isFertile = isDayInFertileWindow(date);
           const isOvulation = ovulationDate && isSameDay(date, ovulationDate);
+          
+          const logForDay = dailyLogs?.find(log => isSameDay(startOfDay(new Date(log.date + 'T00:00:00')), date));
+          const hasLogData = logForDay && (logForDay.mood || (logForDay.symptoms && logForDay.symptoms.length > 0));
+
 
           const dayClasses = cn(
             'relative flex h-10 w-full items-center justify-center rounded-full',
@@ -166,10 +172,15 @@ export function SimpleCalendar({
               <span className={cn(!isDayInCurrentMonth && 'text-muted-foreground/50')}>
                 {format(date, 'd')}
               </span>
-              {/* Indicador de ovulação (um ponto) */}
-              {isOvulation && !isHighlighted && (
-                <div className="absolute bottom-1.5 h-1.5 w-1.5 rounded-full bg-secondary" />
-              )}
+              {/* Indicador de ovulação e logs */}
+              <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1">
+                {isOvulation && !isHighlighted && (
+                  <div className="h-1.5 w-1.5 rounded-full bg-fertile-foreground/80" />
+                )}
+                {hasLogData && !isHighlighted && (
+                  <div className="h-1.5 w-1.5 rounded-full bg-secondary" />
+                )}
+              </div>
             </div>
           );
         })}
