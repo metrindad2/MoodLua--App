@@ -16,39 +16,48 @@ export function CycleProgress({
   // Calculate progress, ensuring it doesn't exceed 100%
   const progress = Math.min((currentDay / cycleLength) * 100, 100);
 
-  // A cor do anel de progresso
   const ringColor = 'hsl(var(--primary))';
-  // A cor de fundo do anel (a parte não preenchida)
   const ringBgColor = 'hsl(var(--muted))';
 
   return (
     <div className="flex justify-center p-4">
-      {/* Círculo externo que serve como container e tem o gradiente */}
+      {/* Círculo de progresso */}
       <div
-        className="relative flex h-56 w-56 items-center justify-center rounded-full shadow-lg"
+        className="relative flex h-60 w-60 items-center justify-center rounded-full"
         style={{
           background: `conic-gradient(${ringColor} ${progress}%, ${ringBgColor} ${progress}%)`,
         }}
       >
-        {/* Círculo interno que cria o efeito de "anel" e contém o texto */}
-        <div className="absolute flex h-[88%] w-[88%] items-center justify-center rounded-full bg-background">
+        {/* Adiciona um efeito de sombra interna sutil para dar profundidade */}
+        <div className="absolute inset-0 rounded-full shadow-[inset_0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_4px_12px_rgba(0,0,0,0.3)]"></div>
+
+        {/* Círculo interno para criar o efeito de anel */}
+        <div className="absolute flex h-[86%] w-[86%] items-center justify-center rounded-full bg-background">
           <div className="text-center">
-            {/* Texto principal: dia do ciclo */}
-            <p className="text-sm font-medium text-primary">{phase}</p>
-            <p className="text-7xl font-bold tracking-tight text-foreground">
+            {/* Fase do ciclo */}
+            <p className="text-base font-semibold text-primary">{phase}</p>
+
+            {/* Dia do ciclo (número grande) */}
+            <p className="text-8xl font-bold tracking-tight text-foreground">
               {currentDay}
             </p>
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+
+            {/* Rótulo "Dia do Ciclo" */}
+            <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground -mt-1">
               Dia do Ciclo
             </p>
 
-            {/* Linha separadora sutil */}
-            <hr className="mx-auto my-2 w-1/2 border-border" />
+            {/* Linha separadora */}
+            <hr className="mx-auto my-2 w-1/3 border-border" />
 
-            {/* Texto secundário: dias para a próxima menstruação */}
+            {/* Dias para a próxima menstruação */}
             <p className="text-sm font-medium text-muted-foreground">
-              {daysUntilNext >= 0
+              {daysUntilNext > 1
                 ? `${daysUntilNext} dias p/ menstruação`
+                : daysUntilNext === 1
+                ? `${daysUntilNext} dia p/ menstruação`
+                : daysUntilNext === 0
+                ? 'Menstruação prevista para hoje'
                 : 'Menstruação atrasada'}
             </p>
           </div>
