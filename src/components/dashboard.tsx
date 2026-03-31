@@ -125,7 +125,7 @@ export default function Dashboard() {
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-primary"></div>
-                <span>Período</span>
+                <span>Menstruação</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full border-2 border-dashed border-primary/50"></div>
@@ -149,7 +149,7 @@ export default function Dashboard() {
               className="w-full"
               onClick={() => setIsRegistrationOpen(true)}
             >
-              Registrar ou Editar Período
+              Registrar ou Editar Menstruação
             </Button>
           </div>
         </Card>

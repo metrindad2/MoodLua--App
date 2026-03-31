@@ -136,7 +136,7 @@ export function PeriodRegistrationModal({
     }
 
     toast({
-      title: 'Período registrado!',
+      title: 'Menstruação registrada!',
       description: `Seu calendário e ciclo foram atualizados.`,
     });
 
@@ -159,7 +159,7 @@ export function PeriodRegistrationModal({
           </DialogClose>
           <div className="flex-1 text-center">
             <DialogTitle className="text-lg font-semibold">
-              Registrar Período
+              Registrar Menstruação
             </DialogTitle>
           </div>
           <div className="h-10 w-10" /> {/* Spacer */}

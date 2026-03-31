@@ -49,7 +49,7 @@ export function CycleProgress({
             <p className="text-sm font-medium text-muted-foreground">
               {daysUntilNext >= 0
                 ? `${daysUntilNext} dias p/ menstruação`
-                : 'Período atrasado'}
+                : 'Menstruação atrasada'}
             </p>
           </div>
         </div>

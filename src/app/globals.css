@@ -4,60 +4,60 @@
 
 @layer base {
   :root {
-    --background: 270 100% 98%; /* #FBF5FF */
-    --foreground: 269 65% 15%; /* #2A0E3F */
-    --card: 0 0% 100%;
-    --card-foreground: 269 65% 15%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 269 65% 15%;
-    --primary: 261 100% 65%; /* #8A4FFF */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 269 96% 75%; /* #C084FC */
-    --secondary-foreground: 269 65% 15%;
-    --muted: 270 100% 96%; /* #F4ECFF */
-    --muted-foreground: 269 58% 35%;
-    --accent: 270 100% 96%; /* #F4ECFF */
-    --accent-foreground: 269 65% 15%;
-    --destructive: 0 62.8% 50.6%;
+    --background: 270 60% 98%; /* #faf8fc */
+    --foreground: 270 40% 15%; /* #312042 */
+    --card: 270 30% 100%; /* #ffffff */
+    --card-foreground: 270 40% 15%;
+    --popover: 270 30% 100%;
+    --popover-foreground: 270 40% 15%;
+    --primary: 270 90% 65%; /* #9f63f7 */
+    --primary-foreground: 270 90% 98%; /* #f9f5fe */
+    --secondary: 270 80% 75%; /* #c49bfa */
+    --secondary-foreground: 270 40% 15%;
+    --muted: 270 50% 95%; /* #f5f0fa */
+    --muted-foreground: 270 20% 45%; /* #6c607a */
+    --accent: 270 50% 92%; /* #ede5f8 */
+    --accent-foreground: 270 40% 15%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 270 100% 92%; /* #E9D5FF */
-    --input: 270 100% 92%;
-    --ring: 261 100% 65%;
+    --border: 270 50% 90%; /* #eae0f5 */
+    --input: 270 50% 90%;
+    --ring: 270 90% 65%;
     --radius: 1rem;
-    --chart-1: 261 100% 65%;
-    --chart-2: 269 96% 75%;
-    --chart-3: 271 62% 70%;
-    --chart-4: 269 58% 80%;
-    --chart-5: 270 100% 92%;
-    --fertile: 210 100% 95%;      /* Light Blue */
+    --chart-1: 270 90% 65%;
+    --chart-2: 270 80% 75%;
+    --chart-3: 270 70% 65%;
+    --chart-4: 270 60% 55%;
+    --chart-5: 270 50% 45%;
+    --fertile: 210 100% 95%; /* Light Blue */
     --fertile-foreground: 210 100% 30%; /* Dark Blue */
   }
 
   .dark {
-    --background: 269 65% 15%; /* #2A0E3F */
-    --foreground: 0 0% 100%; /* #FFFFFF */
-    --card: 269 58% 27%; /* #4C1D6E */
-    --card-foreground: 0 0% 100%;
-    --popover: 269 58% 27%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 261 100% 65%; /* #8A4FFF */
-    --primary-foreground: 269 65% 10%;
-    --secondary: 269 96% 75%; /* #C084FC */
-    --secondary-foreground: 269 65% 15%;
-    --muted: 271 62% 21%; /* #3B1457 */
-    --muted-foreground: 270 100% 92%; /* #E9D5FF */
-    --accent: 271 62% 21%;
-    --accent-foreground: 0 0% 100%;
+    --background: 270 40% 10%; /* #221929 */
+    --foreground: 270 25% 95%; /* #f0eef2 */
+    --card: 270 35% 17%; /* #342740 */
+    --card-foreground: 270 25% 95%;
+    --popover: 270 35% 17%;
+    --popover-foreground: 270 25% 95%;
+    --primary: 270 90% 65%; /* #9f63f7 */
+    --primary-foreground: 270 40% 10%;
+    --secondary: 270 80% 75%; /* #c49bfa */
+    --secondary-foreground: 270 40% 15%;
+    --muted: 270 30% 22%; /* #3e314a */
+    --muted-foreground: 270 20% 70%; /* #ada8b3 */
+    --accent: 270 30% 25%; /* #453652 */
+    --accent-foreground: 270 25% 95%;
     --destructive: 0 62.8% 50.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 269 96% 75%; /* #C084FC */
-    --input: 269 58% 27%;
-    --ring: 261 100% 65%;
-    --chart-1: 261 100% 65%;
-    --chart-2: 269 96% 75%;
-    --chart-3: 271 62% 50%;
-    --chart-4: 269 58% 40%;
-    --chart-5: 270 100% 92%;
+    --border: 270 20% 30%; /* #4a4252 */
+    --input: 270 35% 17%;
+    --ring: 270 90% 65%;
+    --chart-1: 270 90% 65%;
+    --chart-2: 270 80% 75%;
+    --chart-3: 270 70% 65%;
+    --chart-4: 270 60% 55%;
+    --chart-5: 270 50% 45%;
     --fertile: 210 100% 20%;      /* Dark Blue */
     --fertile-foreground: 210 100% 90%; /* Light Blue */
   }
@@ -73,10 +73,10 @@
   }
   .bg-moodlua-gradient {
     /* Light: Lighter Purple -> White-ish Purple */
-    @apply bg-gradient-to-b from-[hsl(270,100%,96%)] to-[hsl(270,100%,98%)];
+    @apply bg-gradient-to-b from-[hsl(270,50%,95%)] to-[hsl(270,60%,98%)];
   }
   .dark .bg-moodlua-gradient {
     /* Dark: Dark Purple -> Slightly Lighter Dark Purple */
-    @apply bg-gradient-to-b from-[hsl(269,65%,15%)] to-[hsl(271,62%,21%)];
+    @apply bg-gradient-to-b from-[hsl(270,40%,10%)] to-[hsl(270,30%,22%)];
   }
 }
