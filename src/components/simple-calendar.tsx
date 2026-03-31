@@ -159,8 +159,8 @@ export function SimpleCalendar({
             // Ordem de prioridade visual:
             // 1. Fundo para período fértil (pode ser combinado com outros)
             isFertile && !isHighlighted && 'bg-fertile',
-            // 2. Anel para o dia atual
-            isCurrentToday && !isHighlighted && 'ring-2 ring-ring',
+            // 2. Destaque para o dia atual
+            isCurrentToday && !isHighlighted && 'bg-accent border-2 border-primary',
             // 3. Borda para previsão
             isInPrevision && !isHighlighted && 'border-2 border-dashed border-secondary',
             // 4. Destaque máximo para período registrado (sobrescreve outros)
@@ -169,7 +169,10 @@ export function SimpleCalendar({
 
           return (
             <div key={i} className={dayClasses} aria-label={format(date, 'PPP', { locale: ptBR })}>
-              <span className={cn(!isDayInCurrentMonth && 'text-muted-foreground/50')}>
+              <span className={cn(
+                  !isDayInCurrentMonth && 'text-muted-foreground/50',
+                  isCurrentToday && !isHighlighted && 'font-bold text-primary'
+                )}>
                 {format(date, 'd')}
               </span>
               {/* Indicador de ovulação e logs */}
