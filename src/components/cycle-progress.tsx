@@ -38,17 +38,17 @@ export function CycleProgress({
             <p className="text-base font-semibold text-primary">{phase}</p>
 
             {/* Dia do ciclo (número grande) */}
-            <p className="text-8xl font-bold tracking-tight text-foreground">
+            <p className="text-7xl font-bold tracking-tight text-foreground">
               {currentDay}
             </p>
 
             {/* Rótulo "Dia do Ciclo" */}
-            <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground -mt-1">
+            <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
               Dia do Ciclo
             </p>
 
             {/* Linha separadora */}
-            <hr className="mx-auto my-2 w-1/3 border-border" />
+            <hr className="mx-auto my-1 w-1/3 border-border" />
 
             {/* Dias para a próxima menstruação */}
             <p className="text-sm font-medium text-muted-foreground">
