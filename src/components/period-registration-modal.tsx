@@ -39,8 +39,7 @@ export function PeriodRegistrationModal({
   onOpenChange,
   previsionRange,
 }: PeriodRegistrationModalProps) {
-  const { dailyLogs, addOrUpdateDailyLog, startNewCycle, userProfile } =
-    useCycleData();
+  const { dailyLogs, addOrUpdateDailyLog } = useCycleData();
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
   const { toast } = useToast();
 
@@ -64,7 +63,9 @@ export function PeriodRegistrationModal({
             const offsetTop = currentMonthRef.current.offsetTop;
             const containerHeight = viewport.clientHeight;
             viewport.scrollTop =
-              offsetTop - containerHeight / 2 + currentMonthRef.current.clientHeight / 2;
+              offsetTop -
+              containerHeight / 2 +
+              currentMonthRef.current.clientHeight / 2;
           }
         }
       }, 100);
@@ -81,26 +82,28 @@ export function PeriodRegistrationModal({
       // Se o dia já estiver selecionado, simplesmente o remove (desseleção manual).
       newSelectedDays = selectedDays.filter((d) => !isSameDay(d, dayStart));
     } else {
-      // O dia não está selecionado. Verifica se deve iniciar um novo bloco de seleção automática.
-      const isStartingNewBlock =
-        selectedDays.length === 0 ||
-        // Considera um novo bloco se o clique for a mais de 15 dias de distância de qualquer dia já selecionado.
-        !selectedDays.some(
-          (d) => Math.abs(differenceInDays(d, dayStart)) < 15
-        );
+      // O dia não está selecionado. Verifica se deve iniciar um novo bloco automático
+      // ou apenas adicionar o dia manualmente.
+      const isNearExistingSelection = selectedDays.some(
+        (d) => Math.abs(differenceInDays(d, dayStart)) < 15
+      );
 
-      if (isStartingNewBlock) {
-        // É um novo bloco. Seleciona 7 dias automaticamente, substituindo qualquer seleção anterior.
-        newSelectedDays = Array.from({ length: 7 }).map((_, i) =>
+      // Se não houver seleção, ou se o clique for "longe" de uma seleção existente,
+      // inicia um novo bloco automático de 7 dias.
+      if (selectedDays.length === 0 || !isNearExistingSelection) {
+        const newBlock = Array.from({ length: 7 }).map((_, i) =>
           addDays(dayStart, i)
         );
+        // Adiciona o novo bloco à seleção existente (importante para múltiplos ciclos no mesmo mês).
+        newSelectedDays = [...selectedDays, ...newBlock];
       } else {
-        // Não é um bloco novo, então apenas adiciona o dia clicado (adição manual).
+        // Se o clique for "perto", é uma edição manual para estender o período ou preencher um buraco.
+        // Apenas adiciona o dia clicado.
         newSelectedDays = [...selectedDays, dayStart];
       }
     }
 
-    // Remove duplicatas e ordena os dias para manter a consistência.
+    // Remove duplicatas (caso um novo bloco sobreponha dias já selecionados) e ordena.
     const uniqueDays = Array.from(
       new Set(newSelectedDays.map((d) => d.getTime()))
     ).map((t) => new Date(t));
