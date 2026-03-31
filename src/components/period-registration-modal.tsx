@@ -73,38 +73,34 @@ export function PeriodRegistrationModal({
 
   const handleDayClick = (day: Date) => {
     const dayStart = startOfDay(day);
-    const flowDuration = userProfile?.flowDurationDays || 5;
-
     const isAlreadySelected = selectedDays.some((d) => isSameDay(d, dayStart));
 
     let newSelectedDays;
 
-    if (!isAlreadySelected) {
-      // Se nenhum dia estiver selecionado, ou se o clique for longe de uma seleção existente (>15 dias),
-      // cria um novo bloco automático. Isso facilita iniciar o registro de um novo ciclo.
+    if (isAlreadySelected) {
+      // Se o dia já estiver selecionado, simplesmente o remove (desseleção manual).
+      newSelectedDays = selectedDays.filter((d) => !isSameDay(d, dayStart));
+    } else {
+      // O dia não está selecionado. Verifica se deve iniciar um novo bloco de seleção automática.
       const isStartingNewBlock =
         selectedDays.length === 0 ||
+        // Considera um novo bloco se o clique for a mais de 15 dias de distância de qualquer dia já selecionado.
         !selectedDays.some(
           (d) => Math.abs(differenceInDays(d, dayStart)) < 15
         );
 
       if (isStartingNewBlock) {
-        // Cria um novo bloco de seleção automático
-        const newBlock = Array.from({ length: flowDuration }).map((_, i) =>
+        // É um novo bloco. Seleciona 7 dias automaticamente, substituindo qualquer seleção anterior.
+        newSelectedDays = Array.from({ length: 7 }).map((_, i) =>
           addDays(dayStart, i)
         );
-        // Combina com seleções existentes se houver, removendo duplicados.
-        newSelectedDays = [...selectedDays, ...newBlock];
       } else {
-        // Se o clique for próximo a um bloco existente, permite a edição manual adicionando um único dia.
+        // Não é um bloco novo, então apenas adiciona o dia clicado (adição manual).
         newSelectedDays = [...selectedDays, dayStart];
       }
-    } else {
-      // Remove o dia clicado se ele já estiver selecionado.
-      newSelectedDays = selectedDays.filter((d) => !isSameDay(d, dayStart));
     }
 
-    // Remove duplicados e ordena os dias para manter a consistência.
+    // Remove duplicatas e ordena os dias para manter a consistência.
     const uniqueDays = Array.from(
       new Set(newSelectedDays.map((d) => d.getTime()))
     ).map((t) => new Date(t));
@@ -166,8 +162,8 @@ export function PeriodRegistrationModal({
           <div className="h-10 w-10" /> {/* Spacer */}
         </DialogHeader>
 
-        <ScrollArea ref={scrollContainerRef} className="flex-1 p-4">
-          <div className="space-y-6 pb-4">
+        <ScrollArea ref={scrollContainerRef} className="flex-1">
+          <div className="space-y-6 p-4">
             {monthsToDisplay.map((month) => {
               const isCurrentMonth = isSameMonth(month, new Date());
               return (
