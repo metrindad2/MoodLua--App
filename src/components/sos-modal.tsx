@@ -55,6 +55,18 @@ export function SosModal() {
       return;
     }
 
+    // Etapa de segurança: Limpa o número para garantir que apenas dígitos sejam usados.
+    const cleanPhone = contact.phone.replace(/[^0-9]/g, '');
+
+    if (cleanPhone.length < 10) {
+      toast({
+        variant: 'destructive',
+        title: 'Número de telefone inválido',
+        description: 'O contato de emergência não possui um número válido.',
+      });
+      return;
+    }
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
@@ -62,24 +74,20 @@ export function SosModal() {
         
         let messageToSend = sosMessage;
         
-        // Substitui o placeholder {{localizacao}} se ele existir na mensagem.
         if (messageToSend.includes('{{localizacao}}')) {
             messageToSend = messageToSend.replace('{{localizacao}}', mapsLink);
         } else {
-            // Se o placeholder não for encontrado, anexa o link de localização ao final da mensagem.
             messageToSend = `${messageToSend.trim()}\n\n${mapsLink}`;
         }
         
-        const whatsappUrl = `https://wa.me/${contact.phone}?text=${encodeURIComponent(messageToSend)}`;
+        const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(messageToSend)}`;
         
         toast({
             title: 'Redirecionando para o WhatsApp...',
             description: 'Sua mensagem de SOS está pronta para ser enviada.'
         })
 
-        // Abre o link em uma nova aba. Em dispositivos móveis, isso geralmente aciona o aplicativo do WhatsApp.
         window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-
         setIsOpen(false);
       },
       (error) => {
@@ -127,8 +135,8 @@ export function SosModal() {
                 {allContacts.map((contact) => (
                     <Card key={contact.id} className="bg-accent/50 text-center shadow-none border-none">
                         <CardHeader className="p-3 pb-2">
-                            <CardTitle className="text-lg font-bold truncate">{contact.phone}</CardTitle>
-                            <CardDescription className="text-sm">{contact.name}</CardDescription>
+                            <CardTitle className="text-lg font-bold truncate">{contact.name}</CardTitle>
+                            <CardDescription className="text-sm font-semibold text-primary">{contact.phone}</CardDescription>
                         </CardHeader>
                         <CardFooter className="flex gap-2 p-3 pt-0">
                             <Button asChild size="sm" className="w-full font-semibold">
