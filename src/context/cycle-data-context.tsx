@@ -13,7 +13,7 @@ import {
   CycleLog,
   EmergencyContact,
 } from '@/lib/types';
-import { format, differenceInDays, startOfDay, addDays } from 'date-fns';
+import { format, differenceInDays, startOfDay, addDays, min, isSameDay } from 'date-fns';
 
 // Combined data structure for localStorage
 interface MoodLuaLocalData {
@@ -39,6 +39,7 @@ interface CycleDataContextType {
   ) => void;
   getLogForDate: (date: Date) => DailyLog | undefined;
   startNewCycle: (startDate: Date) => void;
+  savePeriodDays: (days: Date[]) => void;
   updatePregnancyLmpDate: (date: string | null) => void;
   logout: () => void;
   removeDailyLog: (date: Date) => void;
@@ -289,6 +290,70 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const savePeriodDays = useCallback((newPeriodDays: Date[]) => {
+    const sortedNewDays = [...newPeriodDays].sort((a,b) => a.getTime() - b.getTime());
+    const newFirstDay = sortedNewDays.length > 0 ? sortedNewDays[0] : null;
+
+    // Update profile and cycle history
+    setUserProfile(prevProfile => {
+        if (!prevProfile) return null;
+
+        if (!newFirstDay) {
+            console.warn("Cannot save empty period days. Reverting is not yet implemented.");
+            // In a real app, you might show a toast or revert to the last valid cycle.
+            return prevProfile;
+        }
+
+        const newLmpDate = startOfDay(newFirstDay);
+        const previousLmpDate = startOfDay(new Date(prevProfile.lastMenstruationDate + 'T00:00:00'));
+
+        if (isSameDay(newLmpDate, previousLmpDate)) {
+            return prevProfile; // No change in cycle start date
+        }
+        
+        // A new cycle is starting (or being corrected). Archive the previous one.
+        const lastCycleLength = differenceInDays(newLmpDate, previousLmpDate);
+        if (lastCycleLength > 10) {
+            const newCycleLog: CycleLog = {
+                startDate: format(previousLmpDate, 'yyyy-MM-dd'),
+                cycleLength: lastCycleLength,
+            };
+            setCycleHistory(prevHistory => [...prevHistory, newCycleLog]);
+        }
+        
+        return { ...prevProfile, lastMenstruationDate: format(newLmpDate, 'yyyy-MM-dd') };
+    });
+
+    // Sync daily logs with the new selection
+    setDailyLogs(prevLogs => {
+        const originalPeriodDays = prevLogs
+            .filter(log => log.isPeriodDay)
+            .map(log => startOfDay(new Date(log.date + 'T00:00:00')));
+
+        const allPotentiallyChangedDays = [...new Set([...originalPeriodDays.map(d => d.getTime()), ...sortedNewDays.map(d => d.getTime())])].map(t => new Date(t));
+
+        let updatedLogs = [...prevLogs];
+
+        for (const day of allPotentiallyChangedDays) {
+            const isNowSelected = sortedNewDays.some(d => isSameDay(d, day));
+            const dayStr = format(day, 'yyyy-MM-dd');
+            const logIndex = updatedLogs.findIndex(l => l.date === dayStr);
+
+            if (logIndex !== -1) {
+                const existingLog = updatedLogs[logIndex];
+                if (existingLog.isPeriodDay !== isNowSelected) {
+                    updatedLogs[logIndex] = { ...existingLog, isPeriodDay: isNowSelected };
+                }
+            } else if (isNowSelected) {
+                updatedLogs.push({ date: dayStr, isPeriodDay: true });
+            }
+        }
+        
+        return updatedLogs.filter(log => log.isPeriodDay || log.mood || log.symptoms?.length || (log.flowIntensity && log.flowIntensity !== 'nenhum'));
+    });
+}, []);
+
+
   const updatePregnancyLmpDate = (date: string | null) => {
     setPregnancyLmpDate(date);
   };
@@ -326,6 +391,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     addOrUpdateDailyLog,
     getLogForDate,
     startNewCycle,
+    savePeriodDays,
     updatePregnancyLmpDate,
     logout,
     removeDailyLog,

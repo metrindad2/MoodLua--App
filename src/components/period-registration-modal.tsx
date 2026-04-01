@@ -42,8 +42,7 @@ export function PeriodRegistrationModal({
   onOpenChange,
   previsionRange,
 }: PeriodRegistrationModalProps) {
-  const { userProfile, dailyLogs, addOrUpdateDailyLog, startNewCycle } =
-    useCycleData();
+  const { userProfile, dailyLogs, savePeriodDays } = useCycleData();
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
   const { toast } = useToast();
 
@@ -129,42 +128,7 @@ export function PeriodRegistrationModal({
   const handleSave = () => {
     if (!userProfile) return;
 
-    const originalPeriodDays = dailyLogs
-      .filter((log) => log.isPeriodDay)
-      .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
-
-    // Find the earliest day in the new selection to determine the cycle start.
-    const newFirstDay = selectedDays.length > 0 ? min(selectedDays) : null;
-    const currentLmpDate = startOfDay(
-      new Date(userProfile.lastMenstruationDate + 'T00:00:00')
-    );
-
-    // If the new first day is different from the current cycle start, start a new cycle.
-    if (newFirstDay && !isSameDay(newFirstDay, currentLmpDate)) {
-      startNewCycle(newFirstDay);
-    }
-
-    // Union of old and new days to check for changes.
-    const allPotentiallyChangedDays = [
-      ...new Set(
-        [...originalPeriodDays, ...selectedDays].map((d) => d.getTime())
-      ),
-    ].map((t) => new Date(t));
-
-    for (const day of allPotentiallyChangedDays) {
-      const isNowSelected = selectedDays.some((d) => isSameDay(d, day));
-      const wasOriginallySelected = originalPeriodDays.some((d) =>
-        isSameDay(d, day)
-      );
-
-      // Update only if the state changed.
-      if (isNowSelected !== wasOriginallySelected) {
-        addOrUpdateDailyLog({
-          date: day,
-          isPeriodDay: isNowSelected,
-        });
-      }
-    }
+    savePeriodDays(selectedDays);
 
     toast({
       title: 'Menstruação registrada!',
