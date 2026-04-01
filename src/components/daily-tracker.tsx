@@ -82,12 +82,21 @@ export function DailyTracker() {
       selectedFlow &&
       selectedFlow !== 'nenhum';
 
+    // Garante que o dia seja marcado como menstruação se houver fluxo
+    let isPeriodDay = originalLog?.isPeriodDay;
+    if (selectedFlow && selectedFlow !== 'nenhum') {
+      isPeriodDay = true;
+    } else if (selectedFlow === 'nenhum') {
+      isPeriodDay = false;
+    }
+
     // Save all selections together
     addOrUpdateDailyLog({
       date: selectedDate,
       mood: selectedMood,
       symptoms: selectedSymptoms,
       flowIntensity: selectedFlow,
+      isPeriodDay: isPeriodDay,
     });
     
     // If a new period is starting, update the cycle

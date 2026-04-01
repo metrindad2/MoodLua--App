@@ -119,7 +119,7 @@ export default function Dashboard() {
   };
 
   const highlightedDays = dailyLogs
-    .filter((log) => log.flowIntensity && log.flowIntensity !== 'nenhum')
+    .filter((log) => log.isPeriodDay) // Alterado para usar a nova flag
     .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
 
   const fertileWindow = {

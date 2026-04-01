@@ -32,7 +32,7 @@ interface CycleDataContextType {
   sosContacts: EmergencyContact[];
   loading: boolean;
   updateUserProfile: (profile: Partial<Omit<UserProfile, 'uid'>>) => void;
-  addOrUpdateDailyLog: (log: Omit<DailyLog, 'date'> & { date: Date }) => void;
+  addOrUpdateDailyLog: (log: Partial<Omit<DailyLog, 'date'>> & { date: Date }) => void;
   getLogForDate: (date: Date) => DailyLog | undefined;
   startNewCycle: (startDate: Date) => void;
   updatePregnancyLmpDate: (date: string | null) => void;
@@ -129,20 +129,19 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Adiciona ou atualiza um registro diário.
-  const addOrUpdateDailyLog = useCallback((log: Omit<DailyLog, 'date'> & { date: Date }) => {
+  const addOrUpdateDailyLog = useCallback((log: Partial<Omit<DailyLog, 'date'>> & { date: Date }) => {
     const dateString = format(log.date, 'yyyy-MM-dd');
 
     setDailyLogs((prevLogs) => {
       const existingLogIndex = prevLogs.findIndex((l) => l.date === dateString);
-      const newLog = { ...log, date: dateString };
+      const newLogData = { ...log, date: dateString };
 
       let updatedLogs;
 
       if (existingLogIndex > -1) {
         updatedLogs = [...prevLogs];
         const currentLog = updatedLogs[existingLogIndex];
-        // Mescla o log antigo com as novas informações.
-        const mergedLog = { ...currentLog, ...newLog };
+        const mergedLog = { ...currentLog, ...newLogData };
         
         // Remove propriedades `undefined` para limpar o objeto.
         for (const key in mergedLog) {
@@ -151,16 +150,19 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
           }
         }
         
-        // Se o log ficar "vazio" (apenas com a data), ele é removido.
-        if (Object.keys(mergedLog).length <= 1) {
+        // Se o log ficar "vazio" de dados significativos, ele é removido.
+        const hasMeaningfulData = mergedLog.isPeriodDay || mergedLog.mood || mergedLog.symptoms?.length || (mergedLog.flowIntensity && mergedLog.flowIntensity !== 'nenhum');
+        
+        if (!hasMeaningfulData) {
             updatedLogs = updatedLogs.filter((_, index) => index !== existingLogIndex);
         } else {
             updatedLogs[existingLogIndex] = mergedLog;
         }
       } else {
         // Se o novo log não estiver vazio, adiciona-o à lista.
-        if (Object.keys(newLog).length > 1) {
-          updatedLogs = [...prevLogs, newLog];
+        const hasMeaningfulData = newLogData.isPeriodDay || newLogData.mood || newLogData.symptoms?.length || (newLogData.flowIntensity && newLogData.flowIntensity !== 'nenhum');
+        if (hasMeaningfulData) {
+          updatedLogs = [...prevLogs, newLogData as DailyLog];
         } else {
           return prevLogs;
         }
@@ -177,6 +179,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         mood: undefined,
         symptoms: undefined,
         flowIntensity: undefined,
+        isPeriodDay: false, // Explicitamente desmarca o dia de menstruação
       });
     },
     [addOrUpdateDailyLog]

@@ -43,6 +43,7 @@ export type FlowIntensity = 'nenhum' | 'leve' | 'médio' | 'intenso';
  */
 export type DailyLog = {
   date: string; // A data do registro, no formato "YYYY-MM-DD"
+  isPeriodDay?: boolean; // Adicionado para marcar o dia como menstruação sem especificar fluxo
   flowIntensity?: FlowIntensity;
   symptoms?: string[];
   mood?: Mood;

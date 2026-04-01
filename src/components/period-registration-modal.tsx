@@ -49,7 +49,7 @@ export function PeriodRegistrationModal({
   useEffect(() => {
     if (open) {
       const periodDays = dailyLogs
-        .filter((log) => log.flowIntensity && log.flowIntensity !== 'nenhum')
+        .filter((log) => log.isPeriodDay) // Alterado para usar a nova flag
         .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
       setSelectedDays(periodDays);
 
@@ -92,7 +92,7 @@ export function PeriodRegistrationModal({
 
   const handleSave = () => {
     const originallyLogged = dailyLogs
-      .filter((log) => log.flowIntensity && log.flowIntensity !== 'nenhum')
+      .filter((log) => log.isPeriodDay) // Alterado para usar a nova flag
       .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
 
     const allPotentiallyChangedDays = [
@@ -105,12 +105,11 @@ export function PeriodRegistrationModal({
       const wasOriginallySelected = originallyLogged.some((d) =>
         isSameDay(d, day)
       );
-      // Apenas atualiza o log se o estado do dia (selecionado/não selecionado) mudou.
       if (isNowSelected !== wasOriginallySelected) {
+        // Apenas marca ou desmarca o dia como menstruação, sem definir a intensidade do fluxo.
         addOrUpdateDailyLog({
           date: day,
-          // Define a intensidade como 'médio' para novos registros, e 'nenhum' para remoções.
-          flowIntensity: isNowSelected ? 'médio' : 'nenhum',
+          isPeriodDay: isNowSelected,
         });
       }
     }
@@ -123,8 +122,7 @@ export function PeriodRegistrationModal({
     onOpenChange(false);
   };
 
-  // Cria um calendário de 100 anos (20 para o passado, 80 para o futuro)
-  const monthsToDisplay = Array.from({ length: 1200 }).map((_, i) =>
+  const monthsToDisplay = Array.from({ length: 480 }).map((_, i) =>
     startOfMonth(subMonths(new Date(), 240 - i))
   );
 
