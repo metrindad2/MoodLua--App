@@ -49,97 +49,6 @@ const CycleDataContext = createContext<CycleDataContextType | undefined>(
 
 const LOCAL_STORAGE_KEY = 'moodLuaLocalData';
 
-// --- Funções de "Aprendizado" do Ciclo ---
-
-/**
- * Analisa os logs diários para encontrar a duração de cada período menstrual.
- * Um período é um conjunto contínuo de dias com fluxo registrado.
- * @param logs - A lista de todos os registros diários.
- * @returns Um array com as durações (em dias) de cada período encontrado.
- */
-const _getFlowDurations = (logs: DailyLog[]): number[] => {
-  const periodDays = logs
-    .filter((log) => log.flowIntensity && log.flowIntensity !== 'nenhum')
-    .map((log) => startOfDay(new Date(`${log.date}T00:00:00`)))
-    .sort((a, b) => a.getTime() - b.getTime());
-
-  if (periodDays.length === 0) return [];
-
-  const durations: number[] = [];
-  let currentStreak = 0;
-
-  for (let i = 0; i < periodDays.length; i++) {
-    currentStreak++;
-    const isLastDay = i === periodDays.length - 1;
-    const isGap = !isLastDay && differenceInDays(periodDays[i + 1], periodDays[i]) > 2;
-    
-    if (isLastDay || isGap) {
-      if (currentStreak > 0) {
-        durations.push(currentStreak);
-      }
-      currentStreak = 0;
-    }
-  }
-  return durations;
-};
-
-/**
- * Reconstrói o histórico de ciclos (CycleLog) a partir dos registros diários (DailyLog).
- * Esta é a fonte da verdade para o histórico.
- * @param logs - A lista de todos os registros diários.
- * @param currentProfile - O perfil atual do usuário.
- * @returns Um objeto contendo o novo histórico de ciclos e a data da última menstruação.
- */
-const _recalculateCyclesFromLogs = (
-  logs: DailyLog[],
-  currentProfile: UserProfile | null
-) => {
-  if (!currentProfile) return { newCycleHistory: [], newLmp: null };
-
-  const periodDays = logs
-    .filter((log) => log.flowIntensity && log.flowIntensity !== 'nenhum')
-    .map((log) => startOfDay(new Date(`${log.date}T00:00:00`)))
-    .sort((a, b) => a.getTime() - b.getTime());
-
-  if (periodDays.length === 0) {
-    return { newCycleHistory: [], newLmp: currentProfile.lastMenstruationDate };
-  }
-
-  // Identifica os dias de início de cada período procurando por "gaps" de mais de 2 dias sem fluxo.
-  const periodStartDates: Date[] = [];
-  if (periodDays.length > 0) {
-    periodStartDates.push(periodDays[0]);
-    for (let i = 1; i < periodDays.length; i++) {
-      if (differenceInDays(periodDays[i], periodDays[i - 1]) > 2) {
-        periodStartDates.push(periodDays[i]);
-      }
-    }
-  }
-
-  // Constrói o histórico de ciclos com base nas datas de início.
-  const newCycleHistory: CycleLog[] = [];
-  for (let i = 0; i < periodStartDates.length - 1; i++) {
-    const cycleStartDate = periodStartDates[i];
-    const nextCycleStartDate = periodStartDates[i + 1];
-    const cycleLength = differenceInDays(nextCycleStartDate, cycleStartDate);
-
-    // Ignora ciclos muito curtos que podem ser erros de registro.
-    if (cycleLength > 10) { 
-      newCycleHistory.push({
-        startDate: format(cycleStartDate, 'yyyy-MM-dd'),
-        cycleLength: cycleLength,
-      });
-    }
-  }
-
-  const newLmp =
-    periodStartDates.length > 0
-      ? format(periodStartDates[periodStartDates.length - 1], 'yyyy-MM-dd')
-      : currentProfile.lastMenstruationDate;
-
-  return { newCycleHistory, newLmp };
-};
-
 export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
@@ -167,39 +76,23 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Efeito principal que salva os dados e aplica a lógica de "aprendizado".
-  // Roda sempre que qualquer dado principal é alterado.
+  // Efeito para salvar todos os dados no localStorage sempre que eles mudarem.
   useEffect(() => {
     if (loading) return;
 
-    // Recalcula o histórico de ciclos e a data da última menstruação a partir dos logs diários.
-    const { newCycleHistory, newLmp } = _recalculateCyclesFromLogs(dailyLogs, userProfile);
-    
-    let consistentProfile = userProfile && newLmp ? { ...userProfile, lastMenstruationDate: newLmp } : userProfile;
-
-    // Prepara e salva todos os dados no localStorage.
     const dataToSave: MoodLuaLocalData = {
-      userProfile: consistentProfile,
+      userProfile,
       dailyLogs,
-      cycleHistory: newCycleHistory,
+      cycleHistory,
       pregnancyLmpDate,
       sosContacts,
     };
     try {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
-      
-      // Atualiza o estado do React apenas se houver mudanças, para evitar re-renderizações desnecessárias.
-      if (JSON.stringify(newCycleHistory) !== JSON.stringify(cycleHistory)) {
-        setCycleHistory(newCycleHistory);
-      }
-      if (consistentProfile && JSON.stringify(consistentProfile) !== JSON.stringify(userProfile)) {
-        setUserProfile(consistentProfile);
-      }
-
     } catch (error) {
       console.error('Failed to save local data', error);
     }
-  }, [userProfile, dailyLogs, pregnancyLmpDate, sosContacts, loading, cycleHistory]);
+  }, [userProfile, dailyLogs, cycleHistory, pregnancyLmpDate, sosContacts, loading]);
 
 
   const updateUserProfile = useCallback((profileUpdate: Partial<Omit<UserProfile, 'uid'>>) => {
@@ -289,8 +182,33 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     [addOrUpdateDailyLog]
   );
   
-  // Função legada, agora o fluxo de novo ciclo é tratado pelo `_recalculateCyclesFromLogs`.
-  const startNewCycle = useCallback(() => {}, []);
+  // Função explícita para iniciar um novo ciclo.
+  // É chamada quando a usuária registra um fluxo menstrual pela primeira vez no ciclo.
+  const startNewCycle = useCallback((startDate: Date) => {
+    setUserProfile(prevProfile => {
+      if (!prevProfile) return null;
+
+      const newLmpDate = startOfDay(startDate);
+      const previousLmpDate = startOfDay(new Date(prevProfile.lastMenstruationDate + 'T00:00:00'));
+
+      // Apenas adiciona ao histórico se o novo ciclo não for o primeiro de todos.
+      if (differenceInDays(newLmpDate, previousLmpDate) > 0) {
+        const lastCycleLength = differenceInDays(newLmpDate, previousLmpDate);
+
+        // Adiciona o ciclo anterior ao histórico, se for um ciclo válido.
+        if (lastCycleLength > 10) {
+          const newCycleLog: CycleLog = {
+            startDate: format(previousLmpDate, 'yyyy-MM-dd'),
+            cycleLength: lastCycleLength,
+          };
+          setCycleHistory(prevHistory => [...prevHistory, newCycleLog]);
+        }
+      }
+
+      // Atualiza a data da última menstruação no perfil do usuário.
+      return { ...prevProfile, lastMenstruationDate: format(newLmpDate, 'yyyy-MM-dd') };
+    });
+  }, []);
 
   const updatePregnancyLmpDate = (date: string | null) => {
     setPregnancyLmpDate(date);
