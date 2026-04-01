@@ -18,6 +18,8 @@ import {
   Droplets,
   Waves,
   Trash2,
+  CalendarClock,
+  Repeat,
 } from 'lucide-react';
 import Link from 'next/link';
 import { FlowIntensity } from '@/lib/types';
@@ -45,23 +47,15 @@ export default function HistoryPage() {
   if (loading) {
     return (
       <div className="p-4 space-y-6 animate-pulse">
-        <Card>
-          <CardHeader>
-            <div className="h-8 w-48 bg-muted rounded"></div>
-            <div className="h-4 w-64 bg-muted rounded mt-2"></div>
-          </CardHeader>
-        </Card>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader>
-              <div className="h-16 w-full bg-muted rounded"></div>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <div className="h-16 w-full bg-muted rounded"></div>
-            </CardHeader>
-          </Card>
+        <div className="h-8 w-48 bg-muted rounded mb-2"></div>
+        <div className="h-4 w-64 bg-muted rounded"></div>
+        <div className="grid grid-cols-2 gap-4 mt-6">
+          <div className="h-24 w-full bg-muted rounded-xl"></div>
+          <div className="h-24 w-full bg-muted rounded-xl"></div>
+        </div>
+        <div className="mt-6 space-y-3">
+          <div className="h-20 w-full bg-muted rounded-xl"></div>
+          <div className="h-20 w-full bg-muted rounded-xl"></div>
         </div>
       </div>
     );
@@ -119,37 +113,44 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="p-4 space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <HistoryIcon className="h-6 w-6 text-primary" />
-            Histórico de Ciclos
-          </CardTitle>
-          <CardDescription>
-            Acompanhe a duração e os padrões dos seus ciclos menstruais.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+    <div className="p-4 space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <HistoryIcon className="h-6 w-6 text-primary" />
+          Meu Histórico
+        </h1>
+        <p className="text-muted-foreground">
+          Acompanhe a duração e os padrões dos seus ciclos.
+        </p>
+      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+      <div className="grid grid-cols-2 gap-4 text-center">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">{averageCycleLength} dias</CardTitle>
-            <CardDescription>Média do ciclo</CardDescription>
+          <CardHeader className="p-4">
+            <CardDescription className="flex items-center justify-center gap-2 text-sm">
+              <Repeat className="w-4 h-4" />
+              Média do ciclo
+            </CardDescription>
+            <CardTitle className="text-3xl">{averageCycleLength}</CardTitle>
+             <p className="text-sm text-muted-foreground -mt-1">dias</p>
           </CardHeader>
         </Card>
         <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">
-              {lastCompletedCycle?.cycleLength ?? '--'} dias
+          <CardHeader className="p-4">
+            <CardDescription className="flex items-center justify-center gap-2 text-sm">
+                <CalendarClock className="w-4 h-4" />
+                Último ciclo
+            </CardDescription>
+            <CardTitle className="text-3xl">
+              {lastCompletedCycle?.cycleLength ?? '--'}
             </CardTitle>
-            <CardDescription>Duração do último ciclo</CardDescription>
+             <p className="text-sm text-muted-foreground -mt-1">dias</p>
           </CardHeader>
         </Card>
       </div>
 
       <div className="space-y-3">
+        <h2 className="font-semibold text-lg">Histórico de Ciclos</h2>
         {allCycles.map((cycle, index) => {
           const startDate = startOfDay(new Date(cycle.startDate + 'T00:00:00'));
           const endDate = addDays(startDate, cycle.cycleLength - 1);
@@ -157,15 +158,15 @@ export default function HistoryPage() {
           return (
             <Card
               key={index}
-              className={cycle.isCurrent ? 'border-primary' : ''}
+              className={cn('transition-all', cycle.isCurrent ? 'border-primary/80 border-2' : '')}
             >
               <CardContent className="p-4 flex justify-between items-center">
                 <div>
                   <p className="font-semibold text-sm">
-                    {format(startDate, "d 'de' MMM", { locale: ptBR })} -{' '}
+                    {format(startDate, "d MMM", { locale: ptBR })} -{' '}
                     {cycle.isCurrent
-                      ? 'Presente'
-                      : format(endDate, "d 'de' MMM, yyyy", { locale: ptBR })}
+                      ? 'Hoje'
+                      : format(endDate, "d MMM, yyyy", { locale: ptBR })}
                   </p>
                   {cycle.isCurrent && (
                     <p className="text-xs font-medium text-primary">
@@ -183,16 +184,11 @@ export default function HistoryPage() {
       </div>
 
       {/* Seção de Histórico de Logs Diários */}
-      <div className="space-y-3 pt-6">
-        <CardHeader className="p-0 mb-4">
-          <CardTitle className="flex items-center gap-2">
-            <NotebookText className="h-6 w-6 text-primary" />
+      <div className="space-y-3">
+        <h2 className="font-semibold text-lg flex items-center gap-2">
+            <NotebookText className="h-5 w-5" />
             Registros Diários
-          </CardTitle>
-          <CardDescription>
-            Visualize os detalhes que você salvou a cada dia.
-          </CardDescription>
-        </CardHeader>
+        </h2>
 
         {sortedLogs.length === 0 ? (
           <Card>
@@ -222,9 +218,12 @@ export default function HistoryPage() {
               return (
                 <Card key={log.date}>
                   <CardHeader className="pb-3 pt-4 flex flex-row justify-between items-start">
-                    <CardTitle className="text-base font-semibold">
-                      {format(logDate, "EEEE, d 'de' MMMM, yyyy", { locale: ptBR })}
-                    </CardTitle>
+                    <div>
+                      <CardTitle className="text-base font-semibold">
+                        {format(logDate, "d 'de' MMMM, yyyy", { locale: ptBR })}
+                      </CardTitle>
+                      <CardDescription className="text-xs">{format(logDate, "EEEE", { locale: ptBR })}</CardDescription>
+                    </div>
                     <Button variant="ghost" size="icon" onClick={() => handleDeleteLog(logDate)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
@@ -237,10 +236,10 @@ export default function HistoryPage() {
                     ) : (
                       <div className="space-y-3">
                         {mood && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="text-lg">{mood.emoji}</span>
+                          <div className="flex items-center gap-3 text-sm p-3 bg-muted/50 rounded-lg">
+                            <span className="text-2xl">{mood.emoji}</span>
                             <div>
-                              <p className="font-medium text-muted-foreground">
+                              <p className="font-medium text-muted-foreground text-xs">
                                 Humor
                               </p>
                               <p className="font-semibold">{mood.label}</p>
@@ -248,10 +247,10 @@ export default function HistoryPage() {
                           </div>
                         )}
                         {flow && flow.value !== 'nenhum' && (
-                          <div className="flex items-center gap-2 text-sm">
+                          <div className="flex items-center gap-3 text-sm p-3 bg-muted/50 rounded-lg">
                             <flow.Icon className="h-5 w-5 text-primary" />
                             <div>
-                              <p className="font-medium text-muted-foreground">
+                              <p className="font-medium text-muted-foreground text-xs">
                                 Fluxo
                               </p>
                               <p className="font-semibold">{flow.label}</p>
@@ -260,7 +259,7 @@ export default function HistoryPage() {
                         )}
                         {symptoms && symptoms.length > 0 && (
                           <div>
-                            <h4 className="font-medium text-muted-foreground text-sm mb-2">
+                            <h4 className="font-semibold text-muted-foreground text-sm mb-2 px-1">
                               Sintomas
                             </h4>
                             <div className="flex flex-wrap gap-2">
@@ -269,7 +268,7 @@ export default function HistoryPage() {
                                   symptom && (
                                     <div
                                       key={symptom.id}
-                                      className="flex items-center gap-1.5 text-sm bg-muted text-muted-foreground font-medium p-2 rounded-md"
+                                      className="flex items-center gap-1.5 text-sm bg-muted text-muted-foreground font-medium px-3 py-1.5 rounded-full"
                                     >
                                       <span>{symptom.emoji}</span>
                                       <span>{symptom.label}</span>

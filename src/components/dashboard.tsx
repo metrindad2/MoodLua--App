@@ -2,10 +2,8 @@
 
 import { useCycleData } from '@/context/cycle-data-context';
 import { calculateCycleInfo } from '@/lib/cycle-utils';
-import { CycleProgress } from './cycle-progress';
-import { PhaseTips } from './phase-tips';
-import { DailyTracker } from './daily-tracker';
 import { SimpleCalendar } from './simple-calendar';
+import { DailyTracker } from './daily-tracker';
 import {
   addDays,
   subMonths,
@@ -15,12 +13,82 @@ import {
   addMonths,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Card, CardContent, CardHeader } from './ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { PeriodRegistrationModal } from './period-registration-modal';
-import { History, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  History,
+  ChevronLeft,
+  ChevronRight,
+  Droplets,
+  CalendarDays,
+  Target,
+} from 'lucide-react';
 import Link from 'next/link';
+
+function CycleSummary() {
+  const { userProfile } = useCycleData();
+  if (!userProfile) return null;
+
+  const cycleInfo = calculateCycleInfo(userProfile);
+  if (!cycleInfo) return null;
+
+  const phase = cycleInfo.isMenstruating
+    ? 'Menstruação'
+    : cycleInfo.isFertile
+    ? 'Fase Fértil'
+    : cycleInfo.isPms
+    ? 'Fase Lútea (TPM)'
+    : 'Fase Folicular';
+
+  const fertilityProbability = cycleInfo.isFertile ? 'Alta' : 'Baixa';
+
+  const summaryData = [
+    {
+      title: 'Fase Atual',
+      value: phase,
+      description: `Dia ${cycleInfo.currentCycleDay} do seu ciclo`,
+      icon: Droplets,
+    },
+    {
+      title: 'Próxima Menstruação',
+      value: format(cycleInfo.nextPeriodStartDate, "dd 'de' MMM", {
+        locale: ptBR,
+      }),
+      description: `Em ${cycleInfo.daysUntilNextPeriod} dias`,
+      icon: CalendarDays,
+    },
+    {
+      title: 'Probabilidade Fértil',
+      value: fertilityProbability,
+      description: cycleInfo.isFertile
+        ? 'Janela fértil ativa'
+        : 'Fora da janela fértil',
+      icon: Target,
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-3 gap-3">
+      {summaryData.map((item) => (
+        <Card key={item.title} className="text-center">
+          <CardHeader className="p-3 pb-1">
+            <div className="flex justify-center mb-1">
+              <item.icon className="w-5 h-5 text-primary" />
+            </div>
+            <CardTitle className="text-sm font-semibold text-muted-foreground">
+              {item.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-3 pt-0">
+            <p className="text-lg font-bold text-foreground">{item.value}</p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { userProfile, dailyLogs, cycleHistory } = useCycleData();
@@ -32,14 +100,6 @@ export default function Dashboard() {
 
   const cycleInfo = calculateCycleInfo(userProfile);
   if (!cycleInfo) return null;
-
-  const phase = cycleInfo.isMenstruating
-    ? 'Menstruação'
-    : cycleInfo.isFertile
-    ? 'Fértil'
-    : cycleInfo.isPms
-    ? 'TPM / Lútea'
-    : 'Folicular';
 
   const previsionRange = {
     from: cycleInfo.nextPeriodStartDate,
@@ -77,15 +137,8 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="p-4 space-y-8">
-        <CycleProgress
-          currentDay={cycleInfo.currentCycleDay}
-          cycleLength={userProfile.cycleLengthDays}
-          phase={phase}
-          daysUntilNext={cycleInfo.daysUntilNextPeriod}
-        />
-
-        <PhaseTips phase={phase} />
+      <div className="p-4 space-y-6">
+        <CycleSummary />
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
@@ -94,24 +147,24 @@ export default function Dashboard() {
             </h2>
             <div className="flex items-center gap-1">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
                 onClick={handlePrevMonth}
                 aria-label="Mês anterior"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-5 w-5" />
               </Button>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
                 onClick={handleNextMonth}
                 aria-label="Próximo mês"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-5 w-5" />
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="p-4">
+          <CardContent className="p-2 sm:p-4">
             <SimpleCalendar
               initialDate={currentMonth}
               highlightedDates={highlightedDays}
@@ -121,35 +174,35 @@ export default function Dashboard() {
               dailyLogs={dailyLogs}
             />
           </CardContent>
-          <div className="p-4 border-t space-y-4">
-            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-primary"></div>
+          <div className="p-4 border-t space-y-3">
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-primary"></div>
                 <span>Menstruação</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full border-2 border-dashed border-primary/50"></div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full border border-dashed border-primary/80"></div>
                 <span>Previsão</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-fertile"></div>
-                <span>Fértil</span>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-fertile"></div>
+                <span>Período Fértil</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-fertile-foreground/80"></div>
                 <span>Ovulação</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-secondary"></div>
-                <span>Registro</span>
+                <span>Com registro</span>
               </div>
             </div>
-            <Button
+             <Button
               variant="outline"
               className="w-full"
               onClick={() => setIsRegistrationOpen(true)}
             >
-              Registrar ou Editar Menstruação
+              Registrar / Editar Menstruação
             </Button>
           </div>
         </Card>
@@ -157,16 +210,16 @@ export default function Dashboard() {
         <DailyTracker />
 
         <div>
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <History className="w-5 h-5 text-secondary" />
-              Histórico de Ciclos
+              Último Ciclo
             </h2>
             <Link
               href="/history"
               className="text-sm font-medium text-primary hover:underline"
             >
-              Ver tudo
+              Ver todo histórico
             </Link>
           </div>
           {sortedHistory.length > 0 ? (

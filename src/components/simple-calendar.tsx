@@ -79,16 +79,13 @@ export function SimpleCalendar({
 
   return (
     <div className="text-card-foreground">
-      <h2
-        className={cn(
-          'font-semibold capitalize text-center mb-4',
-          isRegistrationMode ? 'text-xl' : 'text-lg'
-        )}
-      >
-        {format(monthStart, 'MMMM yyyy', { locale: ptBR })}
-      </h2>
+      {isRegistrationMode && (
+        <h2 className="font-semibold capitalize text-center mb-4 text-xl">
+          {format(monthStart, 'MMMM yyyy', { locale: ptBR })}
+        </h2>
+      )}
 
-      <div className="grid grid-cols-7 text-center text-sm text-muted-foreground">
+      <div className="grid grid-cols-7 text-center text-xs text-muted-foreground">
         {weekdays.map((weekday, index) => (
           <div key={index} className="py-2 font-medium">
             {weekday}
@@ -120,9 +117,10 @@ export function SimpleCalendar({
                   onClick={() => onDateClick(date)}
                   disabled={isFuture}
                   className={cn(
-                    'relative flex h-8 w-8 items-center justify-center rounded-full transition-colors text-sm disabled:cursor-not-allowed disabled:opacity-50',
-                    'border border-input',
-                     isSelected && 'bg-primary text-primary-foreground border-primary'
+                    'relative flex h-9 w-9 items-center justify-center rounded-full transition-colors text-sm disabled:cursor-not-allowed disabled:opacity-50',
+                    isSelected
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'border border-transparent hover:bg-accent'
                   )}
                   aria-label={format(date, 'PPP', { locale: ptBR })}
                 >
@@ -145,6 +143,9 @@ export function SimpleCalendar({
           }
           
           // Modo de Dashboard: Lógica para exibir informações.
+          if (!isDayInCurrentMonth) {
+            return <div key={i} className="h-12"></div>
+          }
           const isHighlighted = isDayHighlighted(date);
           const isInPrevision = isDayInPrevisionRange(date);
           const isFertile = isDayInFertileWindow(date);
@@ -153,24 +154,17 @@ export function SimpleCalendar({
           const logForDay = dailyLogs?.find(log => isSameDay(startOfDay(new Date(log.date + 'T00:00:00')), date));
           const hasLogData = logForDay && (logForDay.mood || (logForDay.symptoms && logForDay.symptoms.length > 0));
 
-
           const dayClasses = cn(
-            'relative flex h-10 w-full items-center justify-center rounded-full',
+            'relative flex h-12 w-full items-center justify-center rounded-xl transition-colors',
             // Ordem de prioridade visual:
-            // 1. Fundo para período fértil (pode ser combinado com outros)
             isFertile && !isHighlighted && 'bg-fertile',
-            // 2. Borda para previsão
-            isInPrevision && !isHighlighted && 'border-2 border-dashed border-secondary',
-            // 3. Destaque máximo para período registrado (sobrescreve outros)
             isHighlighted && 'bg-primary text-primary-foreground'
           );
 
           const numberClasses = cn(
-            'flex h-8 w-8 items-center justify-center rounded-full text-sm', // Círculo para o número
-            !isDayInCurrentMonth && 'text-muted-foreground/50',
-            // Destaque para o dia atual (círculo preenchido), se não for um dia de menstruação.
-            isCurrentToday && !isHighlighted && 'bg-accent font-bold text-accent-foreground',
-            // Garante que o texto do dia da menstruação seja da cor correta.
+            'flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium',
+            isInPrevision && !isHighlighted && 'border border-dashed border-primary/80',
+            isCurrentToday && !isHighlighted && 'border-2 border-primary',
             isHighlighted && 'text-primary-foreground'
           );
 
@@ -179,13 +173,12 @@ export function SimpleCalendar({
               <span className={numberClasses}>
                 {format(date, 'd')}
               </span>
-              {/* Indicador de ovulação e logs */}
               <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1">
                 {isOvulation && !isHighlighted && (
                   <div className="h-1.5 w-1.5 rounded-full bg-fertile-foreground/80" />
                 )}
                 {hasLogData && !isHighlighted && (
-                  <div className="h-1.5 w-1.5 rounded-full bg-secondary" />
+                  <div className="h-1 w-1 rounded-full bg-secondary" />
                 )}
               </div>
             </div>

@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useCycleData } from '@/context/cycle-data-context';
-import { Moon, ShieldAlert, Heart } from 'lucide-react';
+import { Moon, ShieldAlert } from 'lucide-react';
 import { format } from 'date-fns';
 import { UserProfile } from '@/lib/types';
 import { Card, CardContent } from './ui/card';
@@ -285,7 +285,8 @@ export default function OnboardingForm() {
 
                 <Button
                   type="submit"
-                  className="w-full font-bold text-base py-6"
+                  size="lg"
+                  className="w-full font-bold"
                 >
                   Começar
                 </Button>

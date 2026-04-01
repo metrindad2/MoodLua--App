@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { MOOD_OPTIONS } from '@/lib/moods';
 import { SYMPTOM_OPTIONS } from '@/lib/symptoms';
 import { CircleSlash, Droplet, Droplets, Save, Trash2, Waves } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
 
@@ -104,29 +104,30 @@ export function DailyTracker() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Registros de Hoje</CardTitle>
-        <p className="text-sm text-muted-foreground !-mt-1">
-          {format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
-        </p>
+        <CardTitle className="text-lg">Meus registros de hoje</CardTitle>
+        <CardDescription className="!mt-0">
+          {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
-          <h3 className="text-base font-semibold mb-3 text-foreground">Como você se sente hoje?</h3>
+          <h3 className="text-base font-semibold mb-3 text-foreground">Como você se sente?</h3>
           <div className="grid grid-cols-3 gap-2">
             {MOOD_OPTIONS.map((option) => {
+              const isSelected = selectedMood === option.value;
               return (
                 <button
                   key={option.value}
                   onClick={() => handleMoodSelect(option.value)}
                   className={cn(
-                    'flex flex-col items-center justify-center gap-2 p-3 rounded-lg border-2 transition-colors text-sm font-medium',
-                    selectedMood === option.value
-                      ? 'bg-primary border-primary text-primary-foreground'
-                      : 'bg-transparent border-input hover:bg-accent'
+                    'flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 text-sm font-medium',
+                    isSelected
+                      ? 'bg-primary/10 border-primary shadow-sm'
+                      : 'bg-muted/50 border-transparent hover:bg-accent'
                   )}
                 >
-                  <span className="text-2xl">{option.emoji}</span>
-                  <span>{option.label}</span>
+                  <span className={cn("text-2xl transition-transform", isSelected ? "scale-110" : "")}>{option.emoji}</span>
+                  <span className={cn(isSelected ? "text-primary font-semibold" : "text-muted-foreground")}>{option.label}</span>
                 </button>
               );
             })}
@@ -135,7 +136,7 @@ export function DailyTracker() {
 
         <div>
           <h3 className="text-base font-semibold mb-3 text-foreground">Fluxo Menstrual</h3>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {FLOW_OPTIONS.map((option) => (
               <button
                 key={option.value}
@@ -143,8 +144,8 @@ export function DailyTracker() {
                 className={cn(
                   'flex items-center justify-center gap-2 px-3 py-2 rounded-full border-2 transition-colors text-sm font-medium',
                   selectedFlow === option.value
-                    ? 'bg-primary border-primary text-primary-foreground'
-                    : 'bg-transparent border-input hover:bg-accent'
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-muted/50 border-transparent hover:bg-accent'
                 )}
               >
                 <option.Icon className="h-4 w-4" />
@@ -158,17 +159,17 @@ export function DailyTracker() {
           <h3 className="text-base font-semibold mb-3 text-foreground">
             Sintomas
           </h3>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex flex-wrap gap-2">
             {SYMPTOM_OPTIONS.map((option) => {
               return (
                 <button
                   key={option.id}
                   onClick={() => handleSymptomSelect(option.id)}
                   className={cn(
-                    'flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 transition-colors text-sm font-medium',
+                    'flex items-center justify-center gap-2 px-3 py-1.5 rounded-full border-2 transition-colors text-sm font-medium',
                     selectedSymptoms.includes(option.id)
-                      ? 'bg-primary border-primary text-primary-foreground'
-                      : 'bg-transparent border-input hover:bg-accent'
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-muted/50 border-transparent hover:bg-accent'
                   )}
                 >
                   <span>{option.emoji}</span>
@@ -180,11 +181,11 @@ export function DailyTracker() {
         </div>
         
         <div className="pt-6 border-t flex flex-col sm:flex-row gap-2">
-          <Button onClick={handleSave} className="w-full font-bold">
-            <Save className="mr-2 h-4 w-4" />
-            Salvar Registros de Hoje
+          <Button onClick={handleSave} className="w-full font-bold h-12 text-base shadow-md hover:shadow-lg transition-shadow">
+            <Save className="mr-2 h-5 w-5" />
+            Salvar Registros
           </Button>
-          <Button onClick={handleClearSelections} variant="outline" className="w-full sm:w-auto">
+          <Button onClick={handleClearSelections} variant="ghost" className="w-full sm:w-auto text-destructive">
             <Trash2 className="mr-2 h-4 w-4" />
             Limpar
           </Button>
