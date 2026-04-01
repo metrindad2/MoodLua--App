@@ -12,12 +12,13 @@ import {
 import { Button } from '@/components/ui/button';
 import {
   isSameDay,
-  subMonths,
   startOfMonth,
   startOfDay,
   addDays,
   differenceInDays,
   isSameMonth,
+  addMonths,
+  differenceInMonths,
 } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { useToast } from '@/hooks/use-toast';
@@ -44,7 +45,7 @@ export function PeriodRegistrationModal({
   const { toast } = useToast();
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const currentMonthRef = useRef<HTMLDivElement>(null);
+  const targetMonthRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -55,17 +56,17 @@ export function PeriodRegistrationModal({
 
       // Atraso para garantir que a DOM esteja pronta antes de rolar.
       setTimeout(() => {
-        if (currentMonthRef.current && scrollContainerRef.current) {
+        if (targetMonthRef.current && scrollContainerRef.current) {
           const viewport = scrollContainerRef.current.querySelector(
             '[data-radix-scroll-area-viewport]'
           );
           if (viewport) {
-            const offsetTop = currentMonthRef.current.offsetTop;
+            const offsetTop = targetMonthRef.current.offsetTop;
             const containerHeight = viewport.clientHeight;
             viewport.scrollTop =
               offsetTop -
               containerHeight / 2 +
-              currentMonthRef.current.clientHeight / 2;
+              targetMonthRef.current.clientHeight / 2;
           }
         }
       }, 100);
@@ -122,8 +123,11 @@ export function PeriodRegistrationModal({
     onOpenChange(false);
   };
 
-  const monthsToDisplay = Array.from({ length: 480 }).map((_, i) =>
-    startOfMonth(subMonths(new Date(), 240 - i))
+  const startDate = startOfMonth(new Date('1970-01-01T00:00:00'));
+  const endDate = startOfMonth(new Date('2100-12-31T00:00:00'));
+  const numMonths = differenceInMonths(endDate, startDate) + 1;
+  const monthsToDisplay = Array.from({ length: numMonths }).map((_, i) =>
+    addMonths(startDate, i)
   );
 
   return (
@@ -146,11 +150,12 @@ export function PeriodRegistrationModal({
         <ScrollArea ref={scrollContainerRef} className="flex-1">
           <div className="space-y-6 p-4">
             {monthsToDisplay.map((month) => {
-              const isCurrentMonth = isSameMonth(month, new Date());
+              const isTargetMonth =
+                month.getFullYear() === 2026 && month.getMonth() === 0; // January 2026
               return (
                  <div
                   key={month.toISOString()}
-                  ref={isCurrentMonth ? currentMonthRef : null}
+                  ref={isTargetMonth ? targetMonthRef : null}
                 >
                   <SimpleCalendar
                     initialDate={month}
