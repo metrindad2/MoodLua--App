@@ -177,28 +177,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     
     let consistentProfile = userProfile && newLmp ? { ...userProfile, lastMenstruationDate: newLmp } : userProfile;
 
-    // --- LÓGICA DE APRENDIZADO ---
-    // Se houver um perfil, o app tenta aprender as médias do ciclo e da menstruação.
-    if (consistentProfile) {
-      // Aprende a duração média da menstruação.
-      const flowDurations = _getFlowDurations(dailyLogs);
-      if (flowDurations.length > 1) { // Precisa de pelo menos 2 ciclos para aprender.
-        const avgFlowDuration = Math.round(flowDurations.reduce((a, b) => a + b, 0) / flowDurations.length);
-        if (avgFlowDuration > 0 && avgFlowDuration !== consistentProfile.flowDurationDays) {
-          consistentProfile = { ...consistentProfile, flowDurationDays: avgFlowDuration };
-        }
-      }
-      
-      // Aprende a duração média do ciclo.
-      if (newCycleHistory.length > 1) { // Precisa de pelo menos 2 ciclos para aprender.
-        const avgCycleLength = Math.round(newCycleHistory.reduce((acc, c) => acc + c.cycleLength, 0) / newCycleHistory.length);
-        if (avgCycleLength > 10 && avgCycleLength !== consistentProfile.cycleLengthDays) {
-          consistentProfile = { ...consistentProfile, cycleLengthDays: avgCycleLength };
-        }
-      }
-    }
-    // --- FIM DA LÓGICA DE APRENDIZADO ---
-
     // Prepara e salva todos os dados no localStorage.
     const dataToSave: MoodLuaLocalData = {
       userProfile: consistentProfile,
