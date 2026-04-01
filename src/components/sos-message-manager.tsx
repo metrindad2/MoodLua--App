@@ -40,8 +40,12 @@ export function SosMessageManager() {
           Mensagem de Emergência
         </Label>
         <p className="text-sm text-muted-foreground">
-          Personalize a mensagem que será enviada. A sua localização será
-          adicionada automaticamente.
+          Personalize a mensagem que será enviada. Use a variável{' '}
+          <code className="font-mono p-1 bg-muted rounded text-sm font-semibold">
+            {'{{localizacao}}'}
+          </code>{' '}
+          para posicionar o link do mapa. Se não usar a variável, o link será
+          adicionado ao final do texto.
         </p>
       </div>
 

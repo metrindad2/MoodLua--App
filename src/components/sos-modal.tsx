@@ -59,10 +59,24 @@ export function SosModal() {
       (position) => {
         const { latitude, longitude } = position.coords;
         const mapsLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
-        const fullMessage = `${sosMessage}\n\n${mapsLink}`;
-        const whatsappUrl = `https://wa.me/${contact.phone}?text=${encodeURIComponent(fullMessage)}`;
         
-        window.location.href = whatsappUrl;
+        let messageToSend = sosMessage;
+        
+        // Substitui o placeholder se existir
+        if (messageToSend.includes('{{localizacao}}')) {
+            messageToSend = messageToSend.replace('{{localizacao}}', mapsLink);
+        } else {
+            // Se o placeholder não existir, apenas anexa o link, garantindo que não haja links duplicados ou malformados.
+            // Remove qualquer link quebrado que possa ter sido salvo anteriormente.
+            messageToSend = messageToSend.replace(/https?:\/\/www\.google\.com\/maps\?q=latitude,longitude/g, '');
+            // Adiciona o link correto com duas quebras de linha para separação.
+            messageToSend = `${messageToSend.trim()}\n\n${mapsLink}`;
+        }
+        
+        const whatsappUrl = `https://wa.me/${contact.phone}?text=${encodeURIComponent(messageToSend)}`;
+        
+        // Abre o link em uma nova aba. Em dispositivos móveis, isso geralmente aciona o aplicativo do WhatsApp.
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
 
         setIsOpen(false);
       },
