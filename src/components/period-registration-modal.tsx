@@ -19,6 +19,7 @@ import {
   addYears,
   differenceInMonths,
   min,
+  addDays,
 } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { SimpleCalendar } from './simple-calendar';
@@ -46,23 +47,9 @@ export function PeriodRegistrationModal({
 
   // A lógica para gerar os meses a serem exibidos agora é memoizada para performance.
   const monthsToDisplay = useMemo(() => {
-    if (!userProfile?.joinDate) {
-      return [];
-    }
-
-    // Encontra a data mais antiga dos logs para permitir a navegação para trás.
-    const logDates = dailyLogs.map((log) => new Date(log.date + 'T00:00:00'));
-
-    // O calendário deve começar no início do ano da data de entrada da usuária,
-    // ou no ano do seu primeiro log, o que vier primeiro.
-    const earliestPossibleDate = min([
-      new Date(userProfile.joinDate + 'T00:00:00'),
-      ...logDates,
-    ]);
-    const calendarStartDate = startOfYear(earliestPossibleDate);
-
-    // O calendário se estende por 10 anos no futuro a partir de hoje.
-    const calendarEndDate = startOfMonth(addYears(new Date(), 10));
+    // Ano inicial é 2000, e vai até 2200
+    const calendarStartDate = new Date(2000, 0, 1);
+    const calendarEndDate = new Date(2200, 0, 1);
 
     const numMonths =
       differenceInMonths(calendarEndDate, calendarStartDate) + 1;
@@ -71,10 +58,11 @@ export function PeriodRegistrationModal({
     return Array.from({ length: numMonths }).map((_, i) =>
       addMonths(calendarStartDate, i)
     );
-  }, [userProfile?.joinDate, dailyLogs]);
+  }, []);
 
-  // O mês alvo para rolagem é o mês atual.
-  const currentDisplayMonth = startOfMonth(new Date());
+  // O mês alvo para rolagem é o início de 2026.
+  const targetScrollDate = new Date(2026, 0, 1);
+  const currentDisplayMonth = startOfMonth(targetScrollDate);
 
   // Obtém os dias de período atualmente selecionados diretamente do contexto.
   const periodDays = useMemo(() => {
@@ -83,7 +71,7 @@ export function PeriodRegistrationModal({
       .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
   }, [dailyLogs]);
 
-  // Efeito para rolar para o mês atual quando o diálogo abre.
+  // Efeito para rolar para o mês alvo quando o diálogo abre.
   useEffect(() => {
     if (open) {
       setTimeout(() => {
@@ -112,11 +100,26 @@ export function PeriodRegistrationModal({
     let newSelectedDays;
 
     if (isAlreadySelected) {
-      // Se o dia já está selecionado, remove-o.
+      // Se o dia já está selecionado, remove-o para permitir o ajuste manual.
       newSelectedDays = periodDays.filter((d) => !isSameDay(d, dayStart));
     } else {
-      // Se o dia não está selecionado, adiciona-o.
-      newSelectedDays = [...periodDays, dayStart];
+      // Se um novo dia é selecionado, adiciona um intervalo de dias
+      // com base na duração do fluxo configurada pela usuária.
+      const flowDuration = userProfile?.flowDurationDays || 5; // Usa 5 dias como padrão.
+      const newPeriodRange = Array.from({ length: flowDuration }).map((_, i) =>
+        addDays(dayStart, i)
+      );
+
+      // Combina os dias existentes com o novo intervalo, removendo duplicatas
+      // para permitir que a usuária adicione múltiplos blocos de período.
+      const combinedDayTimestamps = new Set([
+        ...periodDays.map((d) => d.getTime()),
+        ...newPeriodRange.map((d) => d.getTime()),
+      ]);
+
+      newSelectedDays = Array.from(combinedDayTimestamps).map(
+        (t) => new Date(t)
+      );
     }
 
     // Chama a função do contexto para salvar tudo automaticamente.
