@@ -16,6 +16,7 @@ import {
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import type { DailyLog } from '@/lib/types';
+import { Check } from 'lucide-react';
 
 interface SimpleCalendarProps {
   initialDate?: Date;
@@ -25,7 +26,6 @@ interface SimpleCalendarProps {
   previsionRange?: { from: Date; to: Date };
   fertileWindow?: { from: Date; to: Date };
   ovulationDate?: Date;
-  disableFutureDates?: boolean;
   dailyLogs?: DailyLog[];
 }
 
@@ -37,7 +37,6 @@ export function SimpleCalendar({
   previsionRange,
   fertileWindow,
   ovulationDate,
-  disableFutureDates,
   dailyLogs,
 }: SimpleCalendarProps) {
   const monthStart = startOfMonth(initialDate);
@@ -103,9 +102,7 @@ export function SimpleCalendar({
             if (!isDayInCurrentMonth) {
               return <div key={i} className="h-12" />;
             }
-            const isFuture =
-              disableFutureDates &&
-              isAfter(startOfDay(date), startOfDay(new Date()));
+            const isFuture = isAfter(startOfDay(date), startOfDay(new Date()));
             const isSelected = selectedDates?.some((d) => isSameDay(d, date));
 
             return (
@@ -124,14 +121,18 @@ export function SimpleCalendar({
                   )}
                   aria-label={format(date, 'PPP', { locale: ptBR })}
                 >
-                  <span
-                    className={cn(
-                      isSelected ? 'text-primary-foreground' : 'text-foreground',
-                      isCurrentToday && !isSelected && 'text-primary font-bold'
-                    )}
-                  >
-                    {format(date, 'd')}
-                  </span>
+                  {isSelected ? (
+                    <Check className="h-5 w-5 text-primary-foreground" />
+                  ) : (
+                    <span
+                      className={cn(
+                        'text-foreground',
+                        isCurrentToday && 'text-primary font-bold'
+                      )}
+                    >
+                      {format(date, 'd')}
+                    </span>
+                  )}
                 </button>
                 {isCurrentToday && (
                   <span className="text-[9px] font-bold text-primary mt-1 select-none">
@@ -141,18 +142,23 @@ export function SimpleCalendar({
               </div>
             );
           }
-          
+
           // Modo de Dashboard: Lógica para exibir informações.
           if (!isDayInCurrentMonth) {
-            return <div key={i} className="h-12"></div>
+            return <div key={i} className="h-12"></div>;
           }
           const isHighlighted = isDayHighlighted(date);
           const isInPrevision = isDayInPrevisionRange(date);
           const isFertile = isDayInFertileWindow(date);
           const isOvulation = ovulationDate && isSameDay(date, ovulationDate);
-          
-          const logForDay = dailyLogs?.find(log => isSameDay(startOfDay(new Date(log.date + 'T00:00:00')), date));
-          const hasLogData = logForDay && (logForDay.mood || (logForDay.symptoms && logForDay.symptoms.length > 0));
+
+          const logForDay = dailyLogs?.find((log) =>
+            isSameDay(startOfDay(new Date(log.date + 'T00:00:00')), date)
+          );
+          const hasLogData =
+            logForDay &&
+            (logForDay.mood ||
+              (logForDay.symptoms && logForDay.symptoms.length > 0));
 
           const dayClasses = cn(
             'relative flex h-12 w-full items-center justify-center transition-colors'
@@ -163,14 +169,17 @@ export function SimpleCalendar({
             isInPrevision && !isHighlighted && 'border border-dashed border-primary/80',
             isFertile && !isHighlighted && 'bg-fertile text-fertile-foreground',
             isCurrentToday && !isHighlighted && 'ring-2 ring-primary',
-            isHighlighted && 'bg-primary text-primary-foreground border-transparent ring-0'
+            isHighlighted &&
+              'bg-primary text-primary-foreground border-transparent ring-0'
           );
 
           return (
-            <div key={i} className={dayClasses} aria-label={format(date, 'PPP', { locale: ptBR })}>
-              <span className={numberClasses}>
-                {format(date, 'd')}
-              </span>
+            <div
+              key={i}
+              className={dayClasses}
+              aria-label={format(date, 'PPP', { locale: ptBR })}
+            >
+              <span className={numberClasses}>{format(date, 'd')}</span>
               <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1">
                 {isOvulation && !isHighlighted && (
                   <div className="h-1.5 w-1.5 rounded-full bg-fertile-foreground/80" />

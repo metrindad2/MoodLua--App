@@ -20,11 +20,12 @@ import {
   addYears,
   differenceInMonths,
   min,
+  addDays,
 } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { useToast } from '@/hooks/use-toast';
 import { SimpleCalendar } from './simple-calendar';
-import { X } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 
 interface PeriodRegistrationModalProps {
@@ -41,7 +42,8 @@ export function PeriodRegistrationModal({
   onOpenChange,
   previsionRange,
 }: PeriodRegistrationModalProps) {
-  const { userProfile, dailyLogs, addOrUpdateDailyLog, startNewCycle } = useCycleData();
+  const { userProfile, dailyLogs, addOrUpdateDailyLog, startNewCycle } =
+    useCycleData();
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
   const { toast } = useToast();
 
@@ -68,7 +70,8 @@ export function PeriodRegistrationModal({
     // The calendar extends 10 years into the future from today.
     const calendarEndDate = startOfMonth(addYears(new Date(), 10));
 
-    const numMonths = differenceInMonths(calendarEndDate, calendarStartDate) + 1;
+    const numMonths =
+      differenceInMonths(calendarEndDate, calendarStartDate) + 1;
     if (numMonths <= 0) return [];
 
     return Array.from({ length: numMonths }).map((_, i) =>
@@ -132,15 +135,21 @@ export function PeriodRegistrationModal({
 
     // Find the earliest day in the new selection to determine the cycle start.
     const newFirstDay = selectedDays.length > 0 ? min(selectedDays) : null;
-    const currentLmpDate = startOfDay(new Date(userProfile.lastMenstruationDate + 'T00:00:00'));
+    const currentLmpDate = startOfDay(
+      new Date(userProfile.lastMenstruationDate + 'T00:00:00')
+    );
 
     // If the new first day is different from the current cycle start, start a new cycle.
     if (newFirstDay && !isSameDay(newFirstDay, currentLmpDate)) {
-        startNewCycle(newFirstDay);
+      startNewCycle(newFirstDay);
     }
-    
+
     // Union of old and new days to check for changes.
-    const allPotentiallyChangedDays = [...new Set([...originalPeriodDays, ...selectedDays].map(d => d.getTime()))].map(t => new Date(t));
+    const allPotentiallyChangedDays = [
+      ...new Set(
+        [...originalPeriodDays, ...selectedDays].map((d) => d.getTime())
+      ),
+    ].map((t) => new Date(t));
 
     for (const day of allPotentiallyChangedDays) {
       const isNowSelected = selectedDays.some((d) => isSameDay(d, day));
@@ -187,7 +196,7 @@ export function PeriodRegistrationModal({
             {monthsToDisplay.map((month) => {
               const isTargetMonth = isSameMonth(month, currentDisplayMonth);
               return (
-                 <div
+                <div
                   key={month.toISOString()}
                   ref={isTargetMonth ? targetMonthRef : null}
                 >

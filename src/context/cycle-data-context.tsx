@@ -13,7 +13,7 @@ import {
   CycleLog,
   EmergencyContact,
 } from '@/lib/types';
-import { format, differenceInDays, startOfDay } from 'date-fns';
+import { format, differenceInDays, startOfDay, addDays } from 'date-fns';
 
 // Combined data structure for localStorage
 interface MoodLuaLocalData {
@@ -31,8 +31,12 @@ interface CycleDataContextType {
   pregnancyLmpDate: string | null;
   sosContacts: EmergencyContact[];
   loading: boolean;
-  updateUserProfile: (profile: Partial<Omit<UserProfile, 'uid' | 'joinDate'>>) => void;
-  addOrUpdateDailyLog: (log: Partial<Omit<DailyLog, 'date'>> & { date: Date }) => void;
+  updateUserProfile: (
+    profile: Partial<Omit<UserProfile, 'uid' | 'joinDate'>>
+  ) => void;
+  addOrUpdateDailyLog: (
+    log: Partial<Omit<DailyLog, 'date'>> & { date: Date }
+  ) => void;
   getLogForDate: (date: Date) => DailyLog | undefined;
   startNewCycle: (startDate: Date) => void;
   updatePregnancyLmpDate: (date: string | null) => void;
@@ -92,17 +96,25 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Failed to save local data', error);
     }
-  }, [userProfile, dailyLogs, cycleHistory, pregnancyLmpDate, sosContacts, loading]);
+  }, [
+    userProfile,
+    dailyLogs,
+    cycleHistory,
+    pregnancyLmpDate,
+    sosContacts,
+    loading,
+  ]);
 
   // This effect will patch existing user profiles that don't have a joinDate.
   useEffect(() => {
     if (!loading && userProfile && !userProfile.joinDate) {
       setUserProfile((prevProfile) => {
         if (!prevProfile) return null; // Should not happen inside this condition but good practice
-        
+
         // Use lastMenstruationDate as a fallback for the joinDate for legacy users.
-        const fallbackJoinDate = prevProfile.lastMenstruationDate || format(new Date(), 'yyyy-MM-dd');
-        
+        const fallbackJoinDate =
+          prevProfile.lastMenstruationDate || format(new Date(), 'yyyy-MM-dd');
+
         return {
           ...prevProfile,
           joinDate: fallbackJoinDate,
@@ -111,82 +123,124 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     }
   }, [loading, userProfile]);
 
-  const updateUserProfile = useCallback((profileUpdate: Partial<Omit<UserProfile, 'uid' | 'joinDate'>>) => {
-    setUserProfile((prevProfile) => {
+  const updateUserProfile = useCallback(
+    (profileUpdate: Partial<Omit<UserProfile, 'uid' | 'joinDate'>>) => {
+      setUserProfile((prevProfile) => {
         if (!prevProfile) {
-            // Create a new profile if it doesn't exist.
-            return {
-                uid: new Date().toISOString(),
-                joinDate: format(new Date(), 'yyyy-MM-dd'),
-                ...profileUpdate,
-            } as UserProfile;
-        }
-        // Update the existing profile.
-        return {
-            ...prevProfile,
+          // It's a new user. Create the full profile.
+          const newUserProfile = {
+            uid: new Date().toISOString(),
+            joinDate: format(new Date(), 'yyyy-MM-dd'),
             ...profileUpdate,
-        };
-    });
-  }, []);
-  
-  const addSosContact = useCallback((contact: Omit<EmergencyContact, 'id' | 'isPredefined'>) => {
-    const newContact: EmergencyContact = {
-      id: new Date().getTime().toString(),
-      ...contact,
-    };
-    setSosContacts(prev => [...prev, newContact]);
-  }, []);
+          } as UserProfile;
+
+          // Auto-mark the first period for the new user.
+          if (
+            newUserProfile.lastMenstruationDate &&
+            newUserProfile.flowDurationDays > 0
+          ) {
+            const lmp = new Date(
+              newUserProfile.lastMenstruationDate + 'T00:00:00'
+            );
+            const duration = newUserProfile.flowDurationDays;
+            const newLogs: DailyLog[] = [];
+            for (let i = 0; i < duration; i++) {
+              newLogs.push({
+                date: format(addDays(lmp, i), 'yyyy-MM-dd'),
+                isPeriodDay: true,
+              });
+            }
+            setDailyLogs(newLogs); // Set logs for the new user
+          }
+
+          return newUserProfile;
+        }
+
+        // It's an existing user. Just update.
+        return { ...prevProfile, ...profileUpdate };
+      });
+    },
+    []
+  );
+
+  const addSosContact = useCallback(
+    (contact: Omit<EmergencyContact, 'id' | 'isPredefined'>) => {
+      const newContact: EmergencyContact = {
+        id: new Date().getTime().toString(),
+        ...contact,
+      };
+      setSosContacts((prev) => [...prev, newContact]);
+    },
+    []
+  );
 
   const updateSosContact = useCallback((updatedContact: EmergencyContact) => {
-    setSosContacts(prev => prev.map(c => c.id === updatedContact.id ? updatedContact : c));
+    setSosContacts((prev) =>
+      prev.map((c) => (c.id === updatedContact.id ? updatedContact : c))
+    );
   }, []);
 
   const removeSosContact = useCallback((contactId: string) => {
-    setSosContacts(prev => prev.filter(c => c.id !== contactId));
+    setSosContacts((prev) => prev.filter((c) => c.id !== contactId));
   }, []);
 
   // Adds or updates a daily log.
-  const addOrUpdateDailyLog = useCallback((log: Partial<Omit<DailyLog, 'date'>> & { date: Date }) => {
-    const dateString = format(log.date, 'yyyy-MM-dd');
+  const addOrUpdateDailyLog = useCallback(
+    (log: Partial<Omit<DailyLog, 'date'>> & { date: Date }) => {
+      const dateString = format(log.date, 'yyyy-MM-dd');
 
-    setDailyLogs((prevLogs) => {
-      const existingLogIndex = prevLogs.findIndex((l) => l.date === dateString);
-      const newLogData = { ...log, date: dateString };
+      setDailyLogs((prevLogs) => {
+        const existingLogIndex = prevLogs.findIndex(
+          (l) => l.date === dateString
+        );
+        const newLogData = { ...log, date: dateString };
 
-      let updatedLogs;
+        let updatedLogs;
 
-      if (existingLogIndex > -1) {
-        updatedLogs = [...prevLogs];
-        const currentLog = updatedLogs[existingLogIndex];
-        const mergedLog = { ...currentLog, ...newLogData };
-        
-        // Remove `undefined` properties to clean the object.
-        for (const key in mergedLog) {
-          if (mergedLog[key as keyof typeof mergedLog] === undefined) {
-            delete mergedLog[key as keyof typeof mergedLog];
+        if (existingLogIndex > -1) {
+          updatedLogs = [...prevLogs];
+          const currentLog = updatedLogs[existingLogIndex];
+          const mergedLog = { ...currentLog, ...newLogData };
+
+          // Remove `undefined` properties to clean the object.
+          for (const key in mergedLog) {
+            if (mergedLog[key as keyof typeof mergedLog] === undefined) {
+              delete mergedLog[key as keyof typeof mergedLog];
+            }
+          }
+
+          // If the log becomes "empty" of significant data, it's removed.
+          const hasMeaningfulData =
+            mergedLog.isPeriodDay ||
+            mergedLog.mood ||
+            mergedLog.symptoms?.length ||
+            (mergedLog.flowIntensity && mergedLog.flowIntensity !== 'nenhum');
+
+          if (!hasMeaningfulData) {
+            updatedLogs = updatedLogs.filter(
+              (_, index) => index !== existingLogIndex
+            );
+          } else {
+            updatedLogs[existingLogIndex] = mergedLog;
+          }
+        } else {
+          // If the new log is not empty, add it to the list.
+          const hasMeaningfulData =
+            newLogData.isPeriodDay ||
+            newLogData.mood ||
+            newLogData.symptoms?.length ||
+            (newLogData.flowIntensity && newLogData.flowIntensity !== 'nenhum');
+          if (hasMeaningfulData) {
+            updatedLogs = [...prevLogs, newLogData as DailyLog];
+          } else {
+            return prevLogs;
           }
         }
-        
-        // If the log becomes "empty" of significant data, it's removed.
-        const hasMeaningfulData = mergedLog.isPeriodDay || mergedLog.mood || mergedLog.symptoms?.length || (mergedLog.flowIntensity && mergedLog.flowIntensity !== 'nenhum');
-        
-        if (!hasMeaningfulData) {
-            updatedLogs = updatedLogs.filter((_, index) => index !== existingLogIndex);
-        } else {
-            updatedLogs[existingLogIndex] = mergedLog;
-        }
-      } else {
-        // If the new log is not empty, add it to the list.
-        const hasMeaningfulData = newLogData.isPeriodDay || newLogData.mood || newLogData.symptoms?.length || (newLogData.flowIntensity && newLogData.flowIntensity !== 'nenhum');
-        if (hasMeaningfulData) {
-          updatedLogs = [...prevLogs, newLogData as DailyLog];
-        } else {
-          return prevLogs;
-        }
-      }
-      return updatedLogs;
-    });
-  }, []);
+        return updatedLogs;
+      });
+    },
+    []
+  );
 
   const removeDailyLog = useCallback(
     (date: Date) => {
@@ -201,15 +255,17 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     },
     [addOrUpdateDailyLog]
   );
-  
+
   // Explicit function to start a new cycle.
   // Called when the user logs a period day that signifies a new cycle start.
   const startNewCycle = useCallback((startDate: Date) => {
-    setUserProfile(prevProfile => {
+    setUserProfile((prevProfile) => {
       if (!prevProfile) return null;
 
       const newLmpDate = startOfDay(startDate);
-      const previousLmpDate = startOfDay(new Date(prevProfile.lastMenstruationDate + 'T00:00:00'));
+      const previousLmpDate = startOfDay(
+        new Date(prevProfile.lastMenstruationDate + 'T00:00:00')
+      );
 
       // Only add to history if this new cycle isn't the very first one.
       if (differenceInDays(newLmpDate, previousLmpDate) > 0) {
@@ -221,19 +277,22 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
             startDate: format(previousLmpDate, 'yyyy-MM-dd'),
             cycleLength: lastCycleLength,
           };
-          setCycleHistory(prevHistory => [...prevHistory, newCycleLog]);
+          setCycleHistory((prevHistory) => [...prevHistory, newCycleLog]);
         }
       }
 
       // Update the user's last menstruation date.
-      return { ...prevProfile, lastMenstruationDate: format(newLmpDate, 'yyyy-MM-dd') };
+      return {
+        ...prevProfile,
+        lastMenstruationDate: format(newLmpDate, 'yyyy-MM-dd'),
+      };
     });
   }, []);
 
   const updatePregnancyLmpDate = (date: string | null) => {
     setPregnancyLmpDate(date);
   };
-  
+
   const logout = useCallback(() => {
     try {
       localStorage.removeItem(LOCAL_STORAGE_KEY);
@@ -242,7 +301,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
       setCycleHistory([]);
       setPregnancyLmpDate(null);
       setSosContacts([]);
-      window.location.href = '/'; 
+      window.location.href = '/';
     } catch (error) {
       console.error('Failed to clear data', error);
     }
@@ -255,7 +314,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     },
     [dailyLogs]
   );
-  
+
   const value = {
     userProfile,
     dailyLogs,
