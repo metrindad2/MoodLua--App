@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,11 +14,12 @@ import {
   isSameDay,
   startOfMonth,
   startOfDay,
-  addDays,
-  differenceInDays,
-  isSameMonth,
   addMonths,
+  isSameMonth,
+  startOfYear,
+  addYears,
   differenceInMonths,
+  min,
 } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { useToast } from '@/hooks/use-toast';
@@ -40,21 +41,52 @@ export function PeriodRegistrationModal({
   onOpenChange,
   previsionRange,
 }: PeriodRegistrationModalProps) {
-  const { dailyLogs, addOrUpdateDailyLog } = useCycleData();
+  const { userProfile, dailyLogs, addOrUpdateDailyLog, startNewCycle } = useCycleData();
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
   const { toast } = useToast();
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const targetMonthRef = useRef<HTMLDivElement>(null);
 
+  // The logic for generating the months to display is now memoized for performance.
+  const monthsToDisplay = useMemo(() => {
+    if (!userProfile?.joinDate) {
+      return [];
+    }
+
+    // Find the earliest date from logs to allow backward navigation.
+    const logDates = dailyLogs.map((log) => new Date(log.date + 'T00:00:00'));
+
+    // The calendar should start from the beginning of the year of the user's join date,
+    // or the year of their earliest log, whichever is first.
+    const earliestPossibleDate = min([
+      new Date(userProfile.joinDate + 'T00:00:00'),
+      ...logDates,
+    ]);
+    const calendarStartDate = startOfYear(earliestPossibleDate);
+
+    // The calendar extends 10 years into the future from today.
+    const calendarEndDate = startOfMonth(addYears(new Date(), 10));
+
+    const numMonths = differenceInMonths(calendarEndDate, calendarStartDate) + 1;
+    if (numMonths <= 0) return [];
+
+    return Array.from({ length: numMonths }).map((_, i) =>
+      addMonths(calendarStartDate, i)
+    );
+  }, [userProfile?.joinDate, dailyLogs]);
+
+  // The target month for scrolling is the current month.
+  const currentDisplayMonth = startOfMonth(new Date());
+
   useEffect(() => {
     if (open) {
       const periodDays = dailyLogs
-        .filter((log) => log.isPeriodDay) // Alterado para usar a nova flag
+        .filter((log) => log.isPeriodDay)
         .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
       setSelectedDays(periodDays);
 
-      // Atraso para garantir que a DOM esteja pronta antes de rolar.
+      // Scroll to the current month when the dialog opens.
       setTimeout(() => {
         if (targetMonthRef.current && scrollContainerRef.current) {
           const viewport = scrollContainerRef.current.querySelector(
@@ -71,7 +103,7 @@ export function PeriodRegistrationModal({
         }
       }, 100);
     }
-  }, [open, dailyLogs]);
+  }, [open, dailyLogs, monthsToDisplay]);
 
   const handleDayClick = (day: Date) => {
     const dayStart = startOfDay(day);
@@ -80,34 +112,44 @@ export function PeriodRegistrationModal({
     let newSelectedDays;
 
     if (isAlreadySelected) {
-      // Se o dia já está selecionado, remove-o (desseleciona).
+      // If the day is already selected, remove it.
       newSelectedDays = selectedDays.filter((d) => !isSameDay(d, dayStart));
     } else {
-      // Se o dia não está selecionado, adiciona-o.
+      // If the day is not selected, add it.
       newSelectedDays = [...selectedDays, dayStart];
     }
 
-    // Apenas ordena os dias selecionados.
+    // Sort the selected days.
     setSelectedDays(newSelectedDays.sort((a, b) => a.getTime() - b.getTime()));
   };
 
   const handleSave = () => {
-    const originallyLogged = dailyLogs
-      .filter((log) => log.isPeriodDay) // Alterado para usar a nova flag
+    if (!userProfile) return;
+
+    const originalPeriodDays = dailyLogs
+      .filter((log) => log.isPeriodDay)
       .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
 
-    const allPotentiallyChangedDays = [
-      ...new Set([...originallyLogged, ...selectedDays].map((d) => d.getTime())),
-    ].map((t) => new Date(t));
+    // Find the earliest day in the new selection to determine the cycle start.
+    const newFirstDay = selectedDays.length > 0 ? min(selectedDays) : null;
+    const currentLmpDate = startOfDay(new Date(userProfile.lastMenstruationDate + 'T00:00:00'));
+
+    // If the new first day is different from the current cycle start, start a new cycle.
+    if (newFirstDay && !isSameDay(newFirstDay, currentLmpDate)) {
+        startNewCycle(newFirstDay);
+    }
     
-    // Processa cada dia que pode ter sido alterado
+    // Union of old and new days to check for changes.
+    const allPotentiallyChangedDays = [...new Set([...originalPeriodDays, ...selectedDays].map(d => d.getTime()))].map(t => new Date(t));
+
     for (const day of allPotentiallyChangedDays) {
       const isNowSelected = selectedDays.some((d) => isSameDay(d, day));
-      const wasOriginallySelected = originallyLogged.some((d) =>
+      const wasOriginallySelected = originalPeriodDays.some((d) =>
         isSameDay(d, day)
       );
+
+      // Update only if the state changed.
       if (isNowSelected !== wasOriginallySelected) {
-        // Apenas marca ou desmarca o dia como menstruação, sem definir a intensidade do fluxo.
         addOrUpdateDailyLog({
           date: day,
           isPeriodDay: isNowSelected,
@@ -122,15 +164,6 @@ export function PeriodRegistrationModal({
 
     onOpenChange(false);
   };
-
-  // O calendário agora gera um vasto alcance de meses (200 anos)
-  // para parecer praticamente "infinito" para a usuária.
-  const startDate = startOfMonth(new Date('2000-01-01T00:00:00'));
-  const endDate = startOfMonth(new Date('2200-12-31T00:00:00'));
-  const numMonths = differenceInMonths(endDate, startDate) + 1;
-  const monthsToDisplay = Array.from({ length: numMonths }).map((_, i) =>
-    addMonths(startDate, i)
-  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -152,8 +185,7 @@ export function PeriodRegistrationModal({
         <ScrollArea ref={scrollContainerRef} className="flex-1">
           <div className="space-y-6 p-4">
             {monthsToDisplay.map((month) => {
-              const isTargetMonth =
-                month.getFullYear() === 2026 && month.getMonth() === 0; // January 2026
+              const isTargetMonth = isSameMonth(month, currentDisplayMonth);
               return (
                  <div
                   key={month.toISOString()}
