@@ -32,7 +32,7 @@ export function SosModal() {
   const sosMessage = userProfile?.sosMessage;
 
   const handleWhatsAppSend = (contact: EmergencyContact) => {
-    if (!sosMessage) {
+    if (!sosMessage || !sosMessage.trim()) {
         toast({
             variant: 'destructive',
             title: 'Mensagem não configurada',
@@ -62,19 +62,21 @@ export function SosModal() {
         
         let messageToSend = sosMessage;
         
-        // Substitui o placeholder se existir
+        // Substitui o placeholder {{localizacao}} se ele existir na mensagem.
         if (messageToSend.includes('{{localizacao}}')) {
             messageToSend = messageToSend.replace('{{localizacao}}', mapsLink);
         } else {
-            // Se o placeholder não existir, apenas anexa o link, garantindo que não haja links duplicados ou malformados.
-            // Remove qualquer link quebrado que possa ter sido salvo anteriormente.
-            messageToSend = messageToSend.replace(/https?:\/\/www\.google\.com\/maps\?q=latitude,longitude/g, '');
-            // Adiciona o link correto com duas quebras de linha para separação.
+            // Se o placeholder não for encontrado, anexa o link de localização ao final da mensagem.
             messageToSend = `${messageToSend.trim()}\n\n${mapsLink}`;
         }
         
         const whatsappUrl = `https://wa.me/${contact.phone}?text=${encodeURIComponent(messageToSend)}`;
         
+        toast({
+            title: 'Redirecionando para o WhatsApp...',
+            description: 'Sua mensagem de SOS está pronta para ser enviada.'
+        })
+
         // Abre o link em uma nova aba. Em dispositivos móveis, isso geralmente aciona o aplicativo do WhatsApp.
         window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
 
@@ -83,7 +85,7 @@ export function SosModal() {
       (error) => {
         let errorMessage = 'Não foi possível obter sua localização.';
         if (error.code === 1) { // PERMISSION_DENIED
-          errorMessage = 'Permissão de localização negada. Habilite nas configurações do seu navegador.';
+          errorMessage = 'Permissão de localização negada. Habilite nas configurações do seu navegador ou do aplicativo.';
         }
         
         toast({
