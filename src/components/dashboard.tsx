@@ -13,7 +13,7 @@ import {
   addMonths,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { PeriodRegistrationModal } from './period-registration-modal';
@@ -26,6 +26,7 @@ import {
   Target,
 } from 'lucide-react';
 import Link from 'next/link';
+import { CycleProgress } from './cycle-progress';
 
 function CycleSummary() {
   const { userProfile } = useCycleData();
@@ -101,6 +102,14 @@ export default function Dashboard() {
   const cycleInfo = calculateCycleInfo(userProfile);
   if (!cycleInfo) return null;
 
+  const phase = cycleInfo.isMenstruating
+    ? 'Menstruação'
+    : cycleInfo.isFertile
+    ? 'Fase Fértil'
+    : cycleInfo.isPms
+    ? 'Fase Lútea (TPM)'
+    : 'Fase Folicular';
+
   const previsionRange = {
     from: cycleInfo.nextPeriodStartDate,
     to: addDays(
@@ -138,6 +147,13 @@ export default function Dashboard() {
   return (
     <>
       <div className="p-4 space-y-6">
+        <CycleProgress
+          currentDay={cycleInfo.currentCycleDay}
+          cycleLength={userProfile.cycleLengthDays}
+          phase={phase}
+          daysUntilNext={cycleInfo.daysUntilNextPeriod}
+        />
+        
         <CycleSummary />
 
         <Card>

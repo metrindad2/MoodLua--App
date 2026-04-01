@@ -155,17 +155,15 @@ export function SimpleCalendar({
           const hasLogData = logForDay && (logForDay.mood || (logForDay.symptoms && logForDay.symptoms.length > 0));
 
           const dayClasses = cn(
-            'relative flex h-12 w-full items-center justify-center rounded-xl transition-colors',
-            // Ordem de prioridade visual:
-            isFertile && !isHighlighted && 'bg-fertile',
-            isHighlighted && 'bg-primary text-primary-foreground'
+            'relative flex h-12 w-full items-center justify-center transition-colors'
           );
 
           const numberClasses = cn(
-            'flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium',
+            'flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium transition-colors',
             isInPrevision && !isHighlighted && 'border border-dashed border-primary/80',
-            isCurrentToday && !isHighlighted && 'border-2 border-primary',
-            isHighlighted && 'text-primary-foreground'
+            isFertile && !isHighlighted && 'bg-fertile text-fertile-foreground',
+            isCurrentToday && !isHighlighted && 'ring-2 ring-primary',
+            isHighlighted && 'bg-primary text-primary-foreground border-transparent ring-0'
           );
 
           return (

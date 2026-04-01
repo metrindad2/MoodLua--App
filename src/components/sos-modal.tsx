@@ -113,7 +113,7 @@ export function SosModal() {
         <SheetTrigger asChild>
           <Button
             variant="default"
-            className="fixed bottom-24 right-4 z-50 h-16 w-16 rounded-full shadow-lg bg-primary hover:bg-primary/90 animate-pulse"
+            className="fixed bottom-24 right-4 z-50 h-16 w-16 rounded-full shadow-lg bg-primary hover:bg-primary/90"
             aria-label="Abrir menu de emergência"
           >
             <Heart className="h-8 w-8 text-primary-foreground" />
