@@ -79,35 +79,15 @@ export function PeriodRegistrationModal({
     let newSelectedDays;
 
     if (isAlreadySelected) {
-      // Se o dia já estiver selecionado, simplesmente o remove (desseleção manual).
+      // Se o dia já está selecionado, remove-o (desseleciona).
       newSelectedDays = selectedDays.filter((d) => !isSameDay(d, dayStart));
     } else {
-      // O dia não está selecionado. Verifica se deve iniciar um novo bloco automático
-      // ou apenas adicionar o dia manualmente.
-      const isNearExistingSelection = selectedDays.some(
-        (d) => Math.abs(differenceInDays(d, dayStart)) < 15
-      );
-
-      // Se não houver seleção, ou se o clique for "longe" de uma seleção existente,
-      // inicia um novo bloco automático de 7 dias.
-      if (selectedDays.length === 0 || !isNearExistingSelection) {
-        const newBlock = Array.from({ length: 7 }).map((_, i) =>
-          addDays(dayStart, i)
-        );
-        // Adiciona o novo bloco à seleção existente (importante para múltiplos ciclos no mesmo mês).
-        newSelectedDays = [...selectedDays, ...newBlock];
-      } else {
-        // Se o clique for "perto", é uma edição manual para estender o período ou preencher um buraco.
-        // Apenas adiciona o dia clicado.
-        newSelectedDays = [...selectedDays, dayStart];
-      }
+      // Se o dia não está selecionado, adiciona-o.
+      newSelectedDays = [...selectedDays, dayStart];
     }
 
-    // Remove duplicatas (caso um novo bloco sobreponha dias já selecionados) e ordena.
-    const uniqueDays = Array.from(
-      new Set(newSelectedDays.map((d) => d.getTime()))
-    ).map((t) => new Date(t));
-    setSelectedDays(uniqueDays.sort((a, b) => a.getTime() - b.getTime()));
+    // Apenas ordena os dias selecionados.
+    setSelectedDays(newSelectedDays.sort((a, b) => a.getTime() - b.getTime()));
   };
 
   const handleSave = () => {
