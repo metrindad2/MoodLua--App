@@ -159,20 +159,24 @@ export function SimpleCalendar({
             // Ordem de prioridade visual:
             // 1. Fundo para período fértil (pode ser combinado com outros)
             isFertile && !isHighlighted && 'bg-fertile',
-            // 2. Destaque para o dia atual
-            isCurrentToday && !isHighlighted && 'bg-accent border-2 border-primary',
-            // 3. Borda para previsão
+            // 2. Borda para previsão
             isInPrevision && !isHighlighted && 'border-2 border-dashed border-secondary',
-            // 4. Destaque máximo para período registrado (sobrescreve outros)
+            // 3. Destaque máximo para período registrado (sobrescreve outros)
             isHighlighted && 'bg-primary text-primary-foreground'
+          );
+
+          const numberClasses = cn(
+            'flex h-8 w-8 items-center justify-center rounded-full text-sm', // Círculo para o número
+            !isDayInCurrentMonth && 'text-muted-foreground/50',
+            // Destaque para o dia atual (círculo preenchido), se não for um dia de menstruação.
+            isCurrentToday && !isHighlighted && 'bg-accent font-bold text-accent-foreground',
+            // Garante que o texto do dia da menstruação seja da cor correta.
+            isHighlighted && 'text-primary-foreground'
           );
 
           return (
             <div key={i} className={dayClasses} aria-label={format(date, 'PPP', { locale: ptBR })}>
-              <span className={cn(
-                  !isDayInCurrentMonth && 'text-muted-foreground/50',
-                  isCurrentToday && !isHighlighted && 'font-bold text-primary'
-                )}>
+              <span className={numberClasses}>
                 {format(date, 'd')}
               </span>
               {/* Indicador de ovulação e logs */}
