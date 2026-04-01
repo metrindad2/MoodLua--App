@@ -158,7 +158,6 @@ export function PeriodRegistrationModal({
                     initialDate={month}
                     selectedDates={selectedDays}
                     onDateClick={handleDayClick}
-                    disableFutureDates
                     previsionRange={previsionRange}
                   />
                 </div>
