@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -20,12 +19,10 @@ import {
   addYears,
   differenceInMonths,
   min,
-  addDays,
 } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
-import { useToast } from '@/hooks/use-toast';
 import { SimpleCalendar } from './simple-calendar';
-import { Check, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 
 interface PeriodRegistrationModalProps {
@@ -43,30 +40,28 @@ export function PeriodRegistrationModal({
   previsionRange,
 }: PeriodRegistrationModalProps) {
   const { userProfile, dailyLogs, savePeriodDays } = useCycleData();
-  const [selectedDays, setSelectedDays] = useState<Date[]>([]);
-  const { toast } = useToast();
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const targetMonthRef = useRef<HTMLDivElement>(null);
 
-  // The logic for generating the months to display is now memoized for performance.
+  // A lógica para gerar os meses a serem exibidos agora é memoizada para performance.
   const monthsToDisplay = useMemo(() => {
     if (!userProfile?.joinDate) {
       return [];
     }
 
-    // Find the earliest date from logs to allow backward navigation.
+    // Encontra a data mais antiga dos logs para permitir a navegação para trás.
     const logDates = dailyLogs.map((log) => new Date(log.date + 'T00:00:00'));
 
-    // The calendar should start from the beginning of the year of the user's join date,
-    // or the year of their earliest log, whichever is first.
+    // O calendário deve começar no início do ano da data de entrada da usuária,
+    // ou no ano do seu primeiro log, o que vier primeiro.
     const earliestPossibleDate = min([
       new Date(userProfile.joinDate + 'T00:00:00'),
       ...logDates,
     ]);
     const calendarStartDate = startOfYear(earliestPossibleDate);
 
-    // The calendar extends 10 years into the future from today.
+    // O calendário se estende por 10 anos no futuro a partir de hoje.
     const calendarEndDate = startOfMonth(addYears(new Date(), 10));
 
     const numMonths =
@@ -78,17 +73,19 @@ export function PeriodRegistrationModal({
     );
   }, [userProfile?.joinDate, dailyLogs]);
 
-  // The target month for scrolling is the current month.
+  // O mês alvo para rolagem é o mês atual.
   const currentDisplayMonth = startOfMonth(new Date());
 
+  // Obtém os dias de período atualmente selecionados diretamente do contexto.
+  const periodDays = useMemo(() => {
+    return dailyLogs
+      .filter((log) => log.isPeriodDay)
+      .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
+  }, [dailyLogs]);
+
+  // Efeito para rolar para o mês atual quando o diálogo abre.
   useEffect(() => {
     if (open) {
-      const periodDays = dailyLogs
-        .filter((log) => log.isPeriodDay)
-        .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
-      setSelectedDays(periodDays);
-
-      // Scroll to the current month when the dialog opens.
       setTimeout(() => {
         if (targetMonthRef.current && scrollContainerRef.current) {
           const viewport = scrollContainerRef.current.querySelector(
@@ -105,37 +102,25 @@ export function PeriodRegistrationModal({
         }
       }, 100);
     }
-  }, [open, dailyLogs, monthsToDisplay]);
+  }, [open, monthsToDisplay]);
 
+  // Lida com o clique em um dia. Salva as alterações automaticamente.
   const handleDayClick = (day: Date) => {
     const dayStart = startOfDay(day);
-    const isAlreadySelected = selectedDays.some((d) => isSameDay(d, dayStart));
+    const isAlreadySelected = periodDays.some((d) => isSameDay(d, dayStart));
 
     let newSelectedDays;
 
     if (isAlreadySelected) {
-      // If the day is already selected, remove it.
-      newSelectedDays = selectedDays.filter((d) => !isSameDay(d, dayStart));
+      // Se o dia já está selecionado, remove-o.
+      newSelectedDays = periodDays.filter((d) => !isSameDay(d, dayStart));
     } else {
-      // If the day is not selected, add it.
-      newSelectedDays = [...selectedDays, dayStart];
+      // Se o dia não está selecionado, adiciona-o.
+      newSelectedDays = [...periodDays, dayStart];
     }
 
-    // Sort the selected days.
-    setSelectedDays(newSelectedDays.sort((a, b) => a.getTime() - b.getTime()));
-  };
-
-  const handleSave = () => {
-    if (!userProfile) return;
-
-    savePeriodDays(selectedDays);
-
-    toast({
-      title: 'Menstruação registrada!',
-      description: `Seu calendário e ciclo foram atualizados.`,
-    });
-
-    onOpenChange(false);
+    // Chama a função do contexto para salvar tudo automaticamente.
+    savePeriodDays(newSelectedDays);
   };
 
   return (
@@ -152,7 +137,7 @@ export function PeriodRegistrationModal({
               Registrar Menstruação
             </DialogTitle>
           </div>
-          <div className="h-10 w-10" /> {/* Spacer */}
+          <div className="h-10 w-10" /> {/* Espaçador */}
         </DialogHeader>
 
         <ScrollArea ref={scrollContainerRef} className="flex-1">
@@ -166,7 +151,7 @@ export function PeriodRegistrationModal({
                 >
                   <SimpleCalendar
                     initialDate={month}
-                    selectedDates={selectedDays}
+                    selectedDates={periodDays}
                     onDateClick={handleDayClick}
                     previsionRange={previsionRange}
                   />
@@ -175,17 +160,6 @@ export function PeriodRegistrationModal({
             })}
           </div>
         </ScrollArea>
-
-        <DialogFooter className="p-4 border-t flex-row justify-between bg-background shrink-0">
-          <DialogClose asChild>
-            <Button variant="link" className="text-base text-primary">
-              Cancelar
-            </Button>
-          </DialogClose>
-          <Button onClick={handleSave} className="text-base font-bold">
-            Salvar
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
