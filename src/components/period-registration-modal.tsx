@@ -123,8 +123,10 @@ export function PeriodRegistrationModal({
     onOpenChange(false);
   };
 
-  const startDate = startOfMonth(new Date('1970-01-01T00:00:00'));
-  const endDate = startOfMonth(new Date('2100-12-31T00:00:00'));
+  // O calendário agora gera um vasto alcance de meses (200 anos)
+  // para parecer praticamente "infinito" para a usuária.
+  const startDate = startOfMonth(new Date('2000-01-01T00:00:00'));
+  const endDate = startOfMonth(new Date('2200-12-31T00:00:00'));
   const numMonths = differenceInMonths(endDate, startDate) + 1;
   const monthsToDisplay = Array.from({ length: numMonths }).map((_, i) =>
     addMonths(startDate, i)
