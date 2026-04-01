@@ -291,65 +291,80 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const savePeriodDays = useCallback((newPeriodDays: Date[]) => {
-    const sortedNewDays = [...newPeriodDays].sort((a,b) => a.getTime() - b.getTime());
-    const newFirstDay = sortedNewDays.length > 0 ? sortedNewDays[0] : null;
+    const sortedNewDays = [...newPeriodDays].sort((a, b) => a.getTime() - b.getTime());
 
-    // Update profile and cycle history
-    setUserProfile(prevProfile => {
-        if (!prevProfile) return null;
+    // Part 1: Update the dailyLogs to reflect the new set of period days.
+    // This is done first to ensure the log data is correct.
+    setDailyLogs(prevLogs => {
+      const newPeriodDayStrings = new Set(sortedNewDays.map(d => format(d, 'yyyy-MM-dd')));
+      const oldPeriodDayStrings = new Set(
+        prevLogs
+          .filter(log => log.isPeriodDay)
+          .map(log => log.date)
+      );
 
-        if (!newFirstDay) {
-            console.warn("Cannot save empty period days. Reverting is not yet implemented.");
-            // In a real app, you might show a toast or revert to the last valid cycle.
-            return prevProfile;
-        }
+      // We need to check all days that were or are period days.
+      const allAffectedDayStrings = new Set([...newPeriodDayStrings, ...oldPeriodDayStrings]);
+      
+      // Use a map for efficient updates.
+      const logsMap = new Map(prevLogs.map(log => [log.date, log]));
 
-        const newLmpDate = startOfDay(newFirstDay);
-        const previousLmpDate = startOfDay(new Date(prevProfile.lastMenstruationDate + 'T00:00:00'));
-
-        if (isSameDay(newLmpDate, previousLmpDate)) {
-            return prevProfile; // No change in cycle start date
-        }
+      allAffectedDayStrings.forEach(dayStr => {
+        const isNowPeriodDay = newPeriodDayStrings.has(dayStr);
+        const currentLog = logsMap.get(dayStr) || { date: dayStr };
         
-        // A new cycle is starting (or being corrected). Archive the previous one.
-        const lastCycleLength = differenceInDays(newLmpDate, previousLmpDate);
-        if (lastCycleLength > 10) {
-            const newCycleLog: CycleLog = {
-                startDate: format(previousLmpDate, 'yyyy-MM-dd'),
-                cycleLength: lastCycleLength,
-            };
-            setCycleHistory(prevHistory => [...prevHistory, newCycleLog]);
-        }
-        
-        return { ...prevProfile, lastMenstruationDate: format(newLmpDate, 'yyyy-MM-dd') };
+        // Create an updated log with the correct isPeriodDay status.
+        const updatedLog = { ...currentLog, isPeriodDay: isNowPeriodDay };
+        logsMap.set(dayStr, updatedLog);
+      });
+
+      const finalLogs = Array.from(logsMap.values());
+      
+      // Filter out logs that are now completely empty.
+      return finalLogs.filter(log => 
+        log.isPeriodDay || 
+        log.mood || 
+        (log.symptoms && log.symptoms.length > 0) || 
+        (log.flowIntensity && log.flowIntensity !== 'nenhum')
+      );
     });
 
-    // Sync daily logs with the new selection
-    setDailyLogs(prevLogs => {
-        const originalPeriodDays = prevLogs
-            .filter(log => log.isPeriodDay)
-            .map(log => startOfDay(new Date(log.date + 'T00:00:00')));
+    // Part 2: Update the cycle start date and history if the first period day has changed.
+    setUserProfile(prevProfile => {
+      if (!prevProfile) return null;
 
-        const allPotentiallyChangedDays = [...new Set([...originalPeriodDays.map(d => d.getTime()), ...sortedNewDays.map(d => d.getTime())])].map(t => new Date(t));
+      const newFirstDay = sortedNewDays.length > 0 ? sortedNewDays[0] : null;
 
-        let updatedLogs = [...prevLogs];
+      // If no period days are selected, we cannot determine the cycle start. Do not change the profile.
+      if (!newFirstDay) {
+        return prevProfile;
+      }
 
-        for (const day of allPotentiallyChangedDays) {
-            const isNowSelected = sortedNewDays.some(d => isSameDay(d, day));
-            const dayStr = format(day, 'yyyy-MM-dd');
-            const logIndex = updatedLogs.findIndex(l => l.date === dayStr);
+      const newLmpDate = startOfDay(newFirstDay);
+      const previousLmpDate = startOfDay(new Date(prevProfile.lastMenstruationDate + 'T00:00:00'));
 
-            if (logIndex !== -1) {
-                const existingLog = updatedLogs[logIndex];
-                if (existingLog.isPeriodDay !== isNowSelected) {
-                    updatedLogs[logIndex] = { ...existingLog, isPeriodDay: isNowSelected };
-                }
-            } else if (isNowSelected) {
-                updatedLogs.push({ date: dayStr, isPeriodDay: true });
-            }
-        }
-        
-        return updatedLogs.filter(log => log.isPeriodDay || log.mood || log.symptoms?.length || (log.flowIntensity && log.flowIntensity !== 'nenhum'));
+      // If the cycle start date is the same, no profile/history changes are needed.
+      if (isSameDay(newLmpDate, previousLmpDate)) {
+        return prevProfile;
+      }
+      
+      // The cycle start date has changed. Archive the old cycle.
+      const lastCycleLength = differenceInDays(newLmpDate, previousLmpDate);
+      if (lastCycleLength > 10) { // Sanity check
+        const newCycleLog: CycleLog = {
+          startDate: format(previousLmpDate, 'yyyy-MM-dd'),
+          cycleLength: lastCycleLength,
+        };
+        // Add to history, preventing duplicates.
+        setCycleHistory(prevHistory => {
+          const alreadyExists = prevHistory.some(c => c.startDate === newCycleLog.startDate);
+          if (alreadyExists) return prevHistory;
+          return [...prevHistory, newCycleLog];
+        });
+      }
+      
+      // Update the profile with the new cycle start date.
+      return { ...prevProfile, lastMenstruationDate: format(newLmpDate, 'yyyy-MM-dd') };
     });
 }, []);
 
