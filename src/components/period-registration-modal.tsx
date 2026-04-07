@@ -17,6 +17,7 @@ import {
   isSameMonth,
   addDays,
   differenceInDays,
+  endOfMonth,
 } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { SimpleCalendar } from './simple-calendar';
@@ -90,25 +91,23 @@ export function PeriodRegistrationModal({
 
     let newSelectedDays;
 
-    if (isAlreadySelected) {
-      // Manual adjustment: remove a day from the current selection
-      newSelectedDays = periodDays.filter((d) => !isSameDay(d, dayStart));
-    } else {
-      // It's a new selection. Check if it's an adjustment or a new period start.
-      const isAdjacent = periodDays.some(
-        (d) => Math.abs(differenceInDays(dayStart, d)) === 1
-      );
+    // Check if the clicked day is adjacent to any already selected day
+    const isAdjacent = periodDays.some(
+      (d) => Math.abs(differenceInDays(dayStart, d)) === 1
+    );
 
-      // If there are already selected days and the new day is next to them, it's an adjustment.
-      if (periodDays.length > 0 && isAdjacent) {
-        newSelectedDays = [...periodDays, dayStart];
-      } else {
-        // Otherwise, it's a new period. Create a new range based on flow duration, replacing the old one.
-        const flowDuration = userProfile?.flowDurationDays || 5;
-        newSelectedDays = Array.from({ length: flowDuration }).map((_, i) =>
-          addDays(dayStart, i)
-        );
-      }
+    if (isAlreadySelected) {
+      // If the day is already selected, remove it.
+      newSelectedDays = periodDays.filter((d) => !isSameDay(d, dayStart));
+    } else if (isAdjacent) {
+      // If it's adjacent, just add this single day to the selection.
+      newSelectedDays = [...periodDays, dayStart];
+    } else {
+      // If it's not adjacent and not selected, start a new period block.
+      const flowDuration = userProfile?.flowDurationDays || 5;
+      newSelectedDays = Array.from({ length: flowDuration }).map((_, i) =>
+        addDays(dayStart, i)
+      );
     }
     
     // Chama a função do contexto para salvar tudo automaticamente.
