@@ -15,11 +15,8 @@ import {
   startOfDay,
   addMonths,
   isSameMonth,
-  startOfYear,
-  addYears,
-  differenceInMonths,
-  min,
   addDays,
+  differenceInDays,
 } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { SimpleCalendar } from './simple-calendar';
@@ -45,35 +42,24 @@ export function PeriodRegistrationModal({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const targetMonthRef = useRef<HTMLDivElement>(null);
 
-  // A lógica para gerar os meses a serem exibidos agora é memoizada para performance.
   const monthsToDisplay = useMemo(() => {
-    // Ano inicial é 2000, e vai até 2200
-    const calendarStartDate = new Date(2000, 0, 1);
-    const calendarEndDate = new Date(2200, 0, 1);
+    if (!userProfile?.joinDate) return [];
 
-    const numMonths =
-      differenceInMonths(calendarEndDate, calendarStartDate) + 1;
-    if (numMonths <= 0) return [];
-
-    return Array.from({ length: numMonths }).map((_, i) =>
-      addMonths(calendarStartDate, i)
+    const startDate = startOfMonth(
+      new Date(userProfile.joinDate + 'T00:00:00')
     );
-  }, []);
+    const endDate = addMonths(new Date(), 120); // 10 years into the future
 
-  // O mês alvo para rolagem é o início de 2026.
-  const targetScrollDate = new Date(2026, 0, 1);
-  const currentDisplayMonth = startOfMonth(targetScrollDate);
+    const numMonths = differenceInDays(endOfMonth(endDate), startDate) / 28;
+    return Array.from({ length: numMonths }).map((_, i) =>
+      addMonths(startDate, i)
+    );
+  }, [userProfile?.joinDate]);
 
-  // Obtém os dias de período atualmente selecionados diretamente do contexto.
-  const periodDays = useMemo(() => {
-    return dailyLogs
-      .filter((log) => log.isPeriodDay)
-      .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
-  }, [dailyLogs]);
+  const currentDisplayMonth = startOfMonth(new Date());
 
-  // Efeito para rolar para o mês alvo quando o diálogo abre.
   useEffect(() => {
-    if (open) {
+    if (open && monthsToDisplay.length > 0) {
       setTimeout(() => {
         if (targetMonthRef.current && scrollContainerRef.current) {
           const viewport = scrollContainerRef.current.querySelector(
@@ -92,7 +78,12 @@ export function PeriodRegistrationModal({
     }
   }, [open, monthsToDisplay]);
 
-  // Lida com o clique em um dia. Salva as alterações automaticamente.
+  const periodDays = useMemo(() => {
+    return dailyLogs
+      .filter((log) => log.isPeriodDay)
+      .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
+  }, [dailyLogs]);
+
   const handleDayClick = (day: Date) => {
     const dayStart = startOfDay(day);
     const isAlreadySelected = periodDays.some((d) => isSameDay(d, dayStart));
@@ -100,28 +91,26 @@ export function PeriodRegistrationModal({
     let newSelectedDays;
 
     if (isAlreadySelected) {
-      // Se o dia já está selecionado, remove-o para permitir o ajuste manual.
+      // Manual adjustment: remove a day from the current selection
       newSelectedDays = periodDays.filter((d) => !isSameDay(d, dayStart));
     } else {
-      // Se um novo dia é selecionado, adiciona um intervalo de dias
-      // com base na duração do fluxo configurada pela usuária.
-      const flowDuration = userProfile?.flowDurationDays || 5; // Usa 5 dias como padrão.
-      const newPeriodRange = Array.from({ length: flowDuration }).map((_, i) =>
-        addDays(dayStart, i)
+      // It's a new selection. Check if it's an adjustment or a new period start.
+      const isAdjacent = periodDays.some(
+        (d) => Math.abs(differenceInDays(dayStart, d)) === 1
       );
 
-      // Combina os dias existentes com o novo intervalo, removendo duplicatas
-      // para permitir que a usuária adicione múltiplos blocos de período.
-      const combinedDayTimestamps = new Set([
-        ...periodDays.map((d) => d.getTime()),
-        ...newPeriodRange.map((d) => d.getTime()),
-      ]);
-
-      newSelectedDays = Array.from(combinedDayTimestamps).map(
-        (t) => new Date(t)
-      );
+      // If there are already selected days and the new day is next to them, it's an adjustment.
+      if (periodDays.length > 0 && isAdjacent) {
+        newSelectedDays = [...periodDays, dayStart];
+      } else {
+        // Otherwise, it's a new period. Create a new range based on flow duration, replacing the old one.
+        const flowDuration = userProfile?.flowDurationDays || 5;
+        newSelectedDays = Array.from({ length: flowDuration }).map((_, i) =>
+          addDays(dayStart, i)
+        );
+      }
     }
-
+    
     // Chama a função do contexto para salvar tudo automaticamente.
     savePeriodDays(newSelectedDays);
   };
