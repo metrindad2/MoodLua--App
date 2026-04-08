@@ -1,11 +1,12 @@
 'use client';
 
-import { useMemo, useRef, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -15,14 +16,14 @@ import {
   startOfDay,
   addMonths,
   isSameMonth,
-  addDays,
   differenceInDays,
   endOfMonth,
 } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { SimpleCalendar } from './simple-calendar';
-import { X } from 'lucide-react';
+import { X, Save } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
 
 interface PeriodRegistrationModalProps {
   open: boolean;
@@ -39,6 +40,9 @@ export function PeriodRegistrationModal({
   previsionRange,
 }: PeriodRegistrationModalProps) {
   const { userProfile, dailyLogs, savePeriodDays } = useCycleData();
+  const { toast } = useToast();
+
+  const [selectedDays, setSelectedDays] = useState<Date[]>([]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const targetMonthRef = useRef<HTMLDivElement>(null);
@@ -46,12 +50,10 @@ export function PeriodRegistrationModal({
   const monthsToDisplay = useMemo(() => {
     if (!userProfile?.joinDate) return [];
 
-    const startDate = startOfMonth(
-      new Date(userProfile.joinDate + 'T00:00:00')
-    );
+    const startDate = startOfMonth(new Date(userProfile.joinDate + 'T00:00:00'));
     const endDate = addMonths(new Date(), 120); // 10 years into the future
 
-    const numMonths = differenceInDays(endOfMonth(endDate), startDate) / 28;
+    const numMonths = Math.ceil(differenceInDays(endOfMonth(endDate), startDate) / 28);
     return Array.from({ length: numMonths }).map((_, i) =>
       addMonths(startDate, i)
     );
@@ -59,6 +61,17 @@ export function PeriodRegistrationModal({
 
   const currentDisplayMonth = startOfMonth(new Date());
 
+  // Initialize selected days when modal opens
+  useEffect(() => {
+    if (open) {
+      const initialPeriodDays = dailyLogs
+        .filter((log) => log.isPeriodDay)
+        .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
+      setSelectedDays(initialPeriodDays);
+    }
+  }, [open, dailyLogs]);
+
+  // Scroll to current month effect
   useEffect(() => {
     if (open && monthsToDisplay.length > 0) {
       setTimeout(() => {
@@ -79,39 +92,25 @@ export function PeriodRegistrationModal({
     }
   }, [open, monthsToDisplay]);
 
-  const periodDays = useMemo(() => {
-    return dailyLogs
-      .filter((log) => log.isPeriodDay)
-      .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
-  }, [dailyLogs]);
-
   const handleDayClick = (day: Date) => {
     const dayStart = startOfDay(day);
-    const isAlreadySelected = periodDays.some((d) => isSameDay(d, dayStart));
+    setSelectedDays((prevSelectedDays) => {
+      const isAlreadySelected = prevSelectedDays.some((d) => isSameDay(d, dayStart));
+      if (isAlreadySelected) {
+        return prevSelectedDays.filter((d) => !isSameDay(d, dayStart));
+      } else {
+        return [...prevSelectedDays, dayStart];
+      }
+    });
+  };
 
-    let newSelectedDays;
-
-    // Check if the clicked day is adjacent to any already selected day
-    const isAdjacent = periodDays.some(
-      (d) => Math.abs(differenceInDays(dayStart, d)) === 1
-    );
-
-    if (isAlreadySelected) {
-      // If the day is already selected, remove it.
-      newSelectedDays = periodDays.filter((d) => !isSameDay(d, dayStart));
-    } else if (isAdjacent) {
-      // If it's adjacent, just add this single day to the selection.
-      newSelectedDays = [...periodDays, dayStart];
-    } else {
-      // If it's not adjacent and not selected, start a new period block.
-      const flowDuration = userProfile?.flowDurationDays || 5;
-      newSelectedDays = Array.from({ length: flowDuration }).map((_, i) =>
-        addDays(dayStart, i)
-      );
-    }
-    
-    // Chama a função do contexto para salvar tudo automaticamente.
-    savePeriodDays(newSelectedDays);
+  const handleSave = () => {
+    savePeriodDays(selectedDays);
+    toast({
+      title: 'Registros salvos!',
+      description: 'Seu ciclo menstrual foi atualizado.',
+    });
+    onOpenChange(false);
   };
 
   return (
@@ -128,7 +127,7 @@ export function PeriodRegistrationModal({
               Registrar Menstruação
             </DialogTitle>
           </div>
-          <div className="h-10 w-10" /> {/* Espaçador */}
+          <div className="w-10" /> {/* Spacer */}
         </DialogHeader>
 
         <ScrollArea ref={scrollContainerRef} className="flex-1">
@@ -142,7 +141,7 @@ export function PeriodRegistrationModal({
                 >
                   <SimpleCalendar
                     initialDate={month}
-                    selectedDates={periodDays}
+                    selectedDates={selectedDays}
                     onDateClick={handleDayClick}
                     previsionRange={previsionRange}
                   />
@@ -151,6 +150,16 @@ export function PeriodRegistrationModal({
             })}
           </div>
         </ScrollArea>
+        
+        <DialogFooter className="p-2 border-t shrink-0">
+            <DialogClose asChild>
+                <Button variant="ghost">Cancelar</Button>
+            </DialogClose>
+            <Button onClick={handleSave}>
+                <Save className="mr-2 h-4 w-4" />
+                Salvar Alterações
+            </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
