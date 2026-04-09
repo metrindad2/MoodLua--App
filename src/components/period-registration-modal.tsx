@@ -16,8 +16,6 @@ import {
   startOfDay,
   addMonths,
   isSameMonth,
-  differenceInDays,
-  endOfMonth,
 } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { SimpleCalendar } from './simple-calendar';
@@ -39,7 +37,7 @@ export function PeriodRegistrationModal({
   onOpenChange,
   previsionRange,
 }: PeriodRegistrationModalProps) {
-  const { userProfile, dailyLogs, savePeriodDays } = useCycleData();
+  const { dailyLogs, savePeriodDays } = useCycleData();
   const { toast } = useToast();
 
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
@@ -48,18 +46,16 @@ export function PeriodRegistrationModal({
   const targetMonthRef = useRef<HTMLDivElement>(null);
 
   const monthsToDisplay = useMemo(() => {
-    if (!userProfile?.joinDate) return [];
-
-    const startDate = startOfMonth(new Date(userProfile.joinDate + 'T00:00:00'));
-    const endDate = addMonths(new Date(), 120); // 10 years into the future
-
-    const numMonths = Math.ceil(differenceInDays(endOfMonth(endDate), startDate) / 28);
+    // Calendário começa em Janeiro de 2026 e dura 100 anos (1200 meses) para um efeito "infinito".
+    const startDate = startOfMonth(new Date('2026-01-01T00:00:00'));
+    const numMonths = 1200;
     return Array.from({ length: numMonths }).map((_, i) =>
       addMonths(startDate, i)
     );
-  }, [userProfile?.joinDate]);
+  }, []);
 
-  const currentDisplayMonth = startOfMonth(new Date());
+  // O mês para o qual o calendário deve rolar ao abrir.
+  const targetScrollMonth = startOfMonth(new Date('2026-01-01T00:00:00'));
 
   // Initialize selected days when modal opens
   useEffect(() => {
@@ -71,7 +67,7 @@ export function PeriodRegistrationModal({
     }
   }, [open, dailyLogs]);
 
-  // Scroll to current month effect
+  // Scroll to target month effect
   useEffect(() => {
     if (open && monthsToDisplay.length > 0) {
       setTimeout(() => {
@@ -80,12 +76,8 @@ export function PeriodRegistrationModal({
             '[data-radix-scroll-area-viewport]'
           );
           if (viewport) {
-            const offsetTop = targetMonthRef.current.offsetTop;
-            const containerHeight = viewport.clientHeight;
-            viewport.scrollTop =
-              offsetTop -
-              containerHeight / 2 +
-              targetMonthRef.current.clientHeight / 2;
+            // Rola para o topo do mês alvo (Jan 2026).
+            viewport.scrollTop = targetMonthRef.current.offsetTop;
           }
         }
       }, 100);
@@ -133,7 +125,7 @@ export function PeriodRegistrationModal({
         <ScrollArea ref={scrollContainerRef} className="flex-1">
           <div className="space-y-6 p-4">
             {monthsToDisplay.map((month) => {
-              const isTargetMonth = isSameMonth(month, currentDisplayMonth);
+              const isTargetMonth = isSameMonth(month, targetScrollMonth);
               return (
                 <div
                   key={month.toISOString()}
