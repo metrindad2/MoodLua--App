@@ -18,6 +18,7 @@ import {
   isSameMonth,
   addDays,
   differenceInDays,
+  endOfMonth,
 } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { SimpleCalendar } from './simple-calendar';
@@ -48,7 +49,7 @@ export function PeriodRegistrationModal({
   const targetMonthRef = useRef<HTMLDivElement>(null);
 
   const monthsToDisplay = useMemo(() => {
-    // Calendário começa em Janeiro de 2026 e dura 100 anos (1200 meses) para um efeito "infinito".
+    // Calendário começa em Janeiro de 2026 e dura 1200 meses (100 anos) para um efeito "infinito".
     const startDate = startOfMonth(new Date('2026-01-01T00:00:00'));
     const numMonths = 1200;
     return Array.from({ length: numMonths }).map((_, i) =>
@@ -91,38 +92,36 @@ export function PeriodRegistrationModal({
 
   const handleDayClick = (day: Date) => {
     const dayStart = startOfDay(day);
-    const flowDuration = userProfile?.flowDurationDays ?? 5; // Default to 5
+    const flowDuration = userProfile?.flowDurationDays ?? 5;
 
     setSelectedDays((prevSelectedDays) => {
       const isAlreadySelected = prevSelectedDays.some((d) =>
         isSameDay(d, dayStart)
       );
 
+      // Se o dia clicado já está selecionado, remova-o.
+      // Esta é a principal ação de edição manual para encurtar o período.
       if (isAlreadySelected) {
-        // User is clicking a selected day -> remove it (manual adjustment to shorten)
         return prevSelectedDays.filter((d) => !isSameDay(d, dayStart));
-      } else {
-        // User is clicking an unselected day.
-        // Check if it's "touching" the current selection.
-        const isAdjacent = prevSelectedDays.some(
-          (d) => Math.abs(differenceInDays(d, dayStart)) === 1
-        );
-
-        if (isAdjacent && prevSelectedDays.length > 0) {
-          // It's adjacent, so just add this single day (manual adjustment to lengthen)
-          const newSelection = [...prevSelectedDays, dayStart];
-          // Keep it sorted for easier logic later
-          return newSelection.sort((a, b) => a.getTime() - b.getTime());
-        } else {
-          // It's not adjacent, or the selection is empty.
-          // This is the trigger for a new automatic selection.
-          const newSelection = [];
-          for (let i = 0; i < flowDuration; i++) {
-            newSelection.push(addDays(dayStart, i));
-          }
-          return newSelection;
-        }
       }
+
+      // Se nenhum dia estiver selecionado, ou se o usuário clicar em um dia que não é
+      // adjacente à seleção atual, inicie um novo bloco de período.
+      const isAdjacent = prevSelectedDays.some(
+        (d) => Math.abs(differenceInDays(d, dayStart)) === 1
+      );
+      
+      if (prevSelectedDays.length === 0 || !isAdjacent) {
+        const newSelection = [];
+        for (let i = 0; i < flowDuration; i++) {
+          newSelection.push(addDays(dayStart, i));
+        }
+        return newSelection;
+      }
+      
+      // Se o dia for adjacente, adicione-o à seleção para estendê-la.
+      const newSelection = [...prevSelectedDays, dayStart];
+      return newSelection.sort((a, b) => a.getTime() - b.getTime());
     });
   };
 
