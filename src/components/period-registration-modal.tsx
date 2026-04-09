@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -97,20 +97,20 @@ export function PeriodRegistrationModal({
   const handleDayClick = (day: Date) => {
     const dayStart = startOfDay(day);
     const flowDuration = userProfile?.flowDurationDays ?? 5;
-
+  
     setSelectedDays((prevSelectedDays) => {
       const newSelection = [...prevSelectedDays];
       const isAlreadySelected = newSelection.some((d) => isSameDay(d, dayStart));
-
-      // Case 1: If the day is already selected, remove it.
+  
       if (isAlreadySelected) {
+        // Case 1: If the day is already selected, remove it.
         return newSelection.filter((d) => !isSameDay(d, dayStart));
       }
-      
+  
       // Case 2: The day is not selected.
-      // Check if it's adjacent to any existing selection to decide if it's a manual adjustment or a new block.
-      const isAdjacent = newSelection.some(d => Math.abs(differenceInDays(d, dayStart)) <= 1);
-
+      // Check if it's adjacent to any existing selection.
+      const isAdjacent = newSelection.some(d => Math.abs(differenceInDays(d, dayStart)) === 1);
+  
       if (isAdjacent) {
         // Manual adjustment: Add a single day because it's next to an existing one.
         newSelection.push(dayStart);
