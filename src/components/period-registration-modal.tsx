@@ -16,6 +16,8 @@ import {
   startOfDay,
   addMonths,
   isSameMonth,
+  addDays,
+  differenceInDays,
 } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { SimpleCalendar } from './simple-calendar';
@@ -37,7 +39,7 @@ export function PeriodRegistrationModal({
   onOpenChange,
   previsionRange,
 }: PeriodRegistrationModalProps) {
-  const { dailyLogs, savePeriodDays } = useCycleData();
+  const { dailyLogs, savePeriodDays, userProfile } = useCycleData();
   const { toast } = useToast();
 
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
@@ -55,7 +57,10 @@ export function PeriodRegistrationModal({
   }, []);
 
   // O mês para o qual o calendário deve rolar ao abrir.
-  const targetScrollMonth = startOfMonth(new Date('2026-01-01T00:00:00'));
+  const targetScrollMonth = useMemo(
+    () => startOfMonth(new Date('2026-01-01T00:00:00')),
+    []
+  );
 
   // Initialize selected days when modal opens
   useEffect(() => {
@@ -86,12 +91,37 @@ export function PeriodRegistrationModal({
 
   const handleDayClick = (day: Date) => {
     const dayStart = startOfDay(day);
+    const flowDuration = userProfile?.flowDurationDays ?? 5; // Default to 5
+
     setSelectedDays((prevSelectedDays) => {
-      const isAlreadySelected = prevSelectedDays.some((d) => isSameDay(d, dayStart));
+      const isAlreadySelected = prevSelectedDays.some((d) =>
+        isSameDay(d, dayStart)
+      );
+
       if (isAlreadySelected) {
+        // User is clicking a selected day -> remove it (manual adjustment to shorten)
         return prevSelectedDays.filter((d) => !isSameDay(d, dayStart));
       } else {
-        return [...prevSelectedDays, dayStart];
+        // User is clicking an unselected day.
+        // Check if it's "touching" the current selection.
+        const isAdjacent = prevSelectedDays.some(
+          (d) => Math.abs(differenceInDays(d, dayStart)) === 1
+        );
+
+        if (isAdjacent && prevSelectedDays.length > 0) {
+          // It's adjacent, so just add this single day (manual adjustment to lengthen)
+          const newSelection = [...prevSelectedDays, dayStart];
+          // Keep it sorted for easier logic later
+          return newSelection.sort((a, b) => a.getTime() - b.getTime());
+        } else {
+          // It's not adjacent, or the selection is empty.
+          // This is the trigger for a new automatic selection.
+          const newSelection = [];
+          for (let i = 0; i < flowDuration; i++) {
+            newSelection.push(addDays(dayStart, i));
+          }
+          return newSelection;
+        }
       }
     });
   };
