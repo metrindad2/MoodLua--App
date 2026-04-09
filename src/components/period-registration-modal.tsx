@@ -18,7 +18,7 @@ import {
   isSameMonth,
   addDays,
   differenceInDays,
-  endOfMonth,
+  isAfter,
 } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { SimpleCalendar } from './simple-calendar';
@@ -40,30 +40,49 @@ export function PeriodRegistrationModal({
   onOpenChange,
   previsionRange,
 }: PeriodRegistrationModalProps) {
-  const { dailyLogs, savePeriodDays, userProfile } = useCycleData();
+  const { dailyLogs, savePeriodDays, userProfile, loading } = useCycleData();
   const { toast } = useToast();
 
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
-
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const targetMonthRef = useRef<HTMLDivElement>(null);
-
-  const monthsToDisplay = useMemo(() => {
-    // Calendário começa em Janeiro de 2026 e dura 1200 meses (100 anos) para um efeito "infinito".
-    const startDate = startOfMonth(new Date('2026-01-01T00:00:00'));
-    const numMonths = 1200;
-    return Array.from({ length: numMonths }).map((_, i) =>
-      addMonths(startDate, i)
-    );
-  }, []);
-
-  // O mês para o qual o calendário deve rolar ao abrir.
-  const targetScrollMonth = useMemo(
-    () => startOfMonth(new Date('2026-01-01T00:00:00')),
-    []
+  const [currentDisplayMonth, setCurrentDisplayMonth] = useState(
+    startOfMonth(new Date())
   );
 
-  // Initialize selected days when modal opens
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const monthRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  // Generate a list of months from the user's join date up to 10 years in the future.
+  const monthsToDisplay = useMemo(() => {
+    if (loading || !userProfile?.joinDate) {
+      // Return a default range if data is not ready, to prevent crashes.
+      const startDate = startOfMonth(new Date());
+      return Array.from({ length: 12 }).map((_, i) => addMonths(startDate, i));
+    }
+    const startDate = startOfMonth(new Date(userProfile.joinDate + 'T00:00:00'));
+    const endDate = addMonths(new Date(), 120); // 10 years into the future
+
+    // Also consider the earliest log if it's before the join date
+    const earliestLogDate = dailyLogs.reduce((earliest, log) => {
+      const logDate = startOfDay(new Date(log.date + 'T00:00:00'));
+      return logDate < earliest ? logDate : earliest;
+    }, startDate);
+
+    const absoluteStartDate = startOfMonth(earliestLogDate < startDate ? earliestLogDate : startDate);
+
+    const numMonths =
+      (endDate.getFullYear() - absoluteStartDate.getFullYear()) * 12 +
+      (endDate.getMonth() - absoluteStartDate.getMonth()) +
+      1;
+    
+    return Array.from({ length: numMonths }).map((_, i) =>
+      addMonths(absoluteStartDate, i)
+    );
+  }, [userProfile?.joinDate, dailyLogs, loading]);
+
+  // The month for which the calendar should scroll to when opened.
+  const targetScrollMonth = startOfMonth(new Date());
+
+  // Initialize selected days when modal opens.
   useEffect(() => {
     if (open) {
       const initialPeriodDays = dailyLogs
@@ -73,22 +92,25 @@ export function PeriodRegistrationModal({
     }
   }, [open, dailyLogs]);
 
-  // Scroll to target month effect
+  // Scroll to target month effect.
   useEffect(() => {
-    if (open && monthsToDisplay.length > 0) {
+    if (open) {
+      setCurrentDisplayMonth(startOfMonth(new Date()));
+      const targetMonthKey = targetScrollMonth.toISOString().slice(0, 7);
+      const targetElement = monthRefs.current.get(targetMonthKey);
+
       setTimeout(() => {
-        if (targetMonthRef.current && scrollContainerRef.current) {
+        if (targetElement && scrollContainerRef.current) {
           const viewport = scrollContainerRef.current.querySelector(
             '[data-radix-scroll-area-viewport]'
           );
           if (viewport) {
-            // Rola para o topo do mês alvo (Jan 2026).
-            viewport.scrollTop = targetMonthRef.current.offsetTop;
+            viewport.scrollTop = targetElement.offsetTop;
           }
         }
-      }, 100);
+      }, 100); // A short delay ensures elements are rendered.
     }
-  }, [open, monthsToDisplay]);
+  }, [open, targetScrollMonth]);
 
   const handleDayClick = (day: Date) => {
     const dayStart = startOfDay(day);
@@ -99,29 +121,31 @@ export function PeriodRegistrationModal({
         isSameDay(d, dayStart)
       );
 
-      // Se o dia clicado já está selecionado, remova-o.
-      // Esta é a principal ação de edição manual para encurtar o período.
-      if (isAlreadySelected) {
-        return prevSelectedDays.filter((d) => !isSameDay(d, dayStart));
-      }
-
-      // Se nenhum dia estiver selecionado, ou se o usuário clicar em um dia que não é
-      // adjacente à seleção atual, inicie um novo bloco de período.
-      const isAdjacent = prevSelectedDays.some(
-        (d) => Math.abs(differenceInDays(d, dayStart)) === 1
-      );
-      
-      if (prevSelectedDays.length === 0 || !isAdjacent) {
+      // If the selection is empty and a new day is clicked, create the initial automatic block.
+      // This is the "suggestion" phase.
+      if (prevSelectedDays.length === 0 && !isAlreadySelected) {
         const newSelection = [];
         for (let i = 0; i < flowDuration; i++) {
-          newSelection.push(addDays(dayStart, i));
+          const futureDay = addDays(dayStart, i);
+          // Prevent selecting dates in the future
+          if (!isAfter(futureDay, new Date())) {
+            newSelection.push(futureDay);
+          }
         }
         return newSelection;
       }
-      
-      // Se o dia for adjacente, adicione-o à seleção para estendê-la.
-      const newSelection = [...prevSelectedDays, dayStart];
-      return newSelection.sort((a, b) => a.getTime() - b.getTime());
+
+      // If a selection already exists, or if the clicked day is already selected,
+      // we enter manual adjustment mode. We just toggle the clicked day.
+      if (isAlreadySelected) {
+        // If the day is already in the selection, remove it.
+        return prevSelectedDays.filter((d) => !isSameDay(d, dayStart));
+      } else {
+        // If the day is not in the selection, add it.
+        const newSelection = [...prevSelectedDays, dayStart];
+        // Keep the selection sorted by date.
+        return newSelection.sort((a, b) => a.getTime() - b.getTime());
+      }
     });
   };
 
@@ -152,34 +176,39 @@ export function PeriodRegistrationModal({
         </DialogHeader>
 
         <ScrollArea ref={scrollContainerRef} className="flex-1">
-          <div className="space-y-6 p-4">
-            {monthsToDisplay.map((month) => {
-              const isTargetMonth = isSameMonth(month, targetScrollMonth);
-              return (
-                <div
-                  key={month.toISOString()}
-                  ref={isTargetMonth ? targetMonthRef : null}
-                >
-                  <SimpleCalendar
-                    initialDate={month}
-                    selectedDates={selectedDays}
-                    onDateClick={handleDayClick}
-                    previsionRange={previsionRange}
-                  />
-                </div>
-              );
-            })}
+          <div className="p-4">
+            <div className="space-y-6">
+              {monthsToDisplay.map((month) => {
+                const monthKey = month.toISOString().slice(0, 7);
+                return (
+                  <div
+                    key={monthKey}
+                    ref={(el) => {
+                      if (el) monthRefs.current.set(monthKey, el);
+                      else monthRefs.current.delete(monthKey);
+                    }}
+                  >
+                    <SimpleCalendar
+                      initialDate={month}
+                      selectedDates={selectedDays}
+                      onDateClick={handleDayClick}
+                      previsionRange={previsionRange}
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </ScrollArea>
-        
+
         <DialogFooter className="p-2 border-t shrink-0">
-            <DialogClose asChild>
-                <Button variant="ghost">Cancelar</Button>
-            </DialogClose>
-            <Button onClick={handleSave}>
-                <Save className="mr-2 h-4 w-4" />
-                Salvar Alterações
-            </Button>
+          <DialogClose asChild>
+            <Button variant="ghost">Cancelar</Button>
+          </DialogClose>
+          <Button onClick={handleSave}>
+            <Save className="mr-2 h-4 w-4" />
+            Salvar Alterações
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
