@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,7 @@ import {
   addDays,
   differenceInDays,
   isAfter,
+  endOfMonth,
 } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { SimpleCalendar } from './simple-calendar';
@@ -51,36 +52,17 @@ export function PeriodRegistrationModal({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const monthRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Generate a list of months from the user's join date up to 10 years in the future.
+  // Generate a list of months from 2026 for 200 years.
   const monthsToDisplay = useMemo(() => {
-    if (loading || !userProfile?.joinDate) {
-      // Return a default range if data is not ready, to prevent crashes.
-      const startDate = startOfMonth(new Date());
-      return Array.from({ length: 12 }).map((_, i) => addMonths(startDate, i));
-    }
-    const startDate = startOfMonth(new Date(userProfile.joinDate + 'T00:00:00'));
-    const endDate = addMonths(new Date(), 120); // 10 years into the future
-
-    // Also consider the earliest log if it's before the join date
-    const earliestLogDate = dailyLogs.reduce((earliest, log) => {
-      const logDate = startOfDay(new Date(log.date + 'T00:00:00'));
-      return logDate < earliest ? logDate : earliest;
-    }, startDate);
-
-    const absoluteStartDate = startOfMonth(earliestLogDate < startDate ? earliestLogDate : startDate);
-
-    const numMonths =
-      (endDate.getFullYear() - absoluteStartDate.getFullYear()) * 12 +
-      (endDate.getMonth() - absoluteStartDate.getMonth()) +
-      1;
-    
-    return Array.from({ length: numMonths }).map((_, i) =>
-      addMonths(absoluteStartDate, i)
+    const startDate = startOfMonth(new Date('2026-01-01T00:00:00'));
+    // A large number of months to feel "infinite"
+    return Array.from({ length: 200 * 12 }).map((_, i) =>
+      addMonths(startDate, i)
     );
-  }, [userProfile?.joinDate, dailyLogs, loading]);
+  }, []);
 
   // The month for which the calendar should scroll to when opened.
-  const targetScrollMonth = startOfMonth(new Date());
+  const targetScrollMonth = startOfMonth(new Date('2026-01-01T00:00:00'));
 
   // Initialize selected days when modal opens.
   useEffect(() => {
@@ -95,7 +77,7 @@ export function PeriodRegistrationModal({
   // Scroll to target month effect.
   useEffect(() => {
     if (open) {
-      setCurrentDisplayMonth(startOfMonth(new Date()));
+      setCurrentDisplayMonth(startOfMonth(new Date('2026-01-01T00:00:00')));
       const targetMonthKey = targetScrollMonth.toISOString().slice(0, 7);
       const targetElement = monthRefs.current.get(targetMonthKey);
 
@@ -117,35 +99,35 @@ export function PeriodRegistrationModal({
     const flowDuration = userProfile?.flowDurationDays ?? 5;
 
     setSelectedDays((prevSelectedDays) => {
-      const isAlreadySelected = prevSelectedDays.some((d) =>
-        isSameDay(d, dayStart)
-      );
+      const newSelection = [...prevSelectedDays];
+      const isAlreadySelected = newSelection.some((d) => isSameDay(d, dayStart));
 
-      // If the selection is empty and a new day is clicked, create the initial automatic block.
-      // This is the "suggestion" phase.
-      if (prevSelectedDays.length === 0 && !isAlreadySelected) {
-        const newSelection = [];
+      // Case 1: If the day is already selected, remove it.
+      if (isAlreadySelected) {
+        return newSelection.filter((d) => !isSameDay(d, dayStart));
+      }
+      
+      // Case 2: The day is not selected.
+      // Check if it's adjacent to any existing selection to decide if it's a manual adjustment or a new block.
+      const isAdjacent = newSelection.some(d => Math.abs(differenceInDays(d, dayStart)) <= 1);
+
+      if (isAdjacent) {
+        // Manual adjustment: Add a single day because it's next to an existing one.
+        newSelection.push(dayStart);
+      } else {
+        // New block suggestion: The click is "far" from other selections.
+        // Add a new block of days based on flow duration.
         for (let i = 0; i < flowDuration; i++) {
           const futureDay = addDays(dayStart, i);
-          // Prevent selecting dates in the future
-          if (!isAfter(futureDay, new Date())) {
+          // Ensure we don't add future dates or duplicates
+          if (!isAfter(futureDay, new Date()) && !newSelection.some(d => isSameDay(d, futureDay))) {
             newSelection.push(futureDay);
           }
         }
-        return newSelection;
       }
-
-      // If a selection already exists, or if the clicked day is already selected,
-      // we enter manual adjustment mode. We just toggle the clicked day.
-      if (isAlreadySelected) {
-        // If the day is already in the selection, remove it.
-        return prevSelectedDays.filter((d) => !isSameDay(d, dayStart));
-      } else {
-        // If the day is not in the selection, add it.
-        const newSelection = [...prevSelectedDays, dayStart];
-        // Keep the selection sorted by date.
-        return newSelection.sort((a, b) => a.getTime() - b.getTime());
-      }
+      
+      // Always return a sorted array.
+      return newSelection.sort((a, b) => a.getTime() - b.getTime());
     });
   };
 
