@@ -3,6 +3,7 @@
 // com a interação do usuário no navegador, como cliques de botão e preenchimento de formulário.
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,7 @@ import { addDays, differenceInDays, format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Baby, HeartPulse, Stethoscope, Carrot, Ruler } from 'lucide-react';
 import { useCycleData } from '@/context/cycle-data-context';
+import { PlaceHolderImages, type ImagePlaceholder } from '@/lib/placeholder-images';
 
 // --- LÓGICA DE DADOS (Equivalente ao "script.js" em parte) ---
 
@@ -30,21 +32,27 @@ const weeklyDevelopment: Record<number, string> = {
   40: 'Seu bebê está totalmente desenvolvido e pronto para nascer!',
 };
 
-// BANCO DE DADOS 2: Comparações de tamanho do bebê por semana.
-const weeklySizeComparison: Record<number, { text: string }> = {
-    4: { text: 'um grão de papoula' },
-    6: { text: 'um grão de lentilha' },
-    8: { text: 'um feijão' },
-    10: { text: 'uma azeitona' },
-    12: { text: 'um limão' },
-    16: { text: 'um abacate' },
-    20: { text: 'uma banana' },
-    24: { text: 'uma espiga de milho' },
-    30: { text: 'um coco' },
-    36: { text: 'um mamão' },
-    40: { text: 'uma pequena abóbora' },
+// BANCO DE DADOS 2: Comparações de tamanho do bebê por semana, agora com ID de imagem.
+const weeklySizeComparison: Record<number, { text: string; imageId: string }> = {
+    4: { text: 'um grão de papoula', imageId: 'poppy-seed' },
+    6: { text: 'um grão de lentilha', imageId: 'lentil-grain' },
+    8: { text: 'um feijão', imageId: 'bean' },
+    10: { text: 'uma azeitona', imageId: 'olive' },
+    12: { text: 'um limão', imageId: 'lemon' },
+    16: { text: 'um abacate', imageId: 'avocado' },
+    20: { text: 'uma banana', imageId: 'banana' },
+    24: { text: 'uma espiga de milho', imageId: 'corn-cob' },
+    30: { text: 'um coco', imageId: 'coconut' },
+    36: { text: 'um mamão', imageId: 'papaya' },
+    40: { text: 'uma pequena abóbora', imageId: 'pumpkin' },
 };
 
+const imageMap = new Map(PlaceHolderImages.map(img => [img.id, img]));
+
+type SizeComparison = {
+    text: string;
+    image: ImagePlaceholder | undefined;
+};
 
 // FUNÇÃO 1: Busca a dica de desenvolvimento mais relevante para a semana atual.
 const getDevelopmentTip = (week: number): string => {
@@ -56,14 +64,26 @@ const getDevelopmentTip = (week: number): string => {
   return closestWeek ? weeklyDevelopment[closestWeek] : 'Seu bebê está crescendo e se desenvolvendo a cada dia.';
 };
 
-// FUNÇÃO 2: Busca a comparação de tamanho para a semana atual.
-const getSizeComparison = (week: number): { text: string } | null => {
+// FUNÇÃO 2: Busca a comparação de tamanho e a imagem para a semana atual.
+const getSizeComparison = (week: number): SizeComparison | null => {
+  let comparisonData = null;
+
   if (weeklySizeComparison[week]) {
-    return weeklySizeComparison[week];
+    comparisonData = weeklySizeComparison[week];
+  } else {
+    const availableWeeks = Object.keys(weeklySizeComparison).map(Number).sort((a, b) => b - a);
+    const closestWeek = availableWeeks.find(w => w <= week);
+    if (closestWeek) {
+      comparisonData = weeklySizeComparison[closestWeek];
+    }
   }
-  const availableWeeks = Object.keys(weeklySizeComparison).map(Number).sort((a, b) => b - a);
-  const closestWeek = availableWeeks.find(w => w <= week);
-  return closestWeek ? weeklySizeComparison[closestWeek] : null;
+
+  if (!comparisonData) return null;
+
+  return {
+    text: comparisonData.text,
+    image: imageMap.get(comparisonData.imageId),
+  };
 };
 
 type PregnancyInfo = {
@@ -71,7 +91,7 @@ type PregnancyInfo = {
   days: number;
   dueDate: string;
   developmentTip: string;
-  sizeComparison: { text: string } | null;
+  sizeComparison: SizeComparison | null;
 };
 
 // --- COMPONENTE REACT (Equivalente ao "HTML" e "JavaScript" juntos) ---
@@ -193,16 +213,24 @@ export default function PregnancyPage() {
           </Card>
           
           {/* --- CARD: Tamanho do Bebê --- */}
-          {pregnancyInfo.sizeComparison && (
+          {pregnancyInfo.sizeComparison?.image && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Ruler className="w-5 h-5 text-accent" />
+                  <Ruler className="w-5 h-5 text-primary" />
                   Tamanho do Bebê
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-center">
-                <p className="text-muted-foreground">
+              <CardContent className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-center sm:text-left">
+                <Image
+                    src={pregnancyInfo.sizeComparison.image.imageUrl}
+                    alt={pregnancyInfo.sizeComparison.image.description}
+                    data-ai-hint={pregnancyInfo.sizeComparison.image.imageHint}
+                    width={100}
+                    height={100}
+                    className="rounded-lg object-cover aspect-square"
+                />
+                <p className="text-muted-foreground flex-1">
                     Nesta semana, seu bebê está aproximadamente do tamanho de{' '}
                     <span className="font-semibold text-foreground">{pregnancyInfo.sizeComparison.text}</span>.
                 </p>
@@ -229,21 +257,21 @@ export default function PregnancyPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-start gap-4">
-                <Stethoscope className="w-6 h-6 text-accent shrink-0 mt-1" />
+                <Stethoscope className="w-6 h-6 text-primary shrink-0 mt-1" />
                 <div>
                   <h4 className="font-semibold">Faça o pré-natal</h4>
                   <p className="text-sm text-muted-foreground">É fundamental para a sua saúde e a do bebê. Siga todas as consultas e exames recomendados.</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <Carrot className="w-6 h-6 text-accent shrink-0 mt-1" />
+                <Carrot className="w-6 h-6 text-primary shrink-0 mt-1" />
                 <div>
                   <h4 className="font-semibold">Alimentação Saudável</h4>
                   <p className="text-sm text-muted-foreground">Consuma frutas, vegetais e proteínas. Beba bastante água e evite alimentos crus ou não pasteurizados.</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <HeartPulse className="w-6 h-6 text-accent shrink-0 mt-1" />
+                <HeartPulse className="w-6 h-6 text-primary shrink-0 mt-1" />
                 <div>
                   <h4 className="font-semibold">Exames Importantes</h4>
                   <p className="text-sm text-muted-foreground">Ultrassons, exames de sangue e outros testes são cruciais para monitorar o desenvolvimento do bebê.</p>
