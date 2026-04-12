@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { addDays, differenceInDays, format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Baby, HeartPulse, Stethoscope, Carrot, Ruler } from 'lucide-react';
+import { Baby, HeartPulse, Stethoscope, Carrot, PartyPopper } from 'lucide-react';
 import { useCycleData } from '@/context/cycle-data-context';
 
 // --- LÓGICA DE DADOS (Equivalente ao "script.js" em parte) ---
@@ -30,26 +30,6 @@ const weeklyDevelopment: Record<number, string> = {
   40: 'Seu bebê está totalmente desenvolvido e pronto para nascer!',
 };
 
-// BANCO DE DADOS 2: Comparações de tamanho do bebê por semana.
-const weeklySizeComparison: Record<number, { text: string }> = {
-    4: { text: 'um grão de papoula' },
-    6: { text: 'um grão de lentilha' },
-    8: { text: 'um feijão' },
-    10: { text: 'uma azeitona' },
-    12: { text: 'um limão' },
-    16: { text: 'um abacate' },
-    20: { text: 'uma banana' },
-    24: { text: 'uma espiga de milho' },
-    30: { text: 'um coco' },
-    36: { text: 'um mamão' },
-    40: { text: 'uma pequena abóbora' },
-};
-
-
-type SizeComparison = {
-    text: string;
-};
-
 // FUNÇÃO 1: Busca a dica de desenvolvimento mais relevante para a semana atual.
 const getDevelopmentTip = (week: number): string => {
   if (weeklyDevelopment[week]) {
@@ -60,33 +40,12 @@ const getDevelopmentTip = (week: number): string => {
   return closestWeek ? weeklyDevelopment[closestWeek] : 'Seu bebê está crescendo e se desenvolvendo a cada dia.';
 };
 
-// FUNÇÃO 2: Busca a comparação de tamanho para a semana atual.
-const getSizeComparison = (week: number): SizeComparison | null => {
-  let comparisonData = null;
-
-  if (weeklySizeComparison[week]) {
-    comparisonData = weeklySizeComparison[week];
-  } else {
-    const availableWeeks = Object.keys(weeklySizeComparison).map(Number).sort((a, b) => b - a);
-    const closestWeek = availableWeeks.find(w => w <= week);
-    if (closestWeek) {
-      comparisonData = weeklySizeComparison[closestWeek];
-    }
-  }
-
-  if (!comparisonData) return null;
-
-  return {
-    text: comparisonData.text,
-  };
-};
-
 type PregnancyInfo = {
   weeks: number;
   days: number;
   dueDate: string;
   developmentTip: string;
-  sizeComparison: SizeComparison | null;
+  isComplete: boolean;
 };
 
 // --- COMPONENTE REACT (Equivalente ao "HTML" e "JavaScript" juntos) ---
@@ -114,13 +73,14 @@ export default function PregnancyPage() {
     const weeks = Math.floor(totalDays / 7);
     const days = totalDays % 7;
     const dueDate = addDays(date, 280);
+    const isComplete = weeks >= 40;
 
     setPregnancyInfo({
       weeks,
       days,
       dueDate: format(dueDate, "d 'de' MMMM 'de' yyyy", { locale: ptBR }),
       developmentTip: getDevelopmentTip(weeks),
-      sizeComparison: getSizeComparison(weeks),
+      isComplete,
     });
   };
 
@@ -207,35 +167,39 @@ export default function PregnancyPage() {
             </CardContent>
           </Card>
           
-          {/* --- CARD: Tamanho do Bebê --- */}
-          {pregnancyInfo.sizeComparison && (
+          {/* --- CARD: Tamanho do Bebê (removido) --- */}
+          
+          {/* Card 3: Desenvolvimento do Bebê ou Parabéns */}
+          {pregnancyInfo.isComplete ? (
+             <Card className="border-primary/50">
+              <CardHeader>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <PartyPopper className="w-6 h-6 text-primary" />
+                  Parabéns!
+                </CardTitle>
+                <CardDescription>
+                    A jornada chegou ao seu lindo final!
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-muted-foreground">Seu bebê já nasceu ou está prestes a nascer. Nesta fase final, ele(a) está totalmente desenvolvido(a) e pronto(a) para encontrar você!</p>
+                <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="font-semibold text-foreground text-sm">{pregnancyInfo.developmentTip}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Ruler className="w-5 h-5 text-primary" />
-                  Tamanho do Bebê
+                <CardTitle className="text-lg">
+                  Desenvolvimento na semana {pregnancyInfo.weeks}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground text-center">
-                    Nesta semana, seu bebê está aproximadamente do tamanho de{' '}
-                    <span className="font-semibold text-foreground">{pregnancyInfo.sizeComparison.text}</span>.
-                </p>
+                <p className="text-muted-foreground">{pregnancyInfo.developmentTip}</p>
               </CardContent>
             </Card>
           )}
-
-          {/* Card 3: Desenvolvimento do Bebê */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">
-                Desenvolvimento na semana {pregnancyInfo.weeks}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">{pregnancyInfo.developmentTip}</p>
-            </CardContent>
-          </Card>
 
           {/* Card 4: Dicas de Saúde */}
           <Card>
