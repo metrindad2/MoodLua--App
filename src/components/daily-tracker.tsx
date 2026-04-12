@@ -8,7 +8,15 @@ import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { MOOD_OPTIONS } from '@/lib/moods';
 import { SYMPTOM_OPTIONS } from '@/lib/symptoms';
-import { CircleSlash, Droplet, Droplets, Save, Trash2, Waves } from 'lucide-react';
+import {
+  CircleSlash,
+  Droplet,
+  Droplets,
+  Save,
+  Trash2,
+  Waves,
+  Check,
+} from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -170,19 +178,35 @@ export function DailyTracker() {
           </h3>
           <div className="flex flex-wrap gap-2">
             {SYMPTOM_OPTIONS.map((option) => {
+              const isSelected = selectedSymptoms.includes(option.id);
               return (
                 <button
                   key={option.id}
                   onClick={() => handleSymptomSelect(option.id)}
                   className={cn(
-                    'flex items-center justify-center gap-2 px-3 py-1.5 rounded-full border-2 transition-colors text-sm font-medium',
-                    selectedSymptoms.includes(option.id)
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-muted/50 border-transparent hover:bg-accent'
+                    'flex items-center gap-2 pl-2 pr-3 py-2 rounded-full border-2 transition-all text-sm',
+                    isSelected
+                      ? 'border-primary bg-primary/10'
+                      : 'border-transparent bg-muted/60 hover:bg-muted'
                   )}
                 >
-                  <span>{option.emoji}</span>
-                  <span>{option.label}</span>
+                  <span
+                    className={cn(
+                      'flex h-7 w-7 items-center justify-center rounded-full text-lg',
+                      isSelected ? 'bg-primary/20' : 'bg-background/80'
+                    )}
+                  >
+                    {option.emoji}
+                  </span>
+                  <span
+                    className={cn(
+                      'font-medium',
+                      isSelected ? 'text-primary' : 'text-foreground'
+                    )}
+                  >
+                    {option.label}
+                  </span>
+                  {isSelected && <Check className="h-4 w-4 text-primary" />}
                 </button>
               );
             })}
