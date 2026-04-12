@@ -226,8 +226,8 @@ export default function PregnancyPage() {
                     src={pregnancyInfo.sizeComparison.image.imageUrl}
                     alt={pregnancyInfo.sizeComparison.image.description}
                     data-ai-hint={pregnancyInfo.sizeComparison.image.imageHint}
-                    width={100}
-                    height={100}
+                    width={150}
+                    height={150}
                     className="rounded-lg object-cover aspect-square"
                 />
                 <p className="text-muted-foreground flex-1">
