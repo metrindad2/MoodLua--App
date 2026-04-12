@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
@@ -22,6 +23,7 @@ import {
   startOfWeek,
   endOfWeek,
   format,
+  isSameMonth,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useCycleData } from '@/context/cycle-data-context';
@@ -127,6 +129,7 @@ export function PeriodRegistrationModal({
       return combined.sort((a, b) => a.getTime() - b.getTime());
     });
   };
+
 
   const handleSave = () => {
     savePeriodDays(selectedDays);
