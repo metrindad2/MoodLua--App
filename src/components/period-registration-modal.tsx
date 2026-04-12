@@ -18,12 +18,17 @@ import {
   isAfter,
   addDays,
   differenceInDays,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  format,
 } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { useCycleData } from '@/context/cycle-data-context';
-import { SimpleCalendar } from './simple-calendar';
-import { X, Save } from 'lucide-react';
+import { X, Save, Check } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface PeriodRegistrationModalProps {
   open: boolean;
@@ -37,28 +42,21 @@ interface PeriodRegistrationModalProps {
 export function PeriodRegistrationModal({
   open,
   onOpenChange,
-  previsionRange,
 }: PeriodRegistrationModalProps) {
-  const { dailyLogs, savePeriodDays, userProfile, loading } = useCycleData();
+  const { dailyLogs, savePeriodDays, userProfile } = useCycleData();
   const { toast } = useToast();
 
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
-  const [currentDisplayMonth, setCurrentDisplayMonth] = useState(
-    startOfMonth(new Date())
-  );
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const monthRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Generate a list of months from user's join date for 10 years.
+  // Generate a list of months from 2026 for a long period to feel "infinite".
   const monthsToDisplay = useMemo(() => {
-    if (!userProfile?.joinDate) return [];
-    // Start calendar from the beginning of the month the user joined
-    const startDate = startOfMonth(new Date(userProfile.joinDate + 'T00:00:00'));
-    // Generate months for 10 years into the future
-    return Array.from({ length: 12 * 10 }).map((_, i) => addMonths(startDate, i));
-  }, [userProfile?.joinDate]);
-
+    const startDate = startOfMonth(new Date('2026-01-01T00:00:00'));
+    // A large number of months to feel "infinite"
+    return Array.from({ length: 200 * 12 }).map((_, i) => addMonths(startDate, i));
+  }, []);
 
   // Initialize selected days when modal opens.
   useEffect(() => {
@@ -70,10 +68,10 @@ export function PeriodRegistrationModal({
     }
   }, [open, dailyLogs]);
 
-  // Scroll to current month effect.
+  // Scroll to January 2026 effect.
   useEffect(() => {
     if (open) {
-      const targetMonthKey = startOfMonth(new Date()).toISOString().slice(0, 7);
+      const targetMonthKey = '2026-01'; // Directly set the key for Jan 2026
       const targetElement = monthRefs.current.get(targetMonthKey);
       
       setTimeout(() => {
@@ -82,7 +80,8 @@ export function PeriodRegistrationModal({
             '[data-radix-scroll-area-viewport]'
             );
           if (viewport) {
-            viewport.scrollTop = targetElement.offsetTop - (targetElement.clientHeight / 2);
+            // Scroll to the top of the target element.
+            viewport.scrollTop = targetElement.offsetTop;
           }
         }
       }, 150); // A short delay ensures elements are rendered.
@@ -91,48 +90,43 @@ export function PeriodRegistrationModal({
 
   const handleDayClick = (day: Date) => {
     const dayStart = startOfDay(day);
-    const flowDuration = userProfile?.flowDurationDays ?? 5; // Get user's setting
+    const flowDuration = userProfile?.flowDurationDays ?? 5;
 
     setSelectedDays((currentSelection) => {
-        const isAlreadySelected = currentSelection.some((d) => isSameDay(d, dayStart));
+      const isAlreadySelected = currentSelection.some((d) =>
+        isSameDay(d, dayStart)
+      );
 
-        // Case 1: Day is already selected. User wants to remove it (manual adjustment).
-        if (isAlreadySelected) {
-            return currentSelection.filter((d) => !isSameDay(d, dayStart));
+      // If the day is already selected, remove it.
+      if (isAlreadySelected) {
+        return currentSelection.filter((d) => !isSameDay(d, dayStart));
+      }
+
+      // If the day is adjacent to an existing block, just add the single day.
+      const isAdjacent = currentSelection.some(
+        (selectedDay) => Math.abs(differenceInDays(selectedDay, dayStart)) === 1
+      );
+
+      if (isAdjacent) {
+        const newSelection = [...currentSelection, dayStart];
+        return newSelection.sort((a, b) => a.getTime() - b.getTime());
+      }
+      
+      // If it's a new, non-adjacent day, suggest a new block.
+      // This new block is ADDED to the existing selection, not replacing it.
+      const newBlock = Array.from({ length: flowDuration }, (_, i) => addDays(dayStart, i))
+        .filter(d => !isAfter(d, new Date())); // Don't select future dates
+
+      const combined = [...currentSelection];
+      newBlock.forEach(dayInBlock => {
+        if (!combined.some(d => isSameDay(d, dayInBlock))) {
+          combined.push(dayInBlock);
         }
-
-        // Case 2: Day is not selected. Check for adjacency to extend a block.
-        const isAdjacent = currentSelection.some(
-            (selectedDay) => Math.abs(differenceInDays(selectedDay, dayStart)) === 1
-        );
-
-        if (isAdjacent) {
-            // It's a manual extension. Just add the single day.
-            const newSelection = [...currentSelection, dayStart];
-            return newSelection.sort((a, b) => a.getTime() - b.getTime());
-        }
-
-        // Case 3: Not selected and not adjacent. This is a new period block suggestion.
-        const newBlock = [];
-        for (let i = 0; i < flowDuration; i++) {
-            const dayInBlock = addDays(dayStart, i);
-            // Don't add dates in the future
-            if (!isAfter(dayInBlock, new Date())) {
-                newBlock.push(dayInBlock);
-            }
-        }
-        
-        // Add the new block to the existing selection, avoiding duplicates.
-        const combined = [...currentSelection];
-        newBlock.forEach(dayInBlock => {
-            if (!combined.some(d => isSameDay(d, dayInBlock))) {
-                combined.push(dayInBlock);
-            }
-        });
-        
-        return combined.sort((a, b) => a.getTime() - b.getTime());
+      });
+      
+      return combined.sort((a, b) => a.getTime() - b.getTime());
     });
-};
+  };
 
   const handleSave = () => {
     savePeriodDays(selectedDays);
@@ -198,3 +192,77 @@ export function PeriodRegistrationModal({
     </Dialog>
   );
 }
+
+// Overwrite the original SimpleCalendar to use the new design for this modal only
+const SimpleCalendar = ({
+  initialDate = new Date(),
+  selectedDates,
+  onDateClick,
+}: {
+  initialDate: Date;
+  selectedDates?: Date[];
+  onDateClick?: (date: Date) => void;
+}) => {
+  const monthStart = startOfMonth(initialDate);
+  const monthEnd = endOfMonth(monthStart);
+  const startDate = startOfWeek(monthStart, { locale: ptBR, weekStartsOn: 0 });
+  const endDate = endOfWeek(monthEnd, { locale: ptBR, weekStartsOn: 0 });
+
+  const days = [];
+  let day = startDate;
+
+  while (day <= endDate) {
+    days.push(day);
+    day = addDays(day, 1);
+  }
+
+  const weekdays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+
+  return (
+    <div className="text-card-foreground">
+      <h2 className="font-semibold capitalize text-center mb-4 text-lg">
+        {format(monthStart, 'MMMM yyyy', { locale: ptBR })}
+      </h2>
+
+      <div className="grid grid-cols-7 text-center text-xs text-muted-foreground">
+        {weekdays.map((weekday, index) => (
+          <div key={index} className="py-2 font-medium">
+            {weekday}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 text-center text-sm">
+        {days.map((date, i) => {
+          if (!isSameMonth(date, monthStart)) {
+            return <div key={i} className="h-12" />;
+          }
+          const isFuture = isAfter(startOfDay(date), startOfDay(new Date()));
+          const isSelected = selectedDates?.some((d) => isSameDay(d, date));
+
+          return (
+            <div key={i} className="flex flex-col items-center justify-start h-12 pt-1">
+              <button
+                onClick={() => onDateClick && onDateClick(date)}
+                disabled={isFuture}
+                className={cn(
+                  'relative flex h-9 w-9 items-center justify-center rounded-full transition-colors text-sm font-medium disabled:cursor-not-allowed disabled:opacity-30',
+                  isSelected
+                    ? 'bg-primary text-primary-foreground'
+                    : 'border border-border hover:bg-accent'
+                )}
+                aria-label={format(date, 'PPP', { locale: ptBR })}
+              >
+                {isSelected ? (
+                  <Check className="h-5 w-5 text-primary-foreground" />
+                ) : (
+                  format(date, 'd')
+                )}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
