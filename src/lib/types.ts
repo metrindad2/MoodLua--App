@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview Este arquivo define os tipos de dados centrais para o aplicativo MoodLua.
  * Usar tipos centralizados ajuda a manter a consistência e a prevenir erros em todo o código.
@@ -24,14 +25,23 @@ export type UserProfile = {
  */
 export type Mood =
   | 'feliz'
-  | 'energizada'
+  | 'alegre'
   | 'calma'
+  | 'energetica'
+  | 'carinhosa'
   | 'neutra'
-  | 'ansiosa'
-  | 'cansada'
   | 'triste'
+  | 'ansiosa'
   | 'irritada'
-  | 'carinhosa';
+  | 'cansada'
+  | 'culpada'
+  | 'desanimada'
+  | 'apatica'
+  | 'confusa'
+  | 'pouca_energia'
+  | 'mudancas_humor'
+  | 'pensamentos_obsessivos'
+  | 'muito_autocritica';
 
 /**
  * Define os possíveis valores para a intensidade do fluxo menstrual.
@@ -48,6 +58,7 @@ export type DailyLog = {
   flowIntensity?: FlowIntensity;
   symptoms?: string[];
   mood?: Mood;
+  sexoLibido?: string[];
 };
 
 /**

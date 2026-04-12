@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useCycleData } from '@/context/cycle-data-context';
@@ -8,6 +9,7 @@ import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { MOOD_OPTIONS } from '@/lib/moods';
 import { SYMPTOM_OPTIONS } from '@/lib/symptoms';
+import { SEXO_LIBIDO_OPTIONS } from '@/lib/sexo-libido';
 import {
   CircleSlash,
   Droplet,
@@ -38,10 +40,12 @@ export function DailyTracker() {
 
   const [selectedDate] = useState(new Date());
 
-  // State for current selections, to be edited by the user
+  // State for current selections
   const [selectedMood, setSelectedMood] = useState<Mood | undefined>();
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [selectedFlow, setSelectedFlow] = useState<FlowIntensity | undefined>();
+  const [selectedSexoLibido, setSelectedSexoLibido] = useState<string[]>([]);
+
 
   // State to track the originally loaded log for comparison on save
   const [originalLog, setOriginalLog] = useState<DailyLog | undefined>();
@@ -53,15 +57,14 @@ export function DailyTracker() {
     setSelectedMood(log?.mood);
     setSelectedSymptoms(log?.symptoms || []);
     setSelectedFlow(log?.flowIntensity);
+    setSelectedSexoLibido(log?.sexoLibido || []);
   }, [selectedDate, getLogForDate]);
 
-  // Update local state for mood selection
   const handleMoodSelect = (mood: Mood) => {
     const newMood = selectedMood === mood ? undefined : mood;
     setSelectedMood(newMood);
   };
 
-  // Update local state for symptom selection
   const handleSymptomSelect = (symptomId: string) => {
     const newSymptoms = selectedSymptoms.includes(symptomId)
       ? selectedSymptoms.filter((s) => s !== symptomId)
@@ -69,7 +72,13 @@ export function DailyTracker() {
     setSelectedSymptoms(newSymptoms);
   };
 
-  // Update local state for flow selection
+    const handleSexoLibidoSelect = (id: string) => {
+    const newSelection = selectedSexoLibido.includes(id)
+      ? selectedSexoLibido.filter((s) => s !== id)
+      : [...selectedSexoLibido, id];
+    setSelectedSexoLibido(newSelection);
+  };
+
   const handleFlowSelect = (flow: FlowIntensity) => {
     const newFlow = selectedFlow === flow ? undefined : flow;
     setSelectedFlow(newFlow);
@@ -80,6 +89,7 @@ export function DailyTracker() {
     setSelectedMood(undefined);
     setSelectedSymptoms([]);
     setSelectedFlow(undefined);
+    setSelectedSexoLibido([]);
   };
 
   // Handle saving the current selections
@@ -104,6 +114,7 @@ export function DailyTracker() {
       mood: selectedMood,
       symptoms: selectedSymptoms,
       flowIntensity: selectedFlow,
+      sexoLibido: selectedSexoLibido,
       isPeriodDay: isPeriodDay,
     });
     
@@ -127,51 +138,88 @@ export function DailyTracker() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Sexo e Libido Section */}
         <div>
-          <h3 className="text-base font-semibold mb-3 text-foreground">Como você se sente?</h3>
-          <div className="grid grid-cols-3 gap-2">
+          <h3 className="text-base font-semibold mb-3 text-foreground">Sexo e Libido</h3>
+          <div className="flex flex-wrap gap-2">
+            {SEXO_LIBIDO_OPTIONS.map((option) => {
+              const isSelected = selectedSexoLibido.includes(option.id);
+              return (
+                <button
+                  key={option.id}
+                  onClick={() => handleSexoLibidoSelect(option.id)}
+                  className={cn(
+                    'flex items-center gap-2 pl-2 pr-3 py-2 rounded-full border-2 transition-all text-sm',
+                    isSelected
+                      ? 'border-primary bg-primary/10'
+                      : 'border-transparent bg-muted/60 hover:bg-muted'
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'flex h-7 w-7 items-center justify-center rounded-full text-lg',
+                      isSelected ? 'bg-primary/20' : 'bg-background/80'
+                    )}
+                  >
+                    {option.emoji}
+                  </span>
+                  <span
+                    className={cn(
+                      'font-medium',
+                      isSelected ? 'text-primary' : 'text-foreground'
+                    )}
+                  >
+                    {option.label}
+                  </span>
+                  {isSelected && <Check className="h-4 w-4 text-primary" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        
+        {/* Humor Section */}
+        <div>
+          <h3 className="text-base font-semibold mb-3 text-foreground">Humor</h3>
+          <div className="flex flex-wrap gap-2">
             {MOOD_OPTIONS.map((option) => {
-              const isSelected = selectedMood === option.value;
+              // Legacy support for 'energizada'
+              const isSelected = selectedMood === option.value || (option.value === 'energetica' && selectedMood === ('energizada' as any));
               return (
                 <button
                   key={option.value}
                   onClick={() => handleMoodSelect(option.value)}
                   className={cn(
-                    'flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 text-sm font-medium',
+                    'flex items-center gap-2 pl-2 pr-3 py-2 rounded-full border-2 transition-all text-sm',
                     isSelected
-                      ? 'bg-primary/10 border-primary shadow-sm'
-                      : 'bg-muted/50 border-transparent hover:bg-accent'
+                      ? 'border-primary bg-primary/10'
+                      : 'border-transparent bg-muted/60 hover:bg-muted'
                   )}
                 >
-                  <span className={cn("text-2xl transition-transform", isSelected ? "scale-110" : "")}>{option.emoji}</span>
-                  <span className={cn(isSelected ? "text-primary font-semibold" : "text-muted-foreground")}>{option.label}</span>
+                  <span
+                    className={cn(
+                      'flex h-7 w-7 items-center justify-center rounded-full text-lg',
+                       isSelected ? 'bg-primary/20' : 'bg-background/80'
+                    )}
+                  >
+                    {option.emoji}
+                  </span>
+                  <span
+                    className={cn(
+                      'font-medium',
+                       isSelected ? 'text-primary' : 'text-foreground'
+                    )}
+                  >
+                    {option.label}
+                  </span>
+                   {isSelected && <Check className="h-4 w-4 text-primary" />}
                 </button>
               );
             })}
           </div>
         </div>
 
-        <div>
-          <h3 className="text-base font-semibold mb-3 text-foreground">Fluxo Menstrual</h3>
-          <div className="grid grid-cols-2 gap-2">
-            {FLOW_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => handleFlowSelect(option.value)}
-                className={cn(
-                  'flex items-center justify-center gap-2 px-3 py-2 rounded-full border-2 transition-colors text-sm font-medium',
-                  selectedFlow === option.value
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-muted/50 border-transparent hover:bg-accent'
-                )}
-              >
-                <option.Icon className="h-4 w-4" />
-                <span>{option.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
+        {/* Sintomas Section */}
         <div>
           <h3 className="text-base font-semibold mb-3 text-foreground">
             Sintomas
@@ -210,6 +258,28 @@ export function DailyTracker() {
                 </button>
               );
             })}
+          </div>
+        </div>
+
+        {/* Fluxo Section */}
+        <div>
+          <h3 className="text-base font-semibold mb-3 text-foreground">Fluxo Menstrual</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {FLOW_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => handleFlowSelect(option.value)}
+                className={cn(
+                  'flex items-center justify-center gap-2 px-3 py-2 rounded-full border-2 transition-colors text-sm font-medium',
+                  selectedFlow === option.value
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-muted/50 border-transparent hover:bg-accent'
+                )}
+              >
+                <option.Icon className="h-4 w-4" />
+                <span>{option.label}</span>
+              </button>
+            ))}
           </div>
         </div>
         

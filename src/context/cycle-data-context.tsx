@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, {
@@ -68,8 +69,16 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
       const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (storedData) {
         const data: MoodLuaLocalData = JSON.parse(storedData);
+        // Data migration for 'energizada' to 'energetica'
+        const migratedLogs = (data.dailyLogs || []).map(log => {
+          if ((log.mood as any) === 'energizada') {
+            return { ...log, mood: 'energetica' };
+          }
+          return log;
+        });
+
         setUserProfile(data.userProfile || null);
-        setDailyLogs(data.dailyLogs || []);
+        setDailyLogs(migratedLogs);
         setCycleHistory(data.cycleHistory || []);
         setPregnancyLmpDate(data.pregnancyLmpDate || null);
         setSosContacts(data.sosContacts || []);
@@ -215,6 +224,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
             mergedLog.isPeriodDay ||
             mergedLog.mood ||
             mergedLog.symptoms?.length ||
+            mergedLog.sexoLibido?.length ||
             (mergedLog.flowIntensity && mergedLog.flowIntensity !== 'nenhum');
 
           if (!hasMeaningfulData) {
@@ -230,6 +240,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
             newLogData.isPeriodDay ||
             newLogData.mood ||
             newLogData.symptoms?.length ||
+            newLogData.sexoLibido?.length ||
             (newLogData.flowIntensity && newLogData.flowIntensity !== 'nenhum');
           if (hasMeaningfulData) {
             updatedLogs = [...prevLogs, newLogData as DailyLog];
@@ -252,6 +263,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         symptoms: undefined,
         flowIntensity: undefined,
         isPeriodDay: false, // Explicitly unmarks the day as a period day
+        sexoLibido: undefined,
       });
     },
     [addOrUpdateDailyLog]
@@ -324,7 +336,8 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
       return finalLogs.filter(log => 
         log.isPeriodDay || 
         log.mood || 
-        (log.symptoms && log.symptoms.length > 0) || 
+        (log.symptoms && log.symptoms.length > 0) ||
+        (log.sexoLibido && log.sexoLibido.length > 0) ||
         (log.flowIntensity && log.flowIntensity !== 'nenhum')
       );
     });

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useCycleData } from '@/context/cycle-data-context';
@@ -20,11 +21,13 @@ import {
   Trash2,
   CalendarClock,
   Repeat,
+  Heart,
 } from 'lucide-react';
 import Link from 'next/link';
 import { FlowIntensity } from '@/lib/types';
 import { MOOD_OPTIONS } from '@/lib/moods';
 import { SYMPTOM_OPTIONS } from '@/lib/symptoms';
+import { SEXO_LIBIDO_OPTIONS } from '@/lib/sexo-libido';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -204,17 +207,28 @@ export default function HistoryPage() {
           <div className="space-y-3">
             {sortedLogs.map((log) => {
               const logDate = startOfDay(new Date(log.date + 'T00:00:00'));
-              const mood = MOOD_OPTIONS.find((m) => m.value === log.mood);
+              // Handle legacy mood 'energizada'
+              const moodValue = (log.mood as any) === 'energizada' ? 'energetica' : log.mood;
+              const mood = MOOD_OPTIONS.find((m) => m.value === moodValue);
+
               const symptoms = log.symptoms
                 ?.map((sId) => SYMPTOM_OPTIONS.find((s) => s.id === sId))
                 .filter(Boolean) as { id: string; label: string; emoji: string }[];
+              
+              const sexoLibido = log.sexoLibido
+                ?.map((slId) => SEXO_LIBIDO_OPTIONS.find((sl) => sl.id === slId))
+                .filter(Boolean) as { id: string; label: string; emoji: string }[];
+
               const flow = FLOW_OPTIONS.find(
                 (f) => f.value === log.flowIntensity
               );
+
               const hasData =
                 mood ||
                 (flow && flow.value !== 'nenhum') ||
-                (symptoms && symptoms.length > 0);
+                (symptoms && symptoms.length > 0) ||
+                (sexoLibido && sexoLibido.length > 0);
+
 
               return (
                 <Card key={log.date}>
@@ -244,6 +258,27 @@ export default function HistoryPage() {
                                 Humor
                               </p>
                               <p className="font-semibold">{mood.label}</p>
+                            </div>
+                          </div>
+                        )}
+                        {sexoLibido && sexoLibido.length > 0 && (
+                          <div>
+                            <h4 className="font-semibold text-muted-foreground text-sm mb-2 px-1 flex items-center gap-2">
+                              <Heart className="w-4 h-4"/> Sexo e Libido
+                            </h4>
+                            <div className="flex flex-wrap gap-2">
+                              {sexoLibido.map(
+                                (item) =>
+                                  item && (
+                                    <div
+                                      key={item.id}
+                                      className="flex items-center gap-1.5 text-sm bg-muted text-muted-foreground font-medium px-3 py-1.5 rounded-full"
+                                    >
+                                      <span>{item.emoji}</span>
+                                      <span>{item.label}</span>
+                                    </div>
+                                  )
+                              )}
                             </div>
                           </div>
                         )}
