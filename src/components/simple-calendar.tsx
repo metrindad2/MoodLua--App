@@ -98,7 +98,7 @@ export function SimpleCalendar({
           const isCurrentToday = isToday(date);
 
           // Modo de Registro: Lógica para seleção de dias.
-          if (isRegistrationMode) {
+          if (isRegistrationMode && onDateClick) {
             if (!isDayInCurrentMonth) {
               return <div key={i} className="h-12" />;
             }
@@ -116,8 +116,8 @@ export function SimpleCalendar({
                   className={cn(
                     'relative flex h-9 w-9 items-center justify-center rounded-full transition-colors text-sm disabled:cursor-not-allowed disabled:opacity-50',
                     isSelected
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'border border-transparent hover:bg-accent'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'border border-muted-foreground/30 hover:bg-accent'
                   )}
                   aria-label={format(date, 'PPP', { locale: ptBR })}
                 >
@@ -127,14 +127,14 @@ export function SimpleCalendar({
                     <span
                       className={cn(
                         'text-foreground',
-                        isCurrentToday && 'text-primary font-bold'
+                        isCurrentToday && 'font-bold'
                       )}
                     >
                       {format(date, 'd')}
                     </span>
                   )}
                 </button>
-                {isCurrentToday && (
+                 {isCurrentToday && (
                   <span className="text-[9px] font-bold text-primary mt-1 select-none">
                     HOJE
                   </span>

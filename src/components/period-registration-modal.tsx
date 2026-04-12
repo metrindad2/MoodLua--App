@@ -15,11 +15,9 @@ import {
   startOfMonth,
   startOfDay,
   addMonths,
-  isSameMonth,
+  isAfter,
   addDays,
   differenceInDays,
-  isAfter,
-  endOfMonth,
 } from 'date-fns';
 import { useCycleData } from '@/context/cycle-data-context';
 import { SimpleCalendar } from './simple-calendar';
@@ -52,17 +50,15 @@ export function PeriodRegistrationModal({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const monthRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Generate a list of months from 2026 for 200 years.
+  // Generate a list of months from user's join date for 10 years.
   const monthsToDisplay = useMemo(() => {
-    const startDate = startOfMonth(new Date('2026-01-01T00:00:00'));
-    // A large number of months to feel "infinite"
-    return Array.from({ length: 200 * 12 }).map((_, i) =>
-      addMonths(startDate, i)
-    );
-  }, []);
+    if (!userProfile?.joinDate) return [];
+    // Start calendar from the beginning of the month the user joined
+    const startDate = startOfMonth(new Date(userProfile.joinDate + 'T00:00:00'));
+    // Generate months for 10 years into the future
+    return Array.from({ length: 12 * 10 }).map((_, i) => addMonths(startDate, i));
+  }, [userProfile?.joinDate]);
 
-  // The month for which the calendar should scroll to when opened.
-  const targetScrollMonth = startOfMonth(new Date('2026-01-01T00:00:00'));
 
   // Initialize selected days when modal opens.
   useEffect(() => {
@@ -74,62 +70,69 @@ export function PeriodRegistrationModal({
     }
   }, [open, dailyLogs]);
 
-  // Scroll to target month effect.
+  // Scroll to current month effect.
   useEffect(() => {
     if (open) {
-      setCurrentDisplayMonth(startOfMonth(new Date('2026-01-01T00:00:00')));
-      const targetMonthKey = targetScrollMonth.toISOString().slice(0, 7);
+      const targetMonthKey = startOfMonth(new Date()).toISOString().slice(0, 7);
       const targetElement = monthRefs.current.get(targetMonthKey);
-
+      
       setTimeout(() => {
         if (targetElement && scrollContainerRef.current) {
           const viewport = scrollContainerRef.current.querySelector(
             '[data-radix-scroll-area-viewport]'
-          );
+            );
           if (viewport) {
-            viewport.scrollTop = targetElement.offsetTop;
+            viewport.scrollTop = targetElement.offsetTop - (targetElement.clientHeight / 2);
           }
         }
-      }, 100); // A short delay ensures elements are rendered.
+      }, 150); // A short delay ensures elements are rendered.
     }
-  }, [open, targetScrollMonth]);
+  }, [open]);
 
   const handleDayClick = (day: Date) => {
     const dayStart = startOfDay(day);
-    const flowDuration = userProfile?.flowDurationDays ?? 5;
-  
-    setSelectedDays((prevSelectedDays) => {
-      const newSelection = [...prevSelectedDays];
-      const isAlreadySelected = newSelection.some((d) => isSameDay(d, dayStart));
-  
-      if (isAlreadySelected) {
-        // Case 1: If the day is already selected, remove it.
-        return newSelection.filter((d) => !isSameDay(d, dayStart));
-      }
-  
-      // Case 2: The day is not selected.
-      // Check if it's adjacent to any existing selection.
-      const isAdjacent = newSelection.some(d => Math.abs(differenceInDays(d, dayStart)) === 1);
-  
-      if (isAdjacent) {
-        // Manual adjustment: Add a single day because it's next to an existing one.
-        newSelection.push(dayStart);
-      } else {
-        // New block suggestion: The click is "far" from other selections.
-        // Add a new block of days based on flow duration.
-        for (let i = 0; i < flowDuration; i++) {
-          const futureDay = addDays(dayStart, i);
-          // Ensure we don't add future dates or duplicates
-          if (!isAfter(futureDay, new Date()) && !newSelection.some(d => isSameDay(d, futureDay))) {
-            newSelection.push(futureDay);
-          }
+    const flowDuration = userProfile?.flowDurationDays ?? 5; // Get user's setting
+
+    setSelectedDays((currentSelection) => {
+        const isAlreadySelected = currentSelection.some((d) => isSameDay(d, dayStart));
+
+        // Case 1: Day is already selected. User wants to remove it (manual adjustment).
+        if (isAlreadySelected) {
+            return currentSelection.filter((d) => !isSameDay(d, dayStart));
         }
-      }
-      
-      // Always return a sorted array.
-      return newSelection.sort((a, b) => a.getTime() - b.getTime());
+
+        // Case 2: Day is not selected. Check for adjacency to extend a block.
+        const isAdjacent = currentSelection.some(
+            (selectedDay) => Math.abs(differenceInDays(selectedDay, dayStart)) === 1
+        );
+
+        if (isAdjacent) {
+            // It's a manual extension. Just add the single day.
+            const newSelection = [...currentSelection, dayStart];
+            return newSelection.sort((a, b) => a.getTime() - b.getTime());
+        }
+
+        // Case 3: Not selected and not adjacent. This is a new period block suggestion.
+        const newBlock = [];
+        for (let i = 0; i < flowDuration; i++) {
+            const dayInBlock = addDays(dayStart, i);
+            // Don't add dates in the future
+            if (!isAfter(dayInBlock, new Date())) {
+                newBlock.push(dayInBlock);
+            }
+        }
+        
+        // Add the new block to the existing selection, avoiding duplicates.
+        const combined = [...currentSelection];
+        newBlock.forEach(dayInBlock => {
+            if (!combined.some(d => isSameDay(d, dayInBlock))) {
+                combined.push(dayInBlock);
+            }
+        });
+        
+        return combined.sort((a, b) => a.getTime() - b.getTime());
     });
-  };
+};
 
   const handleSave = () => {
     savePeriodDays(selectedDays);
@@ -174,7 +177,6 @@ export function PeriodRegistrationModal({
                       initialDate={month}
                       selectedDates={selectedDays}
                       onDateClick={handleDayClick}
-                      previsionRange={previsionRange}
                     />
                   </div>
                 );
