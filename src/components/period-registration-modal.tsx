@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
@@ -53,7 +52,7 @@ export function PeriodRegistrationModal({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const monthRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Generate a list of months from 2026 for a long period to feel "infinite".
+  // Generate a list of months from 2026 for 200 years.
   const monthsToDisplay = useMemo(() => {
     const startDate = startOfMonth(new Date('2026-01-01T00:00:00'));
     // A large number of months to feel "infinite"
@@ -99,41 +98,19 @@ export function PeriodRegistrationModal({
         isSameDay(d, dayStart)
       );
 
-      // CASE 1: The day is already selected. Remove it.
-      if (isAlreadySelected) {
-        return currentSelection.filter((d) => !isSameDay(d, dayStart));
-      }
-
-      // CASE 2: The day is not selected.
-      // If the selection is empty, create a new block. This is the "smart start".
+      // Smart start: If no days are selected, create a new block suggestion.
       if (currentSelection.length === 0) {
         const newBlock = Array.from({ length: flowDuration }, (_, i) => addDays(dayStart, i))
           .filter(d => !isAfter(d, new Date()));
         return newBlock;
       }
-      
-      // If the selection is NOT empty, we check for adjacency.
-      const isAdjacent = currentSelection.some(
-        (selectedDay) => Math.abs(differenceInDays(selectedDay, dayStart)) === 1
-      );
 
-      // If it's adjacent, just add the single day to expand the current block.
-      if (isAdjacent) {
+      // Manual toggle: If a selection exists, just add or remove the clicked day.
+      if (isAlreadySelected) {
+        return currentSelection.filter((d) => !isSameDay(d, dayStart));
+      } else {
         return [...currentSelection, dayStart].sort((a, b) => a.getTime() - b.getTime());
       }
-      
-      // If it's not adjacent, it's a new period in a different place.
-      // Add a new block to the existing selection.
-      const newBlock = Array.from({ length: flowDuration }, (_, i) => addDays(dayStart, i))
-          .filter(d => !isAfter(d, new Date()));
-
-      // Use a Set to avoid duplicates and combine.
-      const combinedDays = new Set(currentSelection.map(d => d.getTime()));
-      newBlock.forEach(d => combinedDays.add(d.getTime()));
-      
-      const newSelection = Array.from(combinedDays).map(time => new Date(time));
-      
-      return newSelection.sort((a, b) => a.getTime() - b.getTime());
     });
   };
 
