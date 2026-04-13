@@ -158,6 +158,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
               newLogs.push({
                 date: format(addDays(lmp, i), 'yyyy-MM-dd'),
                 isPeriodDay: true,
+                flowIntensity: 'médio',
               });
             }
             setDailyLogs(newLogs); // Set logs for the new user
@@ -326,7 +327,17 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         allDaysToProcess.forEach(dayStr => {
             const isNowPeriodDay = newPeriodDayStrings.has(dayStr);
             const currentLog = logsMap.get(dayStr) || { date: dayStr };
+            
             const updatedLog = { ...currentLog, isPeriodDay: isNowPeriodDay };
+
+            // If a day is marked as a period day, ensure it has a flow intensity.
+            // If it's unmarked, remove the flow intensity unless other data exists.
+            if (isNowPeriodDay && !updatedLog.flowIntensity) {
+                updatedLog.flowIntensity = 'médio';
+            } else if (!isNowPeriodDay) {
+                delete updatedLog.flowIntensity;
+            }
+
             logsMap.set(dayStr, updatedLog);
         });
 
