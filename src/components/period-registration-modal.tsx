@@ -99,34 +99,41 @@ export function PeriodRegistrationModal({
         isSameDay(d, dayStart)
       );
 
-      // If the day is already selected, remove it.
+      // CASE 1: The day is already selected. Remove it.
       if (isAlreadySelected) {
         return currentSelection.filter((d) => !isSameDay(d, dayStart));
       }
 
-      // If the day is adjacent to an existing block, just add the single day.
+      // CASE 2: The day is not selected.
+      // If the selection is empty, create a new block. This is the "smart start".
+      if (currentSelection.length === 0) {
+        const newBlock = Array.from({ length: flowDuration }, (_, i) => addDays(dayStart, i))
+          .filter(d => !isAfter(d, new Date()));
+        return newBlock;
+      }
+      
+      // If the selection is NOT empty, we check for adjacency.
       const isAdjacent = currentSelection.some(
         (selectedDay) => Math.abs(differenceInDays(selectedDay, dayStart)) === 1
       );
 
+      // If it's adjacent, just add the single day to expand the current block.
       if (isAdjacent) {
-        const newSelection = [...currentSelection, dayStart];
-        return newSelection.sort((a, b) => a.getTime() - b.getTime());
+        return [...currentSelection, dayStart].sort((a, b) => a.getTime() - b.getTime());
       }
       
-      // If it's a new, non-adjacent day, suggest a new block.
-      // This new block is ADDED to the existing selection, not replacing it.
+      // If it's not adjacent, it's a new period in a different place.
+      // Add a new block to the existing selection.
       const newBlock = Array.from({ length: flowDuration }, (_, i) => addDays(dayStart, i))
-        .filter(d => !isAfter(d, new Date())); // Don't select future dates
+          .filter(d => !isAfter(d, new Date()));
 
-      const combined = [...currentSelection];
-      newBlock.forEach(dayInBlock => {
-        if (!combined.some(d => isSameDay(d, dayInBlock))) {
-          combined.push(dayInBlock);
-        }
-      });
+      // Use a Set to avoid duplicates and combine.
+      const combinedDays = new Set(currentSelection.map(d => d.getTime()));
+      newBlock.forEach(d => combinedDays.add(d.getTime()));
       
-      return combined.sort((a, b) => a.getTime() - b.getTime());
+      const newSelection = Array.from(combinedDays).map(time => new Date(time));
+      
+      return newSelection.sort((a, b) => a.getTime() - b.getTime());
     });
   };
 
