@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useCycleData } from '@/context/cycle-data-context';
@@ -17,7 +16,6 @@ import {
   Save,
   Trash2,
   Waves,
-  Check,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -149,7 +147,7 @@ export function DailyTracker() {
                   key={option.id}
                   onClick={() => handleSexoLibidoSelect(option.id)}
                   className={cn(
-                    'flex items-center gap-2 pl-2 pr-3 py-2 rounded-full border-2 transition-all text-sm',
+                    'flex items-center gap-2 px-3 py-2 rounded-full border-2 transition-all text-sm',
                     isSelected
                       ? 'border-primary bg-primary/10'
                       : 'border-transparent bg-muted/60 hover:bg-muted'
@@ -171,7 +169,6 @@ export function DailyTracker() {
                   >
                     {option.label}
                   </span>
-                  {isSelected && <Check className="h-4 w-4 text-primary" />}
                 </button>
               );
             })}
@@ -190,7 +187,7 @@ export function DailyTracker() {
                   key={option.value}
                   onClick={() => handleMoodSelect(option.value)}
                   className={cn(
-                    'flex items-center gap-2 pl-2 pr-3 py-2 rounded-full border-2 transition-all text-sm',
+                    'flex items-center gap-2 px-3 py-2 rounded-full border-2 transition-all text-sm',
                     isSelected
                       ? 'border-primary bg-primary/10'
                       : 'border-transparent bg-muted/60 hover:bg-muted'
@@ -212,7 +209,6 @@ export function DailyTracker() {
                   >
                     {option.label}
                   </span>
-                   {isSelected && <Check className="h-4 w-4 text-primary" />}
                 </button>
               );
             })}
@@ -232,7 +228,7 @@ export function DailyTracker() {
                   key={option.id}
                   onClick={() => handleSymptomSelect(option.id)}
                   className={cn(
-                    'flex items-center gap-2 pl-2 pr-3 py-2 rounded-full border-2 transition-all text-sm',
+                    'flex items-center gap-2 px-3 py-2 rounded-full border-2 transition-all text-sm',
                     isSelected
                       ? 'border-primary bg-primary/10'
                       : 'border-transparent bg-muted/60 hover:bg-muted'
@@ -254,7 +250,6 @@ export function DailyTracker() {
                   >
                     {option.label}
                   </span>
-                  {isSelected && <Check className="h-4 w-4 text-primary" />}
                 </button>
               );
             })}
