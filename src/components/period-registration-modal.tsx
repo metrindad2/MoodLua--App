@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -89,7 +89,7 @@ export function PeriodRegistrationModal({
     }
   }, [open]);
 
-  const handleDayClick = (day: Date) => {
+  const handleDayClick = useCallback((day: Date) => {
     const dayStart = startOfDay(day);
     const flowDuration = userProfile?.flowDurationDays ?? 5;
 
@@ -112,7 +112,7 @@ export function PeriodRegistrationModal({
         return [...currentSelection, dayStart].sort((a, b) => a.getTime() - b.getTime());
       }
     });
-  };
+  }, [userProfile]);
 
 
   const handleSave = () => {
@@ -180,16 +180,51 @@ export function PeriodRegistrationModal({
   );
 }
 
-// Overwrite the original SimpleCalendar to use the new design for this modal only
-const SimpleCalendar = ({
-  initialDate = new Date(),
-  selectedDates,
-  onDateClick,
-}: {
+// Define the props type for clarity
+type CalendarProps = {
   initialDate: Date;
   selectedDates?: Date[];
   onDateClick?: (date: Date) => void;
-}) => {
+};
+
+// Custom comparison function for React.memo to prevent unnecessary re-renders
+const calendarCompare = (
+  prevProps: CalendarProps,
+  nextProps: CalendarProps
+) => {
+  // Props that should trigger a re-render if they change
+  if (prevProps.onDateClick !== nextProps.onDateClick) return false;
+  if (!isSameDay(prevProps.initialDate, nextProps.initialDate)) return false;
+
+  const month = prevProps.initialDate;
+
+  // Check if the selection within this specific month has changed
+  const prevInMonth = prevProps.selectedDates?.filter(d => isSameMonth(d, month)) || [];
+  const nextInMonth = nextProps.selectedDates?.filter(d => isSameMonth(d, month)) || [];
+
+  // If there were no selected dates in this month, and there are still none, no need to re-render.
+  if (prevInMonth.length === 0 && nextInMonth.length === 0) {
+    return true;
+  }
+
+  if (prevInMonth.length !== nextInMonth.length) return false;
+
+  // Deep compare the arrays for the specific month
+  const prevTimes = new Set(prevInMonth.map(d => d.getTime()));
+  for (const date of nextInMonth) {
+    if (!prevTimes.has(date.getTime())) return false;
+  }
+
+  return true; // props are equal, prevent re-render
+};
+
+
+// Overwrite the original SimpleCalendar to use the new design for this modal only
+const SimpleCalendar = React.memo(({
+  initialDate = new Date(),
+  selectedDates,
+  onDateClick,
+}: CalendarProps) => {
   const monthStart = startOfMonth(initialDate);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart, { locale: ptBR, weekStartsOn: 0 });
@@ -252,4 +287,5 @@ const SimpleCalendar = ({
       </div>
     </div>
   );
-};
+}, calendarCompare);
+SimpleCalendar.displayName = 'SimpleCalendar';
