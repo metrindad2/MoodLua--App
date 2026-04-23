@@ -91,11 +91,6 @@ export default {
             height: '0',
           },
         },
-        'background-pan': {
-          '0%': { backgroundPosition: '50% 0%' },
-          '50%': { backgroundPosition: '50% 100%' },
-          '100%': { backgroundPosition: '50% 0%' },
-        },
         'twinkle': {
           '0%, 100%': { opacity: '0.7', transform: 'scale(0.9)' },
           '50%': { opacity: '1', transform: 'scale(1)' },
@@ -103,10 +98,6 @@ export default {
         'moon-reveal': {
           '0%': { transform: 'scale(0.8)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
-        },
-        'orbit': {
-          '0%': { transform: 'rotate(0deg)' },
-          '100%': { transform: 'rotate(360deg)' },
         },
         'text-reveal': {
           '0%': { transform: 'translateY(10px)', opacity: '0' },
@@ -126,10 +117,8 @@ export default {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'background-pan': 'background-pan 8s ease-in-out infinite',
         'twinkle': 'twinkle 2.5s ease-in-out infinite',
         'moon-reveal': 'moon-reveal 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards',
-        'orbit': 'orbit 6s linear infinite',
         'text-reveal': 'text-reveal 0.6s ease-out forwards',
         'slogan-fade': 'slogan-fade 0.6s ease-in forwards',
         'shake': 'shake 0.82s cubic-bezier(.36,.07,.19,.97) both',
