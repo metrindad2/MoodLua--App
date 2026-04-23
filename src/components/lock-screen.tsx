@@ -43,6 +43,14 @@ export function LockScreen() {
   const handleDeleteClick = () => {
     setEnteredPin(enteredPin.slice(0, -1));
   };
+  
+  const handleBiometricClick = () => {
+    toast({
+      title: 'Desbloqueio por Biometria',
+      description:
+        'Este recurso depende do seu dispositivo e navegador. Se compatível, seu aparelho solicitará a autenticação.',
+    });
+  };
 
   const PinDots = () => (
     <div
@@ -67,7 +75,7 @@ export function LockScreen() {
     '1', '2', '3',
     '4', '5', '6',
     '7', '8', '9',
-    '', '0', 'delete',
+    'fingerprint', '0', 'delete',
   ];
 
   return (
@@ -84,8 +92,17 @@ export function LockScreen() {
 
       <div className="grid grid-cols-3 gap-4 w-full max-w-xs">
         {numpadKeys.map((key) => {
-          if (key === '') {
-            return <div key="empty"></div>;
+          if (key === 'fingerprint') {
+            return (
+              <Button
+                key="fingerprint"
+                variant="ghost"
+                className="h-20 w-20 text-2xl font-light rounded-full text-muted-foreground"
+                onClick={handleBiometricClick}
+              >
+                <Fingerprint className="h-8 w-8" />
+              </Button>
+            );
           }
           if (key === 'delete') {
             return (
