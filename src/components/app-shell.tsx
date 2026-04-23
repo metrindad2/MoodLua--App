@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -9,11 +10,12 @@ import { Skeleton } from './ui/skeleton';
 import { useState, useEffect } from 'react';
 import { SplashScreen } from './splash-screen';
 import { SosModal } from './sos-modal';
+import { LockScreen } from './lock-screen';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [isSplashing, setIsSplashing] = useState(true);
   const pathname = usePathname();
-  const { userProfile, loading: isDataLoading } = useCycleData();
+  const { userProfile, loading: isDataLoading, isLocked } = useCycleData();
 
   useEffect(() => {
     const splashTimer = setTimeout(() => {
@@ -36,6 +38,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
     );
+  }
+
+  // If lock is enabled and the app is locked, show the lock screen.
+  // This takes precedence over onboarding and the main app.
+  if (userProfile && userProfile.isLockEnabled && isLocked) {
+    return <LockScreen />;
   }
 
   // Onboarding view without the main app shell.

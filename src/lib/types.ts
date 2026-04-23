@@ -18,6 +18,8 @@ export type UserProfile = {
   flowDurationDays: number;
   cycleLengthDays: number;
   sosMessage?: string;
+  isLockEnabled?: boolean;
+  lockPin?: string;
 };
 
 /**

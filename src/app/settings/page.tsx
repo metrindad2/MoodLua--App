@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Settings as SettingsIcon } from 'lucide-react';
@@ -5,6 +6,7 @@ import { SettingsForm } from '@/components/settings-form';
 import { AppDataManager } from '@/components/app-data-manager';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { SosManager } from '@/components/sos-manager';
+import { LockScreenManager } from '@/components/lock-screen-manager';
 
 export default function SettingsPage() {
   return (
@@ -21,6 +23,9 @@ export default function SettingsPage() {
 
       {/* Theme Settings */}
       <ThemeSwitcher />
+
+      {/* Lock Screen Settings */}
+      <LockScreenManager />
 
       {/* SOS Settings */}
       <SosManager />

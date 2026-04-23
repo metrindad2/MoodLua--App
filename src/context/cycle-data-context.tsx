@@ -14,7 +14,7 @@ import {
   CycleLog,
   EmergencyContact,
 } from '@/lib/types';
-import { format, differenceInDays, startOfDay, addDays, min, isSameDay } from 'date-fns';
+import { format, differenceInDays, startOfDay, addDays, isSameDay } from 'date-fns';
 
 // Combined data structure for localStorage
 interface MoodLuaLocalData {
@@ -32,6 +32,7 @@ interface CycleDataContextType {
   pregnancyLmpDate: string | null;
   sosContacts: EmergencyContact[];
   loading: boolean;
+  isLocked: boolean;
   updateUserProfile: (
     profile: Partial<Omit<UserProfile, 'uid' | 'joinDate'>>
   ) => void;
@@ -47,6 +48,9 @@ interface CycleDataContextType {
   addSosContact: (contact: Omit<EmergencyContact, 'id' | 'isPredefined'>) => void;
   updateSosContact: (contact: EmergencyContact) => void;
   removeSosContact: (contactId: string) => void;
+  enableLock: (pin: string) => void;
+  disableLock: () => void;
+  unlockApp: (pin: string) => boolean;
 }
 
 const CycleDataContext = createContext<CycleDataContextType | undefined>(
@@ -62,6 +66,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   const [pregnancyLmpDate, setPregnancyLmpDate] = useState<string | null>(null);
   const [sosContacts, setSosContacts] = useState<EmergencyContact[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLocked, setIsLocked] = useState(true);
 
   // Load data from localStorage on initialization.
   useEffect(() => {
@@ -82,9 +87,20 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         setCycleHistory(data.cycleHistory || []);
         setPregnancyLmpDate(data.pregnancyLmpDate || null);
         setSosContacts(data.sosContacts || []);
+
+        // Set initial lock state
+        if (data.userProfile?.isLockEnabled) {
+          setIsLocked(true);
+        } else {
+          setIsLocked(false);
+        }
+      } else {
+        // No data, so app is not locked
+        setIsLocked(false);
       }
     } catch (error) {
       console.error('Failed to load local data', error);
+      setIsLocked(false);
     } finally {
       setLoading(false);
     }
@@ -419,6 +435,24 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     },
     [dailyLogs]
   );
+  
+  const enableLock = useCallback((pin: string) => {
+      updateUserProfile({ isLockEnabled: true, lockPin: pin });
+      setIsLocked(true); // Lock immediately after setting
+  }, [updateUserProfile]);
+  
+  const disableLock = useCallback(() => {
+      updateUserProfile({ isLockEnabled: false, lockPin: undefined });
+      setIsLocked(false);
+  }, [updateUserProfile]);
+
+  const unlockApp = useCallback((pin: string): boolean => {
+      if (userProfile?.isLockEnabled && userProfile.lockPin === pin) {
+          setIsLocked(false);
+          return true;
+      }
+      return false;
+  }, [userProfile]);
 
   const value = {
     userProfile,
@@ -427,6 +461,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     pregnancyLmpDate,
     sosContacts,
     loading,
+    isLocked,
     updateUserProfile,
     addOrUpdateDailyLog,
     getLogForDate,
@@ -438,6 +473,9 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     addSosContact,
     updateSosContact,
     removeSosContact,
+    enableLock,
+    disableLock,
+    unlockApp,
   };
 
   return (
