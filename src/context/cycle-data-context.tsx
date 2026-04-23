@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, {
@@ -14,7 +13,13 @@ import {
   CycleLog,
   EmergencyContact,
 } from '@/lib/types';
-import { format, differenceInDays, startOfDay, addDays, isSameDay } from 'date-fns';
+import {
+  format,
+  differenceInDays,
+  startOfDay,
+  addDays,
+  isSameDay,
+} from 'date-fns';
 
 // Combined data structure for localStorage
 interface MoodLuaLocalData {
@@ -75,7 +80,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
       if (storedData) {
         const data: MoodLuaLocalData = JSON.parse(storedData);
         // Data migration for 'energizada' to 'energetica'
-        const migratedLogs = (data.dailyLogs || []).map(log => {
+        const migratedLogs = (data.dailyLogs || []).map((log) => {
           if ((log.mood as any) === 'energizada') {
             return { ...log, mood: 'energetica' };
           }
@@ -151,43 +156,41 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
 
   const updateUserProfile = useCallback(
     (profileUpdate: Partial<Omit<UserProfile, 'uid' | 'joinDate'>>) => {
-      setUserProfile((prevProfile) => {
-        if (!prevProfile) {
-          // It's a new user. Create the full profile.
-          const newUserProfile = {
-            uid: new Date().toISOString(),
-            joinDate: format(new Date(), 'yyyy-MM-dd'),
-            ...profileUpdate,
-          } as UserProfile;
+      // Handles both creating a new user and updating an existing one.
+      if (!userProfile) {
+        // Creating a new user.
+        const newUserProfile = {
+          uid: new Date().toISOString(),
+          joinDate: format(new Date(), 'yyyy-MM-dd'),
+          ...profileUpdate,
+        } as UserProfile;
+        setUserProfile(newUserProfile);
 
-          // Auto-mark the first period for the new user.
-          if (
-            newUserProfile.lastMenstruationDate &&
-            newUserProfile.flowDurationDays > 0
-          ) {
-            const lmp = new Date(
-              newUserProfile.lastMenstruationDate + 'T00:00:00'
-            );
-            const duration = newUserProfile.flowDurationDays;
-            const newLogs: DailyLog[] = [];
-            for (let i = 0; i < duration; i++) {
-              newLogs.push({
-                date: format(addDays(lmp, i), 'yyyy-MM-dd'),
-                isPeriodDay: true,
-                flowIntensity: 'médio',
-              });
-            }
-            setDailyLogs(newLogs); // Set logs for the new user
+        // Auto-mark the first period for the new user.
+        if (
+          newUserProfile.lastMenstruationDate &&
+          newUserProfile.flowDurationDays > 0
+        ) {
+          const lmp = new Date(
+            newUserProfile.lastMenstruationDate + 'T00:00:00'
+          );
+          const duration = newUserProfile.flowDurationDays;
+          const newLogs: DailyLog[] = [];
+          for (let i = 0; i < duration; i++) {
+            newLogs.push({
+              date: format(addDays(lmp, i), 'yyyy-MM-dd'),
+              isPeriodDay: true,
+              flowIntensity: 'médio',
+            });
           }
-
-          return newUserProfile;
+          setDailyLogs(newLogs);
         }
-
-        // It's an existing user. Just update.
-        return { ...prevProfile, ...profileUpdate };
-      });
+      } else {
+        // Updating an existing user.
+        setUserProfile({ ...userProfile, ...profileUpdate });
+      }
     },
-    []
+    [userProfile]
   );
 
   const addSosContact = useCallback(
@@ -287,128 +290,113 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   );
 
   // Explicit function to start a new cycle.
-  // Called when the user logs a period day that signifies a new cycle start.
-  const startNewCycle = useCallback((startDate: Date) => {
-    setUserProfile((prevProfile) => {
-      if (!prevProfile) return null;
+  const startNewCycle = useCallback(
+    (startDate: Date) => {
+      if (!userProfile) return;
 
       const newLmpDate = startOfDay(startDate);
       const previousLmpDate = startOfDay(
-        new Date(prevProfile.lastMenstruationDate + 'T00:00:00')
+        new Date(userProfile.lastMenstruationDate + 'T00:00:00')
       );
 
-      // Only add to history if this new cycle isn't the very first one.
       if (differenceInDays(newLmpDate, previousLmpDate) > 0) {
         const lastCycleLength = differenceInDays(newLmpDate, previousLmpDate);
 
-        // Add the previous cycle to history if it was a valid cycle.
         if (lastCycleLength > 10) {
           const newCycleLog: CycleLog = {
             startDate: format(previousLmpDate, 'yyyy-MM-dd'),
             cycleLength: lastCycleLength,
           };
-          setCycleHistory((prevHistory) => [...prevHistory, newCycleLog]);
+          if (!cycleHistory.some((c) => c.startDate === newCycleLog.startDate)) {
+            setCycleHistory([...cycleHistory, newCycleLog]);
+          }
         }
       }
 
       // Update the user's last menstruation date.
-      return {
-        ...prevProfile,
+      setUserProfile({
+        ...userProfile,
         lastMenstruationDate: format(newLmpDate, 'yyyy-MM-dd'),
-      };
-    });
-  }, []);
+      });
+    },
+    [userProfile, cycleHistory]
+  );
 
-  const savePeriodDays = useCallback((newPeriodDays: Date[]) => {
-    // Sort the incoming days to easily find the first day
-    const sortedNewDays = [...newPeriodDays].sort((a, b) => a.getTime() - b.getTime());
-    const newPeriodDayStrings = new Set(sortedNewDays.map(d => format(d, 'yyyy-MM-dd')));
+  const savePeriodDays = useCallback(
+    (newPeriodDays: Date[]) => {
+      // Part 1: Calculate the new state for dailyLogs
+      const sortedNewDays = [...newPeriodDays].sort(
+        (a, b) => a.getTime() - b.getTime()
+      );
+      const newPeriodDayStrings = new Set(
+        sortedNewDays.map((d) => format(d, 'yyyy-MM-dd'))
+      );
 
-    // Part 1: Update the dailyLogs state based on the new selection
-    setDailyLogs(prevLogs => {
-        const logsMap = new Map(prevLogs.map(log => [log.date, log]));
-        const allDaysToProcess = new Set<string>();
+      const logsMap = new Map(dailyLogs.map((log) => [log.date, log]));
+      const allDaysToProcess = new Set<string>();
 
-        // Add all days from the new selection
-        newPeriodDayStrings.forEach(dayStr => allDaysToProcess.add(dayStr));
-
-        // Also add any day that was previously a period day, to ensure it can be unmarked
-        prevLogs.forEach(log => {
-            if (log.isPeriodDay) {
-                allDaysToProcess.add(log.date);
-            }
-        });
-
-        // Process each relevant day
-        allDaysToProcess.forEach(dayStr => {
-            const isNowPeriodDay = newPeriodDayStrings.has(dayStr);
-            const currentLog = logsMap.get(dayStr) || { date: dayStr };
-            
-            const updatedLog = { ...currentLog, isPeriodDay: isNowPeriodDay };
-
-            // If a day is marked as a period day, ensure it has a flow intensity.
-            // If it's unmarked, remove the flow intensity unless other data exists.
-            if (isNowPeriodDay && !updatedLog.flowIntensity) {
-                updatedLog.flowIntensity = 'médio';
-            } else if (!isNowPeriodDay) {
-                delete updatedLog.flowIntensity;
-            }
-
-            logsMap.set(dayStr, updatedLog);
-        });
-
-        // Convert map back to an array and filter out any logs that are now completely empty
-        return Array.from(logsMap.values()).filter(log =>
-            log.isPeriodDay ||
-            log.mood ||
-            (log.symptoms && log.symptoms.length > 0) ||
-            (log.sexoLibido && log.sexoLibido.length > 0) ||
-            (log.flowIntensity && log.flowIntensity !== 'nenhum')
-        );
-    });
-
-    // Part 2: Update the user's cycle start date and history if necessary
-    setUserProfile(prevProfile => {
-        if (!prevProfile) return null;
-
-        const newFirstDay = sortedNewDays.length > 0 ? sortedNewDays[0] : null;
-
-        // If all period days were cleared, we don't update the cycle start date.
-        if (!newFirstDay) {
-            return prevProfile;
+      newPeriodDayStrings.forEach((dayStr) => allDaysToProcess.add(dayStr));
+      dailyLogs.forEach((log) => {
+        if (log.isPeriodDay) {
+          allDaysToProcess.add(log.date);
         }
-        
-        const newLmpDate = startOfDay(newFirstDay);
-        const previousLmpDate = startOfDay(new Date(prevProfile.lastMenstruationDate + 'T00:00:00'));
+      });
 
-        // If the main cycle start date hasn't changed, no further action is needed for the profile.
-        if (isSameDay(newLmpDate, previousLmpDate)) {
-            return prevProfile;
+      allDaysToProcess.forEach((dayStr) => {
+        const isNowPeriodDay = newPeriodDayStrings.has(dayStr);
+        const currentLog = logsMap.get(dayStr) || { date: dayStr };
+        const updatedLog = { ...currentLog, isPeriodDay: isNowPeriodDay };
+
+        if (isNowPeriodDay && !updatedLog.flowIntensity) {
+          updatedLog.flowIntensity = 'médio';
+        } else if (!isNowPeriodDay) {
+          delete updatedLog.flowIntensity;
         }
+        logsMap.set(dayStr, updatedLog);
+      });
 
-        // The cycle start date has changed. Archive the old cycle if it was a valid length.
-        const lastCycleLength = differenceInDays(newLmpDate, previousLmpDate);
-        if (lastCycleLength > 15 && lastCycleLength < 90) { // Wider, more reasonable range
-            const newCycleLog: CycleLog = {
-                startDate: format(previousLmpDate, 'yyyy-MM-dd'),
-                cycleLength: lastCycleLength,
-            };
-            
-            setCycleHistory(prevHistory => {
-                // Prevent adding a duplicate of the same completed cycle
-                const alreadyExists = prevHistory.some(c => c.startDate === newCycleLog.startDate);
-                if (!alreadyExists) {
-                    return [...prevHistory, newCycleLog];
-                }
-                return prevHistory;
-            });
+      const newDailyLogs = Array.from(logsMap.values()).filter(
+        (log) =>
+          log.isPeriodDay ||
+          log.mood ||
+          (log.symptoms && log.symptoms.length > 0) ||
+          (log.sexoLibido && log.sexoLibido.length > 0) ||
+          (log.flowIntensity && log.flowIntensity !== 'nenhum')
+      );
+      setDailyLogs(newDailyLogs);
+
+      // Part 2: Calculate new state for userProfile and cycleHistory
+      if (!userProfile) return;
+
+      const newFirstDay = sortedNewDays.length > 0 ? sortedNewDays[0] : null;
+      if (!newFirstDay) return;
+
+      const newLmpDate = startOfDay(newFirstDay);
+      const previousLmpDate = startOfDay(
+        new Date(userProfile.lastMenstruationDate + 'T00:00:00')
+      );
+
+      if (isSameDay(newLmpDate, previousLmpDate)) return;
+
+      const lastCycleLength = differenceInDays(newLmpDate, previousLmpDate);
+      if (lastCycleLength > 15 && lastCycleLength < 90) {
+        const newCycleLog: CycleLog = {
+          startDate: format(previousLmpDate, 'yyyy-MM-dd'),
+          cycleLength: lastCycleLength,
+        };
+
+        if (!cycleHistory.some((c) => c.startDate === newCycleLog.startDate)) {
+          setCycleHistory([...cycleHistory, newCycleLog]);
         }
-        
-        // Finally, update the profile with the new cycle start date.
-        return { ...prevProfile, lastMenstruationDate: format(newLmpDate, 'yyyy-MM-dd') };
-    });
-}, []);
+      }
 
+      setUserProfile({
+        ...userProfile,
+        lastMenstruationDate: format(newLmpDate, 'yyyy-MM-dd'),
+      });
+    },
+    [userProfile, dailyLogs, cycleHistory]
+  );
 
   const updatePregnancyLmpDate = (date: string | null) => {
     setPregnancyLmpDate(date);
@@ -435,24 +423,35 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     },
     [dailyLogs]
   );
-  
-  const enableLock = useCallback((pin: string) => {
-      updateUserProfile({ isLockEnabled: true, lockPin: pin });
-      setIsLocked(true); // Lock immediately after setting
-  }, [updateUserProfile]);
-  
-  const disableLock = useCallback(() => {
-      updateUserProfile({ isLockEnabled: false, lockPin: undefined });
-      setIsLocked(false);
-  }, [updateUserProfile]);
 
-  const unlockApp = useCallback((pin: string): boolean => {
+  const enableLock = useCallback(
+    (pin: string) => {
+      if (userProfile) {
+        setUserProfile({ ...userProfile, isLockEnabled: true, lockPin: pin });
+        setIsLocked(true);
+      }
+    },
+    [userProfile]
+  );
+
+  const disableLock = useCallback(() => {
+    if (userProfile) {
+      const { lockPin, ...rest } = userProfile;
+      setUserProfile({ ...rest, isLockEnabled: false, lockPin: undefined });
+      setIsLocked(false);
+    }
+  }, [userProfile]);
+
+  const unlockApp = useCallback(
+    (pin: string): boolean => {
       if (userProfile?.isLockEnabled && userProfile.lockPin === pin) {
-          setIsLocked(false);
-          return true;
+        setIsLocked(false);
+        return true;
       }
       return false;
-  }, [userProfile]);
+    },
+    [userProfile]
+  );
 
   const value = {
     userProfile,
