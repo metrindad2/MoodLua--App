@@ -35,7 +35,9 @@ function CycleSummary() {
   const cycleInfo = calculateCycleInfo(userProfile);
   if (!cycleInfo) return null;
 
-  const phase = cycleInfo.isMenstruating
+  const phase = cycleInfo.isDelayed
+    ? 'Atrasada'
+    : cycleInfo.isMenstruating
     ? 'Menstruação'
     : cycleInfo.isFertile
     ? 'Fase Fértil'
@@ -102,7 +104,9 @@ export default function Dashboard() {
   const cycleInfo = calculateCycleInfo(userProfile);
   if (!cycleInfo) return null;
 
-  const phase = cycleInfo.isMenstruating
+  const phase = cycleInfo.isDelayed
+    ? 'Menstruação Atrasada'
+    : cycleInfo.isMenstruating
     ? 'Menstruação'
     : cycleInfo.isFertile
     ? 'Fase Fértil'

@@ -28,6 +28,7 @@ export interface CycleInfo {
   menstruationStartDate: Date;
   menstruationEndDate: Date;
   isMenstruating: boolean;
+  isDelayed: boolean;
 }
 
 /**
@@ -54,18 +55,21 @@ export function calculateCycleInfo(userProfile: UserProfile): CycleInfo | null {
   const menstruationEndDate = addDays(lastPeriod, userProfile.flowDurationDays);
   const isMenstruating = today >= lastPeriod && today < menstruationEndDate;
 
+  // Se o ciclo estiver muito longo, consideramos como "atrasado" em vez de continuar as fases normais.
+  const isDelayed = daysUntilNextPeriod < 0;
+
   // Previsão da TPM (geralmente 7-10 dias antes da menstruação)
   const pmsStartDate = subDays(nextPeriodStartDate, 7);
   const pmsEndDate = subDays(nextPeriodStartDate, 1);
-  const isPms = today >= pmsStartDate && today <= pmsEndDate;
+  const isPms = !isDelayed && today >= pmsStartDate && today <= pmsEndDate;
 
   // Previsão da Janela Fértil e Ovulação (baseado em um ciclo padrão)
   // Ovulação geralmente ocorre ~14 dias ANTES da próxima menstruação.
   const ovulationDate = subDays(nextPeriodStartDate, 14);
   const fertileWindowStartDate = subDays(ovulationDate, 5);
   const fertileWindowEndDate = addDays(ovulationDate, 1);
-  const isFertile = today >= fertileWindowStartDate && today <= fertileWindowEndDate;
-  const isOvulating = isSameDay(today, ovulationDate);
+  const isFertile = !isDelayed && today >= fertileWindowStartDate && today <= fertileWindowEndDate;
+  const isOvulating = !isDelayed && isSameDay(today, ovulationDate);
 
   return {
     currentCycleDay,
@@ -82,5 +86,6 @@ export function calculateCycleInfo(userProfile: UserProfile): CycleInfo | null {
     menstruationStartDate: lastPeriod,
     menstruationEndDate,
     isMenstruating,
+    isDelayed,
   };
 }
