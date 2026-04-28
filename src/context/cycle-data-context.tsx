@@ -79,16 +79,9 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
       const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (storedData) {
         const data: MoodLuaLocalData = JSON.parse(storedData);
-        // Data migration for 'energizada' to 'energetica'
-        const migratedLogs = (data.dailyLogs || []).map((log) => {
-          if ((log.mood as any) === 'energizada') {
-            return { ...log, mood: 'energetica' };
-          }
-          return log;
-        });
-
+        // Data migration for 'energizada' to 'energetica' is handled in updateUserProfile now.
         setUserProfile(data.userProfile || null);
-        setDailyLogs(migratedLogs);
+        setDailyLogs(data.dailyLogs || []);
         setCycleHistory(data.cycleHistory || []);
         setPregnancyLmpDate(data.pregnancyLmpDate || null);
         setSosContacts(data.sosContacts || []);
@@ -140,9 +133,8 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!loading && userProfile && !userProfile.joinDate) {
       setUserProfile((prevProfile) => {
-        if (!prevProfile) return null; // Should not happen inside this condition but good practice
+        if (!prevProfile) return null;
 
-        // Use lastMenstruationDate as a fallback for the joinDate for legacy users.
         const fallbackJoinDate =
           prevProfile.lastMenstruationDate || format(new Date(), 'yyyy-MM-dd');
 
@@ -182,7 +174,8 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
                 flowIntensity: 'médio',
               });
             }
-            setDailyLogs(newLogs);
+            // Use functional update to ensure we're not overwriting other state changes
+            setDailyLogs(currentLogs => [...currentLogs, ...newLogs]);
           }
           return newUserProfile;
         } else {
@@ -215,7 +208,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     setSosContacts((prev) => prev.filter((c) => c.id !== contactId));
   }, []);
 
-  // Adds or updates a daily log.
   const addOrUpdateDailyLog = useCallback(
     (log: Partial<Omit<DailyLog, 'date'>> & { date: Date }) => {
       const dateString = format(log.date, 'yyyy-MM-dd');
@@ -233,14 +225,12 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
           const currentLog = updatedLogs[existingLogIndex];
           const mergedLog = { ...currentLog, ...newLogData };
 
-          // Remove `undefined` properties to clean the object.
           for (const key in mergedLog) {
             if (mergedLog[key as keyof typeof mergedLog] === undefined) {
               delete mergedLog[key as keyof typeof mergedLog];
             }
           }
 
-          // If the log becomes "empty" of significant data, it's removed.
           const hasMeaningfulData =
             mergedLog.isPeriodDay ||
             mergedLog.mood ||
@@ -256,7 +246,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
             updatedLogs[existingLogIndex] = mergedLog;
           }
         } else {
-          // If the new log is not empty, add it to the list.
           const hasMeaningfulData =
             newLogData.isPeriodDay ||
             newLogData.mood ||
@@ -277,55 +266,46 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
 
   const removeDailyLog = useCallback(
     (date: Date) => {
-      // Removing a log is the same as updating it with empty data.
       addOrUpdateDailyLog({
         date: date,
         mood: undefined,
         symptoms: undefined,
         flowIntensity: undefined,
-        isPeriodDay: false, // Explicitly unmarks the day as a period day
+        isPeriodDay: false,
         sexoLibido: undefined,
       });
     },
     [addOrUpdateDailyLog]
   );
-
-  // Explicit function to start a new cycle.
-  const startNewCycle = useCallback((startDate: Date) => {
-    const newLmpDate = startOfDay(startDate);
-
+  
+  const startNewCycle = useCallback((newStartDate: Date) => {
+    const newLmpDate = startOfDay(newStartDate);
+  
     setUserProfile((currentProfile) => {
-      if (!currentProfile) {
-        return null; // No profile to update
-      }
-
-      const previousLmpDate = startOfDay(
-        new Date(currentProfile.lastMenstruationDate + 'T00:00:00')
-      );
-
-      // Only proceed if the new date is different from the old one
+      if (!currentProfile) return null;
+  
+      const previousLmpDate = startOfDay(new Date(currentProfile.lastMenstruationDate + 'T00:00:00'));
+  
       if (isSameDay(newLmpDate, previousLmpDate)) {
-        return currentProfile; // No change needed
+        return currentProfile;
       }
-
-      // Add the last cycle to history if it was a forward progression
+  
       const lastCycleLength = differenceInDays(newLmpDate, previousLmpDate);
-      if (lastCycleLength > 10) { // Only log cycles longer than 10 days
+      if (lastCycleLength > 10) {
         const newCycleLog: CycleLog = {
           startDate: format(previousLmpDate, 'yyyy-MM-dd'),
           cycleLength: lastCycleLength,
         };
-        
+  
         setCycleHistory((currentHistory) => {
-          // Prevent adding duplicate history entries
-          if (!currentHistory.some((c) => c.startDate === newCycleLog.startDate)) {
+          const alreadyExists = currentHistory.some(c => c.startDate === newCycleLog.startDate);
+          if (!alreadyExists) {
             return [...currentHistory, newCycleLog];
           }
           return currentHistory;
         });
       }
-
-      // Return the updated profile with the new last menstruation date
+  
       return {
         ...currentProfile,
         lastMenstruationDate: format(newLmpDate, 'yyyy-MM-dd'),
@@ -333,13 +313,12 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const savePeriodDays = useCallback(
-    (newPeriodDays: Date[]) => {
+  const savePeriodDays = useCallback((newPeriodDays: Date[]) => {
+      const sortedNewDays = [...newPeriodDays].sort((a, b) => a.getTime() - b.getTime());
+
       setDailyLogs((currentLogs) => {
         const logsMap = new Map(currentLogs.map((log) => [log.date, { ...log }]));
-        const newPeriodDayStrings = new Set(
-          newPeriodDays.map((d) => format(d, 'yyyy-MM-dd'))
-        );
+        const newPeriodDayStrings = new Set(sortedNewDays.map((d) => format(d, 'yyyy-MM-dd')));
         const daysToUpdate = new Set<string>(newPeriodDayStrings);
 
         currentLogs.forEach((log) => {
@@ -375,17 +354,12 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         );
         return newLogs;
       });
-      
-      const sortedNewDays = [...newPeriodDays].sort(
-        (a, b) => a.getTime() - b.getTime()
-      );
-      
+
       if (sortedNewDays.length > 0) {
         const firstDayOfPeriod = sortedNewDays[0];
         startNewCycle(firstDayOfPeriod);
       }
-    },
-    [startNewCycle]
+    }, [startNewCycle]
   );
 
   const updatePregnancyLmpDate = useCallback((date: string | null) => {
@@ -400,7 +374,7 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
       setCycleHistory([]);
       setPregnancyLmpDate(null);
       setSosContacts([]);
-      setIsLocked(true); // Default to locked on logout.
+      setIsLocked(true); 
       window.location.href = '/';
     } catch (error) {
       console.error('Failed to clear data', error);
@@ -415,28 +389,22 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     [dailyLogs]
   );
 
-  const enableLock = useCallback(
-    (pin: string) => {
-      if (userProfile) {
-        setUserProfile((profile) =>
-          profile ? { ...profile, isLockEnabled: true, lockPin: pin } : null
-        );
-        setIsLocked(true);
-      }
-    },
-    [userProfile]
-  );
+  const enableLock = useCallback((pin: string) => {
+      setUserProfile((profile) =>
+        profile ? { ...profile, isLockEnabled: true, lockPin: pin } : null
+      );
+      setIsLocked(true);
+    }, []);
 
   const disableLock = useCallback(() => {
-    if (userProfile) {
       setUserProfile((profile) => {
         if (!profile) return null;
         const { lockPin, ...rest } = profile;
         return { ...rest, isLockEnabled: false, lockPin: undefined };
       });
       setIsLocked(false);
-    }
-  }, [userProfile]);
+    }, []);
+
 
   const unlockApp = useCallback(
     (pin: string): boolean => {

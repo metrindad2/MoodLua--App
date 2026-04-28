@@ -111,14 +111,15 @@ export function SimpleCalendar({
 
           const numberClasses = cn(
             'flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium transition-colors',
-            isHighlighted &&
-              'bg-primary text-primary-foreground border-transparent ring-0',
-            isFertile && !isHighlighted && 'bg-fertile text-fertile-foreground',
-            isCurrentToday && !isHighlighted && 'ring-2 ring-primary',
-            isInPrevision &&
-              !isHighlighted &&
-              !isFertile &&
-              'bg-primary/10'
+            // Ordem de prioridade de estilos (mais específico primeiro)
+            isHighlighted
+              ? 'bg-primary text-primary-foreground' // Menstruação registrada
+              : isFertile
+              ? 'bg-fertile text-fertile-foreground' // Janela fértil
+              : isInPrevision
+              ? 'bg-primary/20' // Previsão de menstruação
+              : 'bg-transparent', // Dia normal
+            isCurrentToday && !isHighlighted && 'ring-2 ring-primary' // Anel para o dia de hoje
           );
 
           return (
@@ -129,10 +130,10 @@ export function SimpleCalendar({
             >
               <span className={numberClasses}>{format(date, 'd')}</span>
               <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1">
-                {isOvulation && !isHighlighted && (
+                {isOvulation && isFertile && !isHighlighted && (
                   <div className="h-1.5 w-1.5 rounded-full bg-fertile-foreground/80" />
                 )}
-                {dayHasLog && !isHighlighted && (
+                {dayHasLog && !isHighlighted && !isFertile && (
                   <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/70" />
                 )}
               </div>

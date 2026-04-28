@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { CycleProgress } from './cycle-progress';
+import { CalendarLegend } from './calendar-legend';
 
 function CycleSummary() {
   const { userProfile, dailyLogs } = useCycleData();
@@ -227,16 +228,16 @@ export default function Dashboard() {
               dailyLogs={dailyLogs}
             />
           </CardContent>
-          <div className="p-4 border-t space-y-3">
-             <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => setIsRegistrationOpen(true)}
-            >
-              Registrar / Editar Menstruação
-            </Button>
-          </div>
+          <CalendarLegend />
         </Card>
+
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => setIsRegistrationOpen(true)}
+        >
+          Registrar / Editar Menstruação
+        </Button>
 
         <DailyTracker />
 
