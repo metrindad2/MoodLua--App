@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -17,49 +17,43 @@ import {
   addMonths,
   isAfter,
   addDays,
-  differenceInDays,
   endOfMonth,
   startOfWeek,
   endOfWeek,
   format,
-  isSameMonth,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useCycleData } from '@/context/cycle-data-context';
-import { X, Save, Check } from 'lucide-react';
+import { X, Save } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { SimpleCalendar } from './simple-calendar';
+import { CalendarProps, calendarCompare } from './simple-calendar-logic';
 
 interface PeriodRegistrationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  previsionRange?: {
-    from: Date;
-    to: Date;
-  };
+  onSave: (days: Date[]) => void;
 }
 
 export function PeriodRegistrationModal({
   open,
   onOpenChange,
+  onSave,
 }: PeriodRegistrationModalProps) {
-  const { dailyLogs, savePeriodDays, userProfile } = useCycleData();
+  const { dailyLogs } = useCycleData();
   const { toast } = useToast();
 
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
-
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const monthRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Generate a list of months from 2026 for 200 years.
-  const monthsToDisplay = useMemo(() => {
-    const startDate = startOfMonth(new Date('2026-01-01T00:00:00'));
-    // A large number of months to feel "infinite"
-    return Array.from({ length: 200 * 12 }).map((_, i) => addMonths(startDate, i));
+  const monthsToDisplay = React.useMemo(() => {
+    const start = startOfMonth(subMonths(new Date(), 6));
+    return Array.from({ length: 18 }).map((_, i) => addMonths(start, i));
   }, []);
 
-  // Initialize selected days when modal opens.
   useEffect(() => {
     if (open) {
       const initialPeriodDays = dailyLogs
@@ -69,60 +63,80 @@ export function PeriodRegistrationModal({
     }
   }, [open, dailyLogs]);
 
-  // Scroll to January 2026 effect.
   useEffect(() => {
     if (open) {
-      const targetMonthKey = '2026-01'; // Directly set the key for Jan 2026
+      const targetMonthKey = format(new Date(), 'yyyy-MM');
       const targetElement = monthRefs.current.get(targetMonthKey);
-      
       setTimeout(() => {
         if (targetElement && scrollContainerRef.current) {
           const viewport = scrollContainerRef.current.querySelector(
             '[data-radix-scroll-area-viewport]'
-            );
+          );
           if (viewport) {
-            // Scroll to the top of the target element.
-            viewport.scrollTop = targetElement.offsetTop;
+            viewport.scrollTop =
+              targetElement.offsetTop - viewport.clientHeight / 2;
           }
         }
-      }, 150); // A short delay ensures elements are rendered.
+      }, 150);
     }
   }, [open]);
 
   const handleDayClick = useCallback((day: Date) => {
     const dayStart = startOfDay(day);
-    const flowDuration = userProfile?.flowDurationDays ?? 5;
-
     setSelectedDays((currentSelection) => {
       const isAlreadySelected = currentSelection.some((d) =>
         isSameDay(d, dayStart)
       );
-
-      // Smart start: If no days are selected, create a new block suggestion.
-      if (currentSelection.length === 0) {
-        const newBlock = Array.from({ length: flowDuration }, (_, i) => addDays(dayStart, i))
-          .filter(d => !isAfter(d, new Date()));
-        return newBlock;
-      }
-
-      // Manual toggle: If a selection exists, just add or remove the clicked day.
       if (isAlreadySelected) {
         return currentSelection.filter((d) => !isSameDay(d, dayStart));
       } else {
-        return [...currentSelection, dayStart].sort((a, b) => a.getTime() - b.getTime());
+        return [...currentSelection, dayStart].sort(
+          (a, b) => a.getTime() - b.getTime()
+        );
       }
     });
-  }, [userProfile]);
-
+  }, []);
 
   const handleSave = () => {
-    savePeriodDays(selectedDays);
+    onSave(selectedDays);
     toast({
       title: 'Registros salvos!',
       description: 'Seu ciclo menstrual foi atualizado.',
     });
     onOpenChange(false);
   };
+
+  const MemoizedCalendar = React.memo(
+    ({ month }: { month: Date }) => {
+      const monthKey = format(month, 'yyyy-MM');
+      return (
+        <div
+          key={monthKey}
+          ref={(el) => {
+            if (el) monthRefs.current.set(monthKey, el);
+            else monthRefs.current.delete(monthKey);
+          }}
+        >
+          <RegistrationCalendar
+            initialDate={month}
+            selectedDates={selectedDays}
+            onDateClick={handleDayClick}
+          />
+        </div>
+      );
+    },
+    (prevProps, nextProps) => {
+      const month = prevProps.month;
+      const prevInMonth = selectedDays.filter((d) =>
+        isSameDay(d, month)
+      );
+      const nextInMonth = selectedDays.filter((d) =>
+        isSameDay(d, nextProps.month)
+      );
+      return prevInMonth.length === nextInMonth.length;
+    }
+  );
+  MemoizedCalendar.displayName = 'MemoizedCalendar';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -144,24 +158,9 @@ export function PeriodRegistrationModal({
         <ScrollArea ref={scrollContainerRef} className="flex-1">
           <div className="p-4">
             <div className="space-y-6">
-              {monthsToDisplay.map((month) => {
-                const monthKey = month.toISOString().slice(0, 7);
-                return (
-                  <div
-                    key={monthKey}
-                    ref={(el) => {
-                      if (el) monthRefs.current.set(monthKey, el);
-                      else monthRefs.current.delete(monthKey);
-                    }}
-                  >
-                    <SimpleCalendar
-                      initialDate={month}
-                      selectedDates={selectedDays}
-                      onDateClick={handleDayClick}
-                    />
-                  </div>
-                );
-              })}
+              {monthsToDisplay.map((month) => (
+                <MemoizedCalendar key={format(month, 'yyyy-MM')} month={month} />
+              ))}
             </div>
           </div>
         </ScrollArea>
@@ -180,51 +179,12 @@ export function PeriodRegistrationModal({
   );
 }
 
-// Define the props type for clarity
-type CalendarProps = {
-  initialDate: Date;
-  selectedDates?: Date[];
-  onDateClick?: (date: Date) => void;
-};
-
-// Custom comparison function for React.memo to prevent unnecessary re-renders
-const calendarCompare = (
-  prevProps: CalendarProps,
-  nextProps: CalendarProps
-) => {
-  // Props that should trigger a re-render if they change
-  if (prevProps.onDateClick !== nextProps.onDateClick) return false;
-  if (!isSameDay(prevProps.initialDate, nextProps.initialDate)) return false;
-
-  const month = prevProps.initialDate;
-
-  // Check if the selection within this specific month has changed
-  const prevInMonth = prevProps.selectedDates?.filter(d => isSameMonth(d, month)) || [];
-  const nextInMonth = nextProps.selectedDates?.filter(d => isSameMonth(d, month)) || [];
-
-  // If there were no selected dates in this month, and there are still none, no need to re-render.
-  if (prevInMonth.length === 0 && nextInMonth.length === 0) {
-    return true;
-  }
-
-  if (prevInMonth.length !== nextInMonth.length) return false;
-
-  // Deep compare the arrays for the specific month
-  const prevTimes = new Set(prevInMonth.map(d => d.getTime()));
-  for (const date of nextInMonth) {
-    if (!prevTimes.has(date.getTime())) return false;
-  }
-
-  return true; // props are equal, prevent re-render
-};
-
-
-// Overwrite the original SimpleCalendar to use the new design for this modal only
-const SimpleCalendar = React.memo(({
-  initialDate = new Date(),
-  selectedDates,
-  onDateClick,
-}: CalendarProps) => {
+const RegistrationCalendar = React.memo((props: CalendarProps) => {
+  const {
+    initialDate = new Date(),
+    selectedDates,
+    onDateClick,
+  } = props;
   const monthStart = startOfMonth(initialDate);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart, { locale: ptBR, weekStartsOn: 0 });
@@ -263,23 +223,24 @@ const SimpleCalendar = React.memo(({
           const isSelected = selectedDates?.some((d) => isSameDay(d, date));
 
           return (
-            <div key={i} className="flex flex-col items-center justify-start h-12 pt-1">
+            <div
+              key={i}
+              className="flex flex-col items-center justify-start h-12 pt-1"
+            >
               <button
                 onClick={() => onDateClick && onDateClick(date)}
                 disabled={isFuture}
                 className={cn(
                   'relative flex h-9 w-9 items-center justify-center rounded-full transition-colors text-sm font-medium disabled:cursor-not-allowed disabled:opacity-30',
-                  isSelected
-                    ? 'bg-primary text-primary-foreground'
-                    : 'border border-border hover:bg-accent'
+                   isSelected
+                      ? 'border border-dashed border-primary/80'
+                      : 'border border-border hover:bg-accent'
                 )}
                 aria-label={format(date, 'PPP', { locale: ptBR })}
               >
-                {isSelected ? (
-                  <Check className="h-5 w-5 text-primary-foreground" />
-                ) : (
-                  format(date, 'd')
-                )}
+                <span className={cn(isSelected && 'font-bold text-primary')}>
+                  {format(date, 'd')}
+                </span>
               </button>
             </div>
           );
@@ -288,4 +249,4 @@ const SimpleCalendar = React.memo(({
     </div>
   );
 }, calendarCompare);
-SimpleCalendar.displayName = 'SimpleCalendar';
+RegistrationCalendar.displayName = 'RegistrationCalendar';

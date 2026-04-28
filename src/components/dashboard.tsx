@@ -95,7 +95,7 @@ function CycleSummary() {
 }
 
 export default function Dashboard() {
-  const { userProfile, dailyLogs, cycleHistory } = useCycleData();
+  const { userProfile, dailyLogs, cycleHistory, savePeriodDays } = useCycleData();
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
   // State to manage the currently displayed month
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
@@ -231,11 +231,11 @@ export default function Dashboard() {
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
               <div className="flex items-center gap-1.5">
                 <div className="w-2.5 h-2.5 rounded-full bg-primary"></div>
-                <span>Menstruação</span>
+                <span>Previsão</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="w-2.5 h-2.5 rounded-full border border-dashed border-primary/80"></div>
-                <span>Previsão</span>
+                <span>Menstruação</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="w-2.5 h-2.5 rounded-full bg-fertile"></div>
@@ -307,11 +307,7 @@ export default function Dashboard() {
         <PeriodRegistrationModal
           open={isRegistrationOpen}
           onOpenChange={setIsRegistrationOpen}
-          previsionRange={
-            predictions.previsionRanges.length > 0
-              ? predictions.previsionRanges[0]
-              : undefined
-          }
+          onSave={savePeriodDays}
         />
       </div>
     </>

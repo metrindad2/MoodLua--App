@@ -17,17 +17,7 @@ import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import type { DailyLog } from '@/lib/types';
 import { Check } from 'lucide-react';
-
-interface SimpleCalendarProps {
-  initialDate?: Date;
-  selectedDates?: Date[];
-  onDateClick?: (date: Date) => void;
-  highlightedDates?: Date[];
-  previsionRanges?: { from: Date; to: Date }[];
-  fertileWindows?: { from: Date; to: Date }[];
-  ovulationDates?: Date[];
-  dailyLogs?: DailyLog[];
-}
+import { CalendarProps } from './simple-calendar-logic';
 
 export function SimpleCalendar({
   initialDate = new Date(),
@@ -38,7 +28,7 @@ export function SimpleCalendar({
   fertileWindows,
   ovulationDates,
   dailyLogs,
-}: SimpleCalendarProps) {
+}: CalendarProps) {
   const monthStart = startOfMonth(initialDate);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart, { locale: ptBR, weekStartsOn: 0 });
@@ -53,13 +43,13 @@ export function SimpleCalendar({
   }
 
   const weekdays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
-  const isRegistrationMode = !!onDateClick;
 
   const isDayInPrevisionRange = (day: Date) => {
     if (!previsionRanges) return false;
     const current = startOfDay(day);
     return previsionRanges.some(
-      (range) => current >= startOfDay(range.from) && current <= startOfDay(range.to)
+      (range) =>
+        current >= startOfDay(range.from) && current <= startOfDay(range.to)
     );
   };
 
@@ -67,7 +57,8 @@ export function SimpleCalendar({
     if (!fertileWindows) return false;
     const current = startOfDay(day);
     return fertileWindows.some(
-      (window) => current >= startOfDay(window.from) && current <= startOfDay(window.to)
+      (window) =>
+        current >= startOfDay(window.from) && current <= startOfDay(window.to)
     );
   };
 
@@ -78,12 +69,6 @@ export function SimpleCalendar({
 
   return (
     <div className="text-card-foreground">
-      {isRegistrationMode && (
-        <h2 className="font-semibold capitalize text-center mb-4 text-xl">
-          {format(monthStart, 'MMMM yyyy', { locale: ptBR })}
-        </h2>
-      )}
-
       <div className="grid grid-cols-7 text-center text-xs text-muted-foreground">
         {weekdays.map((weekday, index) => (
           <div key={index} className="py-2 font-medium">
@@ -95,58 +80,11 @@ export function SimpleCalendar({
       <div className="grid grid-cols-7 text-center text-sm">
         {days.map((date, i) => {
           const isDayInCurrentMonth = isSameMonth(date, monthStart);
-          const isCurrentToday = isToday(date);
-
-          // Modo de Registro: Lógica para seleção de dias.
-          if (isRegistrationMode && onDateClick) {
-            if (!isDayInCurrentMonth) {
-              return <div key={i} className="h-12" />;
-            }
-            const isFuture = isAfter(startOfDay(date), startOfDay(new Date()));
-            const isSelected = selectedDates?.some((d) => isSameDay(d, date));
-
-            return (
-              <div
-                key={i}
-                className="flex flex-col items-center justify-start h-12 pt-1"
-              >
-                <button
-                  onClick={() => onDateClick(date)}
-                  disabled={isFuture}
-                  className={cn(
-                    'relative flex h-9 w-9 items-center justify-center rounded-full transition-colors text-sm disabled:cursor-not-allowed disabled:opacity-50',
-                    isSelected
-                      ? 'bg-primary text-primary-foreground'
-                      : 'border border-muted-foreground/30 hover:bg-accent'
-                  )}
-                  aria-label={format(date, 'PPP', { locale: ptBR })}
-                >
-                  {isSelected ? (
-                    <Check className="h-5 w-5 text-primary-foreground" />
-                  ) : (
-                    <span
-                      className={cn(
-                        'text-foreground',
-                        isCurrentToday && 'font-bold'
-                      )}
-                    >
-                      {format(date, 'd')}
-                    </span>
-                  )}
-                </button>
-                 {isCurrentToday && (
-                  <span className="text-[9px] font-bold text-primary mt-1 select-none">
-                    HOJE
-                  </span>
-                )}
-              </div>
-            );
-          }
-
-          // Modo de Dashboard: Lógica para exibir informações.
           if (!isDayInCurrentMonth) {
             return <div key={i} className="h-12"></div>;
           }
+
+          const isCurrentToday = isToday(date);
           const isHighlighted = isDayHighlighted(date);
           const isInPrevision = isDayInPrevisionRange(date);
           const isFertile = isDayInFertileWindow(date);
@@ -166,10 +104,11 @@ export function SimpleCalendar({
 
           const numberClasses = cn(
             'flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium transition-colors',
-            isInPrevision && !isHighlighted && 'border border-dashed border-primary/80',
+            isHighlighted && 'border border-dashed border-primary/80',
             isFertile && !isHighlighted && 'bg-fertile text-fertile-foreground',
             isCurrentToday && !isHighlighted && 'ring-2 ring-primary',
-            isHighlighted &&
+            isInPrevision &&
+              !isHighlighted &&
               'bg-primary text-primary-foreground border-transparent ring-0'
           );
 
