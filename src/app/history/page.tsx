@@ -207,9 +207,7 @@ export default function HistoryPage() {
           <div className="space-y-3">
             {sortedLogs.map((log) => {
               const logDate = startOfDay(new Date(log.date + 'T00:00:00'));
-              // Handle legacy mood 'energizada'
-              const moodValue = (log.mood as any) === 'energizada' ? 'energetica' : log.mood;
-              const mood = MOOD_OPTIONS.find((m) => m.value === moodValue);
+              const mood = MOOD_OPTIONS.find((m) => m.value === log.mood);
 
               const symptoms = log.symptoms
                 ?.map((sId) => SYMPTOM_OPTIONS.find((s) => s.id === sId))

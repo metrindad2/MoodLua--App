@@ -10,6 +10,7 @@ import { addDays, differenceInDays, format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Baby, HeartPulse, Stethoscope, Carrot, PartyPopper } from 'lucide-react';
 import { useCycleData } from '@/context/cycle-data-context';
+import { BabySizeCard } from '@/components/baby-size-card';
 
 // --- LÓGICA DE DADOS (Equivalente ao "script.js" em parte) ---
 
@@ -167,7 +168,7 @@ export default function PregnancyPage() {
             </CardContent>
           </Card>
           
-          {/* --- CARD: Tamanho do Bebê (removido) --- */}
+          {!pregnancyInfo.isComplete && <BabySizeCard week={pregnancyInfo.weeks} />}
           
           {/* Card 3: Desenvolvimento do Bebê ou Parabéns */}
           {pregnancyInfo.isComplete ? (

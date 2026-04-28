@@ -180,8 +180,7 @@ export function DailyTracker() {
           <h3 className="text-base font-semibold mb-3 text-foreground">Humor</h3>
           <div className="flex flex-wrap gap-2">
             {MOOD_OPTIONS.map((option) => {
-              // Legacy support for 'energizada'
-              const isSelected = selectedMood === option.value || (option.value === 'energetica' && selectedMood === ('energizada' as any));
+              const isSelected = selectedMood === option.value;
               return (
                 <button
                   key={option.value}
