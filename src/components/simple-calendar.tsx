@@ -11,12 +11,10 @@ import {
   isSameDay,
   isToday,
   startOfDay,
-  isAfter,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import type { DailyLog } from '@/lib/types';
-import { Check } from 'lucide-react';
 import { CalendarProps } from './simple-calendar-logic';
 
 export function SimpleCalendar({
@@ -67,6 +65,22 @@ export function SimpleCalendar({
     return highlightedDates.some((d) => isSameDay(d, day));
   };
 
+  const hasLog = (day: Date): boolean => {
+    if (!dailyLogs) return false;
+    const log = dailyLogs.find((log) =>
+      isSameDay(startOfDay(new Date(log.date + 'T00:00:00')), day)
+    );
+    if (!log) return false;
+
+    // A log is considered meaningful if it has specific data.
+    return !!(
+      log.mood ||
+      (log.symptoms && log.symptoms.length > 0) ||
+      (log.sexoLibido && log.sexoLibido.length > 0) ||
+      (log.flowIntensity && log.flowIntensity !== 'nenhum')
+    );
+  };
+
   return (
     <div className="text-card-foreground">
       <div className="grid grid-cols-7 text-center text-xs text-muted-foreground">
@@ -89,6 +103,7 @@ export function SimpleCalendar({
           const isInPrevision = isDayInPrevisionRange(date);
           const isFertile = isDayInFertileWindow(date);
           const isOvulation = ovulationDates?.some((d) => isSameDay(date, d));
+          const dayHasLog = hasLog(date);
 
           const dayClasses = cn(
             'relative flex h-12 w-full items-center justify-center transition-colors'
@@ -102,7 +117,8 @@ export function SimpleCalendar({
             isCurrentToday && !isHighlighted && 'ring-2 ring-primary',
             isInPrevision &&
               !isHighlighted &&
-              'border border-dashed border-primary/80'
+              !isFertile &&
+              'bg-primary/10'
           );
 
           return (
@@ -115,6 +131,9 @@ export function SimpleCalendar({
               <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1">
                 {isOvulation && !isHighlighted && (
                   <div className="h-1.5 w-1.5 rounded-full bg-fertile-foreground/80" />
+                )}
+                {dayHasLog && !isHighlighted && (
+                  <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/70" />
                 )}
               </div>
             </div>
