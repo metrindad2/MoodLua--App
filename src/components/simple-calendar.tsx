@@ -90,14 +90,6 @@ export function SimpleCalendar({
           const isFertile = isDayInFertileWindow(date);
           const isOvulation = ovulationDates?.some((d) => isSameDay(date, d));
 
-          const logForDay = dailyLogs?.find((log) =>
-            isSameDay(startOfDay(new Date(log.date + 'T00:00:00')), date)
-          );
-          const hasLogData =
-            logForDay &&
-            (logForDay.mood ||
-              (logForDay.symptoms && logForDay.symptoms.length > 0));
-
           const dayClasses = cn(
             'relative flex h-12 w-full items-center justify-center transition-colors'
           );
@@ -123,9 +115,6 @@ export function SimpleCalendar({
               <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1">
                 {isOvulation && !isHighlighted && (
                   <div className="h-1.5 w-1.5 rounded-full bg-fertile-foreground/80" />
-                )}
-                {hasLogData && !isHighlighted && (
-                  <div className="h-1 w-1 rounded-full bg-secondary" />
                 )}
               </div>
             </div>
