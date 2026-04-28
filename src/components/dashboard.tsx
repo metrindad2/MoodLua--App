@@ -11,10 +11,11 @@ import {
   format,
   startOfDay,
   addMonths,
+  subDays,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from './ui/button';
 import { PeriodRegistrationModal } from './period-registration-modal';
 import {
@@ -114,22 +115,54 @@ export default function Dashboard() {
     ? 'Fase Lútea (TPM)'
     : 'Fase Folicular';
 
-  const previsionRange = {
-    from: cycleInfo.nextPeriodStartDate,
-    to: addDays(
-      cycleInfo.nextPeriodStartDate,
-      userProfile.flowDurationDays - 1
-    ),
-  };
+  // Calculate predictions dynamically for the calendar based on the current month
+  const predictions = useMemo(() => {
+    if (!userProfile)
+      return { previsionRanges: [], fertileWindows: [], ovulationDates: [] };
+
+    const {
+      lastMenstruationDate: lmpString,
+      cycleLengthDays,
+      flowDurationDays,
+    } = userProfile;
+    const lastPeriodDate = startOfDay(new Date(lmpString + 'T00:00:00'));
+
+    const previsionRanges: { from: Date; to: Date }[] = [];
+    const fertileWindows: { from: Date; to: Date }[] = [];
+    const ovulationDates: Date[] = [];
+
+    // Start projecting from a point before the displayed month to catch overlaps
+    let periodStart = lastPeriodDate;
+    while (
+      addDays(periodStart, cycleLengthDays) <
+      startOfMonth(subMonths(currentMonth, 1))
+    ) {
+      periodStart = addDays(periodStart, cycleLengthDays);
+    }
+
+    // Generate predictions for a few cycles to cover the screen
+    for (let i = 0; i < 4; i++) {
+      const nextPeriod = addDays(periodStart, cycleLengthDays * i);
+
+      previsionRanges.push({
+        from: nextPeriod,
+        to: addDays(nextPeriod, flowDurationDays - 1),
+      });
+
+      const ovulationDate = subDays(nextPeriod, 14);
+      ovulationDates.push(ovulationDate);
+      fertileWindows.push({
+        from: subDays(ovulationDate, 5),
+        to: addDays(ovulationDate, 1),
+      });
+    }
+
+    return { previsionRanges, fertileWindows, ovulationDates };
+  }, [currentMonth, userProfile]);
 
   const highlightedDays = dailyLogs
     .filter((log) => log.isPeriodDay) // Alterado para usar a nova flag
     .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
-
-  const fertileWindow = {
-    from: cycleInfo.fertileWindowStartDate,
-    to: cycleInfo.fertileWindowEndDate,
-  };
 
   const sortedHistory = [...cycleHistory]
     .sort(
@@ -188,9 +221,9 @@ export default function Dashboard() {
             <SimpleCalendar
               initialDate={currentMonth}
               highlightedDates={highlightedDays}
-              previsionRange={previsionRange}
-              fertileWindow={fertileWindow}
-              ovulationDate={cycleInfo.ovulationDate}
+              previsionRanges={predictions.previsionRanges}
+              fertileWindows={predictions.fertileWindows}
+              ovulationDates={predictions.ovulationDates}
               dailyLogs={dailyLogs}
             />
           </CardContent>
@@ -274,7 +307,11 @@ export default function Dashboard() {
         <PeriodRegistrationModal
           open={isRegistrationOpen}
           onOpenChange={setIsRegistrationOpen}
-          previsionRange={previsionRange}
+          previsionRange={
+            predictions.previsionRanges.length > 0
+              ? predictions.previsionRanges[0]
+              : undefined
+          }
         />
       </div>
     </>

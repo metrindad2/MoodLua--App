@@ -23,9 +23,9 @@ interface SimpleCalendarProps {
   selectedDates?: Date[];
   onDateClick?: (date: Date) => void;
   highlightedDates?: Date[];
-  previsionRange?: { from: Date; to: Date };
-  fertileWindow?: { from: Date; to: Date };
-  ovulationDate?: Date;
+  previsionRanges?: { from: Date; to: Date }[];
+  fertileWindows?: { from: Date; to: Date }[];
+  ovulationDates?: Date[];
   dailyLogs?: DailyLog[];
 }
 
@@ -34,9 +34,9 @@ export function SimpleCalendar({
   selectedDates,
   onDateClick,
   highlightedDates,
-  previsionRange,
-  fertileWindow,
-  ovulationDate,
+  previsionRanges,
+  fertileWindows,
+  ovulationDates,
   dailyLogs,
 }: SimpleCalendarProps) {
   const monthStart = startOfMonth(initialDate);
@@ -56,19 +56,19 @@ export function SimpleCalendar({
   const isRegistrationMode = !!onDateClick;
 
   const isDayInPrevisionRange = (day: Date) => {
-    if (!previsionRange) return false;
-    const from = startOfDay(previsionRange.from);
-    const to = startOfDay(previsionRange.to);
+    if (!previsionRanges) return false;
     const current = startOfDay(day);
-    return current >= from && current <= to;
+    return previsionRanges.some(
+      (range) => current >= startOfDay(range.from) && current <= startOfDay(range.to)
+    );
   };
 
   const isDayInFertileWindow = (day: Date) => {
-    if (!fertileWindow) return false;
-    const from = startOfDay(fertileWindow.from);
-    const to = startOfDay(fertileWindow.to);
+    if (!fertileWindows) return false;
     const current = startOfDay(day);
-    return current >= from && current <= to;
+    return fertileWindows.some(
+      (window) => current >= startOfDay(window.from) && current <= startOfDay(window.to)
+    );
   };
 
   const isDayHighlighted = (day: Date) => {
@@ -150,7 +150,7 @@ export function SimpleCalendar({
           const isHighlighted = isDayHighlighted(date);
           const isInPrevision = isDayInPrevisionRange(date);
           const isFertile = isDayInFertileWindow(date);
-          const isOvulation = ovulationDate && isSameDay(date, ovulationDate);
+          const isOvulation = ovulationDates?.some((d) => isSameDay(date, d));
 
           const logForDay = dailyLogs?.find((log) =>
             isSameDay(startOfDay(new Date(log.date + 'T00:00:00')), date)
