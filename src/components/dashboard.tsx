@@ -230,11 +230,11 @@ export default function Dashboard() {
           <div className="p-4 border-t space-y-3">
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
               <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-primary"></div>
+                <div className="w-2.5 h-2.5 rounded-full border border-dashed border-primary/80"></div>
                 <span>Previsão</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full border border-dashed border-primary/80"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-primary"></div>
                 <span>Menstruação</span>
               </div>
               <div className="flex items-center gap-1.5">

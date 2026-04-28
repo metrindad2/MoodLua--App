@@ -235,12 +235,12 @@ const RegistrationCalendar = React.memo((props: CalendarProps) => {
                 className={cn(
                   'relative flex h-9 w-9 items-center justify-center rounded-full transition-colors text-sm font-medium disabled:cursor-not-allowed disabled:opacity-30',
                    isSelected
-                      ? 'border border-dashed border-primary/80'
+                      ? 'bg-primary text-primary-foreground'
                       : 'border border-border hover:bg-accent'
                 )}
                 aria-label={format(date, 'PPP', { locale: ptBR })}
               >
-                <span className={cn(isSelected && 'font-bold text-primary')}>
+                <span className={cn(isSelected && 'font-bold text-primary-foreground')}>
                   {format(date, 'd')}
                 </span>
               </button>

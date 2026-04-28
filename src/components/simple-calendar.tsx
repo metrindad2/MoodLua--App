@@ -104,12 +104,13 @@ export function SimpleCalendar({
 
           const numberClasses = cn(
             'flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium transition-colors',
-            isHighlighted && 'border border-dashed border-primary/80',
+            isHighlighted &&
+              'bg-primary text-primary-foreground border-transparent ring-0',
             isFertile && !isHighlighted && 'bg-fertile text-fertile-foreground',
             isCurrentToday && !isHighlighted && 'ring-2 ring-primary',
             isInPrevision &&
               !isHighlighted &&
-              'bg-primary text-primary-foreground border-transparent ring-0'
+              'border border-dashed border-primary/80'
           );
 
           return (
