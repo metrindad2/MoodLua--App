@@ -8,7 +8,7 @@
  */
 
 import { addDays, subDays, differenceInDays, startOfDay, isSameDay } from 'date-fns';
-import { UserProfile } from './types';
+import { UserProfile, DailyLog } from './types';
 
 /**
  * Representa os resultados dos cálculos do ciclo.
@@ -35,9 +35,10 @@ export interface CycleInfo {
  * Calcula várias informações sobre o ciclo menstrual com base no perfil da usuária.
  *
  * @param {UserProfile} userProfile - O perfil da usuária contendo os dados do ciclo.
+ * @param {DailyLog[]} dailyLogs - Os registros diários para verificar o status real da menstruação.
  * @returns {CycleInfo | null} Um objeto com todas as informações calculadas do ciclo, ou null se o perfil for inválido.
  */
-export function calculateCycleInfo(userProfile: UserProfile): CycleInfo | null {
+export function calculateCycleInfo(userProfile: UserProfile, dailyLogs: DailyLog[]): CycleInfo | null {
   if (!userProfile?.lastMenstruationDate || !userProfile.cycleLengthDays || userProfile.cycleLengthDays <= 0) {
     return null;
   }
@@ -53,10 +54,19 @@ export function calculateCycleInfo(userProfile: UserProfile): CycleInfo | null {
   const nextPeriodStartDate = addDays(lastPeriod, userProfile.cycleLengthDays);
   const daysUntilNextPeriod = differenceInDays(nextPeriodStartDate, today);
   const menstruationEndDate = addDays(lastPeriod, userProfile.flowDurationDays);
-  const isMenstruating = today >= lastPeriod && today < menstruationEndDate;
 
-  // Se o ciclo estiver muito longo, consideramos como "atrasado" em vez de continuar as fases normais.
-  const isDelayed = daysUntilNextPeriod < 0;
+  // Verifica o log diário para saber o status real da menstruação de hoje
+  const todayLog = dailyLogs.find(log => isSameDay(startOfDay(new Date(log.date + 'T00:00:00')), today));
+  const isMenstruatingFromLog = !!todayLog?.isPeriodDay;
+
+  // Lógica de previsão se não houver log para hoje
+  const isMenstruatingFromProfile = today >= lastPeriod && today < menstruationEndDate;
+  
+  // Prioriza o registro do log, se existir. Caso contrário, usa a previsão.
+  const isMenstruating = todayLog ? isMenstruatingFromLog : isMenstruatingFromProfile;
+
+  // Se o ciclo estiver muito longo E a usuária não estiver menstruando, consideramos como "atrasado".
+  const isDelayed = daysUntilNextPeriod < 0 && !isMenstruating;
 
   // Previsão da TPM (geralmente 7-10 dias antes da menstruação)
   const pmsStartDate = subDays(nextPeriodStartDate, 7);

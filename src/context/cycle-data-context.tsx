@@ -156,43 +156,46 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
 
   const updateUserProfile = useCallback(
     (profileUpdate: Partial<Omit<UserProfile, 'uid' | 'joinDate'>>) => {
-      setUserProfile((currentProfile) => {
-        // Handles both creating a new user and updating an existing one.
-        if (!currentProfile) {
-          // Creating a new user.
-          const newUserProfile = {
-            uid: new Date().toISOString(),
-            joinDate: format(new Date(), 'yyyy-MM-dd'),
-            ...profileUpdate,
-          } as UserProfile;
+      if (!userProfile) {
+        // Creating a new user.
+        const newUserProfile = {
+          uid: new Date().toISOString(),
+          joinDate: format(new Date(), 'yyyy-MM-dd'),
+          ...profileUpdate,
+        } as UserProfile;
 
-          // Auto-mark the first period for the new user.
-          if (
-            newUserProfile.lastMenstruationDate &&
-            newUserProfile.flowDurationDays > 0
-          ) {
-            const lmp = new Date(
-              newUserProfile.lastMenstruationDate + 'T00:00:00'
-            );
-            const duration = newUserProfile.flowDurationDays;
-            const newLogs: DailyLog[] = [];
-            for (let i = 0; i < duration; i++) {
-              newLogs.push({
-                date: format(addDays(lmp, i), 'yyyy-MM-dd'),
-                isPeriodDay: true,
-                flowIntensity: 'médio',
-              });
-            }
-            setDailyLogs(newLogs);
+        // Set profile first
+        setUserProfile(newUserProfile);
+
+        // Auto-mark the first period for the new user.
+        if (
+          newUserProfile.lastMenstruationDate &&
+          newUserProfile.flowDurationDays > 0
+        ) {
+          const lmp = new Date(
+            newUserProfile.lastMenstruationDate + 'T00:00:00'
+          );
+          const duration = newUserProfile.flowDurationDays;
+          const newLogs: DailyLog[] = [];
+          for (let i = 0; i < duration; i++) {
+            newLogs.push({
+              date: format(addDays(lmp, i), 'yyyy-MM-dd'),
+              isPeriodDay: true,
+              flowIntensity: 'médio',
+            });
           }
-          return newUserProfile;
-        } else {
-          // Updating an existing user.
-          return { ...currentProfile, ...profileUpdate };
+          // Set logs separately
+          setDailyLogs(newLogs);
         }
-      });
+      } else {
+        // Updating an existing user.
+        setUserProfile((currentProfile) => {
+          if (!currentProfile) return null;
+          return { ...currentProfile, ...profileUpdate };
+        });
+      }
     },
-    []
+    [userProfile]
   );
 
   const addSosContact = useCallback(

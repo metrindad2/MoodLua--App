@@ -30,10 +30,10 @@ import Link from 'next/link';
 import { CycleProgress } from './cycle-progress';
 
 function CycleSummary() {
-  const { userProfile } = useCycleData();
+  const { userProfile, dailyLogs } = useCycleData();
   if (!userProfile) return null;
 
-  const cycleInfo = calculateCycleInfo(userProfile);
+  const cycleInfo = calculateCycleInfo(userProfile, dailyLogs);
   if (!cycleInfo) return null;
 
   const phase = cycleInfo.isDelayed
@@ -102,7 +102,7 @@ export default function Dashboard() {
 
   if (!userProfile) return null;
 
-  const cycleInfo = calculateCycleInfo(userProfile);
+  const cycleInfo = calculateCycleInfo(userProfile, dailyLogs);
   if (!cycleInfo) return null;
 
   const phase = cycleInfo.isDelayed
