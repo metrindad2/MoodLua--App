@@ -23,6 +23,7 @@ import {
   format,
   subMonths,
   isSameMonth,
+  isToday,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useCycleData } from '@/context/cycle-data-context';
@@ -166,6 +167,24 @@ export function PeriodRegistrationModal({
             </div>
           </div>
         </ScrollArea>
+        
+        <div className="p-4 border-t bg-background/95 backdrop-blur-sm">
+            <h3 className="text-sm font-semibold mb-2 text-foreground">Legenda</h3>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-full bg-primary" />
+                    <span>Menstruação</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-full ring-2 ring-primary" />
+                    <span>Hoje</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-full border border-border" />
+                    <span>Dia selecionável</span>
+                </div>
+            </div>
+        </div>
 
         <DialogFooter className="p-2 border-t shrink-0">
           <DialogClose asChild>
@@ -223,6 +242,7 @@ const RegistrationCalendar = React.memo((props: CalendarProps) => {
           }
           const isFuture = isAfter(startOfDay(date), startOfDay(new Date()));
           const isSelected = selectedDates?.some((d) => isSameDay(d, date));
+          const dayIsToday = isToday(date);
 
           return (
             <div
@@ -236,11 +256,12 @@ const RegistrationCalendar = React.memo((props: CalendarProps) => {
                   'relative flex h-9 w-9 items-center justify-center rounded-full transition-colors text-sm font-medium disabled:cursor-not-allowed disabled:opacity-30',
                    isSelected
                       ? 'bg-primary text-primary-foreground'
-                      : 'border border-border hover:bg-accent'
+                      : 'border border-border hover:bg-accent',
+                   dayIsToday && !isSelected && 'ring-2 ring-primary'
                 )}
                 aria-label={format(date, 'PPP', { locale: ptBR })}
               >
-                <span className={cn(isSelected && 'font-bold text-primary-foreground')}>
+                <span className={cn(isSelected ? 'font-bold text-primary-foreground' : dayIsToday ? 'font-bold' : '')}>
                   {format(date, 'd')}
                 </span>
               </button>
