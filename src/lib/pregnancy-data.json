@@ -1,0 +1,482 @@
+{
+  "1": {
+    "semana": 1,
+    "tamanho": "—",
+    "fruta": "Nenhuma",
+    "imagemId": null,
+    "descricao": "A gravidez ainda não começou oficialmente. A primeira semana é, na verdade, a semana da sua última menstruação. Seu corpo está se preparando para uma possível ovulação.",
+    "dicas": [
+      "Foque no seu bem-estar geral.",
+      "Mantenha uma dieta equilibrada e, se recomendado, comece a tomar ácido fólico.",
+      "É um bom momento para abandonar hábitos como fumar ou consumir álcool."
+    ]
+  },
+  "2": {
+    "semana": 2,
+    "tamanho": "—",
+    "fruta": "Nenhuma",
+    "imagemId": null,
+    "descricao": "Seu corpo está se preparando para a ovulação. O óvulo está amadurecendo e o revestimento do útero está se espessando para receber um possível embrião.",
+    "dicas": [
+      "Este é o período fértil, o momento ideal para tentar engravidar.",
+      "Continue com a alimentação saudável e o ácido fólico.",
+      "Preste atenção aos sinais de ovulação, como um leve aumento na temperatura corporal."
+    ]
+  },
+  "3": {
+    "semana": 3,
+    "tamanho": "Menor que 1 mm",
+    "fruta": "Nenhuma",
+    "imagemId": null,
+    "descricao": "A fecundação aconteceu! O óvulo e o espermatozoide se uniram, formando uma única célula chamada zigoto, que começa a se dividir rapidamente enquanto viaja em direção ao útero.",
+    "dicas": [
+      "Muitas mulheres ainda não sabem que estão grávidas. Continue se cuidando!",
+      "Evite atividades de alto impacto e continue com os hábitos saudáveis.",
+      "Fique atenta a um possível sangramento de nidação (leve e de curta duração)."
+    ]
+  },
+  "4": {
+    "semana": 4,
+    "tamanho": "1 mm",
+    "fruta": "semente de papoula",
+    "imagemId": "poppy-seed",
+    "descricao": "O pequeno embrião, agora chamado de blastocisto, se implantou na parede do útero. O coração primitivo começa a se formar e a bater, e a placenta começa a se desenvolver.",
+    "dicas": [
+      "É provável que sua menstruação atrase. Um teste de gravidez já pode dar positivo!",
+      "Os primeiros sintomas, como cansaço e seios sensíveis, podem aparecer.",
+      "Agende sua primeira consulta pré-natal."
+    ]
+  },
+  "5": {
+    "semana": 5,
+    "tamanho": "1-2 mm",
+    "fruta": "semente de gergelim",
+    "imagemId": "sesame-seed",
+    "descricao": "O cérebro, a medula espinhal e o coração do bebê estão se desenvolvendo rapidamente. O embrião parece um pequeno girino. Os sistemas circulatório e nervoso começam a se formar.",
+    "dicas": [
+      "Enjoos matinais podem começar. Tente comer pequenas porções ao longo do dia.",
+      "Continue tomando ácido fólico, é crucial para o desenvolvimento do tubo neural.",
+      "Descanse sempre que possível. Seu corpo está trabalhando muito!"
+    ]
+  },
+  "6": {
+    "semana": 6,
+    "tamanho": "4 mm",
+    "fruta": "grão de lentilha",
+    "imagemId": "lentil",
+    "descricao": "Pequenos brotos que se tornarão braços e pernas estão surgindo. O coração já bate de forma mais regular. As características faciais, como olhos e narinas, começam a se esboçar.",
+    "dicas": [
+      "A vontade de urinar aumenta. É normal, seu útero está crescendo.",
+      "Seu primeiro ultrassom pode ser realizado para confirmar a gravidez e ouvir os batimentos cardíacos.",
+      "Converse com seu parceiro e família sobre a novidade."
+    ]
+  },
+  "7": {
+    "semana": 7,
+    "tamanho": "8 mm",
+    "fruta": "mirtilo",
+    "imagemId": "blueberry",
+    "descricao": "O cérebro está se tornando mais complexo e o bebê está crescendo rapidamente, dobrando de tamanho. As mãos e os pés estão se formando, parecendo pequenas pás.",
+    "dicas": [
+      "Desejos e aversões alimentares podem se intensificar.",
+      "Mantenha-se hidratada, bebendo bastante água.",
+      "Use roupas confortáveis que não apertem a barriga."
+    ]
+  },
+  "8": {
+    "semana": 8,
+    "tamanho": "1,6 cm",
+    "fruta": "grão de feijão",
+    "imagemId": "bean",
+    "descricao": "O bebê já é oficialmente um feto! Todos os órgãos essenciais já começaram a se formar. Ele começa a se mover, embora você ainda não consiga sentir. Os dedos das mãos e dos pés estão se separando.",
+    "dicas": [
+      "Seus seios podem estar maiores e mais sensíveis.",
+      "Pratique exercícios leves, como caminhada, se o seu médico autorizar.",
+      "Continue com o acompanhamento pré-natal rigorosamente."
+    ]
+  },
+  "9": {
+    "semana": 9,
+    "tamanho": "2,3 cm",
+    "fruta": "uva",
+    "imagemId": "grape",
+    "descricao": "As articulações, como cotovelos e joelhos, já funcionam. As pálpebras cobrem os olhos e permanecerão fechadas por um tempo. Os detalhes do rosto estão mais definidos.",
+    "dicas": [
+      "O cansaço ainda é comum. Priorize o sono.",
+      "Sua barriga pode começar a aparecer discretamente.",
+      "Evite carregar peso e fazer esforço excessivo."
+    ]
+  },
+  "10": {
+    "semana": 10,
+    "tamanho": "3,1 cm",
+    "fruta": "azeitona",
+    "imagemId": "olive",
+    "descricao": "O período mais crítico do desenvolvimento está terminando. Os órgãos vitais já estão formados e funcionando. As unhas e os cabelos começam a crescer.",
+    "dicas": [
+      "Os enjoos tendem a diminuir a partir de agora.",
+      "É um bom momento para começar a pensar no enxoval e no quarto do bebê.",
+      "Faça os exames solicitados pelo seu médico, como o de translucência nucal."
+    ]
+  },
+  "11": {
+    "semana": 11,
+    "tamanho": "4,1 cm",
+    "fruta": "figo",
+    "imagemId": "fig",
+    "descricao": "O bebê está muito ativo, chutando e se espreguiçando. Os órgãos genitais externos começam a se diferenciar, mas ainda é cedo para saber o sexo pelo ultrassom.",
+    "dicas": [
+      "Sua pele pode ficar mais oleosa ou, ao contrário, mais seca. Adapte seus cuidados.",
+      "A circulação sanguínea aumenta, o que pode deixar seu rosto mais corado.",
+      "Converse sobre seus sentimentos. Mudanças de humor são normais."
+    ]
+  },
+  "12": {
+    "semana": 12,
+    "tamanho": "5,4 cm",
+    "fruta": "limão siciliano",
+    "imagemId": "sicilian-lemon",
+    "descricao": "O risco de aborto espontâneo diminui significativamente. O feto já tem reflexos: ele pode fechar os dedos, curvar os pés e fazer movimentos de sucção com a boca.",
+    "dicas": [
+      "Parabéns, você completou o primeiro trimestre!",
+      "É um bom momento para contar a notícia para amigos e familiares.",
+      "Sua energia tende a voltar. Aproveite para retomar atividades leves."
+    ]
+  },
+  "13": {
+    "semana": 13,
+    "tamanho": "7,4 cm",
+    "fruta": "vagem de ervilha",
+    "imagemId": "pea-pod",
+    "descricao": "As impressões digitais únicas do seu bebê já estão formadas nas pontas dos dedos. O corpo está crescendo mais rápido que a cabeça, tornando as proporções mais equilibradas.",
+    "dicas": [
+      "Sua barriga está cada vez mais aparente.",
+      "Azia e má digestão podem ocorrer. Evite alimentos gordurosos.",
+      "Comece a hidratar a pele da barriga para prevenir estrias."
+    ]
+  },
+  "14": {
+    "semana": 14,
+    "tamanho": "8,7 cm",
+    "fruta": "pêssego",
+    "imagemId": "peach",
+    "descricao": "O bebê começa a fazer expressões faciais, como franzir a testa. O pescoço está mais longo e a cabeça mais erguida. Ele já engole líquido amniótico, treinando o sistema digestivo.",
+    "dicas": [
+      "O segundo trimestre é considerado a fase mais tranquila da gravidez.",
+      "Seu apetite pode aumentar. Escolha lanches saudáveis.",
+      "Planeje uma viagem curta (babymoon), se desejar e seu médico permitir."
+    ]
+  },
+  "15": {
+    "semana": 15,
+    "tamanho": "10 cm",
+    "fruta": "maçã",
+    "imagemId": "apple",
+    "descricao": "O esqueleto está se ossificando e a pele ainda é muito fina e transparente. É possível ver os vasos sanguíneos através dela. O bebê consegue perceber a luz externa.",
+    "dicas": [
+      "Dor nas costas pode começar devido ao peso da barriga. Use sapatos confortáveis.",
+      "Praticar ioga ou pilates para gestantes pode ajudar com as dores.",
+      "O ultrassom morfológico do segundo trimestre pode ser agendado em breve."
+    ]
+  },
+  "16": {
+    "semana": 16,
+    "tamanho": "11,6 cm",
+    "fruta": "abacate",
+    "imagemId": "avocado",
+    "descricao": "Os olhos do bebê já se movem e ele pode fazer movimentos de sucção. O sistema nervoso continua a se desenvolver, permitindo movimentos mais coordenados.",
+    "dicas": [
+      "Você pode sentir os primeiros movimentos do bebê, como leves tremores ou \"borboletas\".",
+      "Sua gengiva pode ficar mais sensível e sangrar. Reforce a higiene bucal.",
+      "É possível que o sexo do bebê já possa ser revelado no ultrassom."
+    ]
+  },
+  "17": {
+    "semana": 17,
+    "tamanho": "13 cm",
+    "fruta": "pera",
+    "imagemId": "pear",
+    "descricao": "A audição está se desenvolvendo. O bebê começa a ouvir sons, como os batimentos do seu coração, sua voz e ruídos externos. Uma camada de gordura começa a se formar sob a pele.",
+    "dicas": [
+      "Converse e cante para o seu bebê. Ele está começando a te ouvir!",
+      "Seios e barriga continuam crescendo. Invista em sutiãs de sustentação.",
+      "Evite ficar muito tempo na mesma posição."
+    ]
+  },
+  "18": {
+    "semana": 18,
+    "tamanho": "14,2 cm",
+    "fruta": "batata-doce",
+    "imagemId": "sweet-potato",
+    "descricao": "O sistema nervoso está sendo coberto por mielina, uma substância que acelera a comunicação entre os neurônios. A retina já consegue detectar a luz.",
+    "dicas": [
+      "Os movimentos do bebê ficam mais fortes e perceptíveis.",
+      "Pode ocorrer tontura ao se levantar rápido. Faça movimentos lentos.",
+      "O ultrassom morfológico é geralmente realizado entre 18 e 22 semanas."
+    ]
+  },
+  "19": {
+    "semana": 19,
+    "tamanho": "15,3 cm",
+    "fruta": "manga",
+    "imagemId": "mango",
+    "descricao": "Uma camada gordurosa e esbranquiçada, chamada verniz caseoso, começa a cobrir a pele do bebê para protegê-la do líquido amniótico. Os sentidos (olfato, paladar, audição, visão, tato) estão se desenvolvendo.",
+    "dicas": [
+      "Inchaço nos pés e tornozelos pode ocorrer. Descanse com as pernas elevadas.",
+      "Beba bastante água para ajudar na circulação e prevenir cãibras.",
+      "Cãibras nas pernas são comuns, principalmente à noite."
+    ]
+  },
+  "20": {
+    "semana": 20,
+    "tamanho": "16,4 cm",
+    "fruta": "banana",
+    "imagemId": "banana",
+    "descricao": "Parabéns, você chegou na metade da gravidez! O bebê engole mais líquido amniótico, o que é bom para o sistema digestivo. O cabelo e as sobrancelhas estão crescendo.",
+    "dicas": [
+      "Sua barriga está bem evidente. Celebre essa fase!",
+      "O umbigo pode começar a ficar saliente.",
+      "É um bom momento para começar a frequentar cursos para gestantes."
+    ]
+  },
+  "21": {
+    "semana": 21,
+    "tamanho": "26,7 cm",
+    "fruta": "romã",
+    "imagemId": "pomegranate",
+    "descricao": "O bebê tem um ciclo de sono e vigília mais definido. A medula óssea começa a produzir células sanguíneas, uma função que antes era do fígado e do baço.",
+    "dicas": [
+      "Seu ganho de peso se tornará mais constante a partir de agora.",
+      "Continue com a hidratação da pele para evitar estrias.",
+      "Falta de ar pode acontecer, pois o útero pressiona o diafragma."
+    ]
+  },
+  "22": {
+    "semana": 22,
+    "tamanho": "27,8 cm",
+    "fruta": "cenoura",
+    "imagemId": "carrot",
+    "descricao": "A pele do bebê ainda é enrugada, mas ele está começando a acumular mais gordura. As papilas gustativas já estão formadas, e ele pode sentir os sabores dos alimentos que você come.",
+    "dicas": [
+      "Varie sua dieta. O bebê está experimentando diferentes sabores!",
+      "Seu equilíbrio pode mudar com o crescimento da barriga. Cuidado com quedas.",
+      "Use calçados seguros e confortáveis."
+    ]
+  },
+  "23": {
+    "semana": 23,
+    "tamanho": "28,9 cm",
+    "fruta": "alcachofra",
+    "imagemId": "artichoke",
+    "descricao": "A audição está ainda mais aguçada. O bebê pode se assustar com sons altos e repentinos. Os pulmões estão se desenvolvendo, mas ainda não estão prontos para respirar sozinhos.",
+    "dicas": [
+      "A linha nigra, uma linha escura que vai do umbigo ao osso púbico, pode aparecer.",
+      "Descanse deitada do seu lado esquerdo para melhorar a circulação sanguínea.",
+      "Continue monitorando os movimentos do bebê."
+    ]
+  },
+  "24": {
+    "semana": 24,
+    "tamanho": "30 cm",
+    "fruta": "espiga de milho",
+    "imagemId": "corn-cob",
+    "descricao": "O bebê atinge um marco de viabilidade, o que significa que ele tem chances de sobreviver se nascer prematuramente. O rosto já está totalmente formado.",
+    "dicas": [
+      "O teste de tolerância à glicose, para detectar diabetes gestacional, geralmente é feito agora.",
+      "Fique atenta a sinais de parto prematuro, como contrações regulares.",
+      "Seu corpo está se preparando para a amamentação; pode haver saída de colostro."
+    ]
+  },
+  "25": {
+    "semana": 25,
+    "tamanho": "34,6 cm",
+    "fruta": "mamão papaya",
+    "imagemId": "papaya",
+    "descricao": "O bebê está cada vez mais gordinho. O cabelo já tem cor e textura definidas. Ele pratica o movimento de respiração, inalando e exalando líquido amniótico.",
+    "dicas": [
+      "A dor no nervo ciático pode aparecer. Alongamentos podem ajudar.",
+      "Comece a pesquisar sobre parto e amamentação.",
+      "Monte o plano de parto, se desejar."
+    ]
+  },
+  "26": {
+    "semana": 26,
+    "tamanho": "35,6 cm",
+    "fruta": "berinjela",
+    "imagemId": "eggplant",
+    "descricao": "As redes de neurônios do cérebro estão mais desenvolvidas. O bebê já responde a estímulos como luz e som com mais frequência. As pálpebras se abrem pela primeira vez.",
+    "dicas": [
+      "Sua barriga pode estar coçando devido ao estiramento da pele. Hidrate bem.",
+      "Converse com outras mães, troque experiências.",
+      "Prepare a mala da maternidade e a do bebê com antecedência."
+    ]
+  },
+  "27": {
+    "semana": 27,
+    "tamanho": "36,6 cm",
+    "fruta": "coco",
+    "imagemId": "coconut",
+    "descricao": "Bem-vinda ao terceiro e último trimestre! O cérebro do bebê continua em rápido desenvolvimento. Os pulmões estão amadurecendo, produzindo surfactante, uma substância vital para a respiração.",
+    "dicas": [
+      "As consultas pré-natais podem se tornar mais frequentes.",
+      "Insônia pode ser um desafio. Crie um ritual de relaxamento antes de dormir.",
+      "Fique atenta ao inchaço excessivo, pode ser sinal de pré-eclâmpsia."
+    ]
+  },
+  "28": {
+    "semana": 28,
+    "tamanho": "37,6 cm",
+    "fruta": "repolho",
+    "imagemId": "cabbage",
+    "descricao": "O bebê já consegue sonhar! Os olhos estão abertos e ele pode piscar. A visão está se desenvolvendo, embora ainda seja embaçada. Ele está ganhando peso rapidamente.",
+    "dicas": [
+      "Contrações de treinamento (Braxton Hicks) podem começar. São irregulares e indolores.",
+      "Visite a maternidade onde planeja ter o bebê.",
+      "Verifique a necessidade da vacina antitetânica e da coqueluche (dTpa)."
+    ]
+  },
+  "29": {
+    "semana": 29,
+    "tamanho": "38,6 cm",
+    "fruta": "abacaxi",
+    "imagemId": "pineapple",
+    "descricao": "A cabeça do bebê está crescendo para acomodar o cérebro em desenvolvimento. Os ossos estão totalmente desenvolvidos, mas ainda são moles e flexíveis.",
+    "dicas": [
+      "Azia e refluxo podem piorar. Coma pequenas refeições e evite deitar logo após comer.",
+      "Seu corpo precisa de mais cálcio para os ossos do bebê. Capriche nos laticínios.",
+      "Pense sobre quem você gostaria que estivesse com você durante o parto."
+    ]
+  },
+  "30": {
+    "semana": 30,
+    "tamanho": "39,9 cm",
+    "fruta": "melão",
+    "imagemId": "honeydew-melon",
+    "descricao": "O bebê está ganhando cerca de 200 gramas por semana. A lanugem (pelos finos) que cobria seu corpo começa a desaparecer. A visão continua a se aprimorar.",
+    "dicas": [
+      "O cansaço da reta final pode chegar. Descanse sempre que puder.",
+      "Acompanhe a frequência dos movimentos do bebê.",
+      "Comece a lavar as roupinhas do enxoval."
+    ]
+  },
+  "31": {
+    "semana": 31,
+    "tamanho": "41,1 cm",
+    "fruta": "aipo",
+    "imagemId": "celery",
+    "descricao": "Todos os cinco sentidos do bebê estão funcionando. O sistema nervoso central está maduro o suficiente para controlar a temperatura do corpo. Ele está acumulando mais e mais gordura.",
+    "dicas": [
+      "Dificuldade para encontrar uma posição confortável para dormir é normal.",
+      "Use travesseiros para apoiar a barriga e as costas.",
+      "Falta pouco! Aproveite para curtir os últimos momentos da gravidez."
+    ]
+  },
+  "32": {
+    "semana": 32,
+    "tamanho": "42,4 cm",
+    "fruta": "abóbora pequena",
+    "imagemId": "pumpkin",
+    "descricao": "As unhas já cresceram até as pontas dos dedos. O bebê provavelmente já está na posição cefálica (de cabeça para baixo), preparando-se para o parto.",
+    "dicas": [
+      "Seu médico pode começar a verificar a posição do bebê.",
+      "É hora de finalizar os preparativos práticos, como a instalação da cadeirinha no carro.",
+      "Converse sobre suas ansiedades e medos. É uma fase de muitas emoções."
+    ]
+  },
+  "33": {
+    "semana": 33,
+    "tamanho": "43,7 cm",
+    "fruta": "abóbora pequena",
+    "imagemId": "pumpkin",
+    "descricao": "Os ossos do crânio ainda não estão fundidos, o que permitirá que a cabeça passe pelo canal do parto. Os anticorpos da mãe estão sendo passados para o bebê, fortalecendo seu sistema imunológico.",
+    "dicas": [
+      "Continue monitorando a pressão arterial e o inchaço.",
+      "Beba muita água para evitar a desidratação e as contrações prematuras.",
+      "Repasse seu plano de parto com a equipe médica."
+    ]
+  },
+  "34": {
+    "semana": 34,
+    "tamanho": "45 cm",
+    "fruta": "abóbora pequena",
+    "imagemId": "pumpkin",
+    "descricao": "O verniz caseoso que protege a pele está mais espesso. Os pulmões estão quase totalmente maduros. Se o bebê nascesse agora, provavelmente precisaria de pouco suporte respiratório.",
+    "dicas": [
+      "Você pode sentir a barriga \"baixar\", um sinal de que o bebê está se encaixando na pelve.",
+      "As consultas pré-natais agora são semanais.",
+      "Aprenda a diferenciar as contrações de treinamento das contrações de parto."
+    ]
+  },
+  "35": {
+    "semana": 35,
+    "tamanho": "46,2 cm",
+    "fruta": "melancia",
+    "imagemId": "watermelon",
+    "descricao": "O bebê tem menos espaço para se mover, então os movimentos podem parecer menos amplos, mas ainda devem ser frequentes. O ganho de peso agora é principalmente de gordura.",
+    "dicas": [
+      "Descanse o máximo que puder. Armazene energia para o parto.",
+      "Seu parceiro pode ajudar com massagens para aliviar o desconforto.",
+      "Tenha seus contatos de emergência e da maternidade sempre à mão."
+    ]
+  },
+  "36": {
+    "semana": 36,
+    "tamanho": "47,4 cm",
+    "fruta": "melancia",
+    "imagemId": "watermelon",
+    "descricao": "Seu bebê é considerado \"a termo inicial\". O desenvolvimento está praticamente completo. Ele continua praticando a respiração e a sucção.",
+    "dicas": [
+      "Fique atenta aos sinais do início do trabalho de parto: contrações rítmicas e fortes, perda do tampão mucoso ou rompimento da bolsa.",
+      "Finalize os últimos detalhes e relaxe.",
+      "Confie no seu corpo e na sua equipe."
+    ]
+  },
+  "37": {
+    "semana": 37,
+    "tamanho": "48,6 cm",
+    "fruta": "melancia",
+    "imagemId": "watermelon",
+    "descricao": "O bebê continua a ganhar gordura, o que ajudará a regular a temperatura corporal após o nascimento. A lanugem já desapareceu quase por completo.",
+    "dicas": [
+      "A ansiedade pode aumentar. Tente técnicas de relaxamento e respiração.",
+      "Durma sempre que sentir sono, mesmo que seja durante o dia.",
+      "O parto pode acontecer a qualquer momento. Esteja preparada!"
+    ]
+  },
+  "38": {
+    "semana": 38,
+    "tamanho": "49,8 cm",
+    "fruta": "melancia",
+    "imagemId": "watermelon",
+    "descricao": "O cérebro e os pulmões continuam a amadurecer. O bebê já tem uma boa pegada e seus órgãos estão prontos para a vida fora do útero.",
+    "dicas": [
+      "Caminhadas leves podem ajudar a induzir o trabalho de parto.",
+      "Continue se alimentando bem para ter energia.",
+      "Aproveite esses últimos dias para se conectar com sua barriga."
+    ]
+  },
+  "39": {
+    "semana": 39,
+    "tamanho": "50,7 cm",
+    "fruta": "melancia",
+    "imagemId": "watermelon",
+    "descricao": "O bebê é considerado \"a termo completo\". Ele está pronto para nascer, mas pode ficar confortável no útero por mais um tempo. A camada de gordura está bem desenvolvida.",
+    "dicas": [
+      "Monitore os movimentos do bebê. Qualquer diminuição, contate seu médico.",
+      "Tente relaxar e não se estressar com a data do parto. O bebê virá no tempo dele.",
+      "Confie nos sinais do seu corpo."
+    ]
+  },
+  "40": {
+    "semana": 40,
+    "tamanho": "51,2 cm",
+    "fruta": "melancia",
+    "imagemId": "watermelon",
+    "descricao": "A data provável do parto chegou! No entanto, muitos bebês nascem alguns dias antes ou depois. Seu bebê está totalmente desenvolvido e pronto para o grande encontro.",
+    "dicas": [
+      "Parabéns pela jornada! Você chegou até aqui.",
+      "Se o parto não começar, seu médico discutirá os próximos passos, como a indução.",
+      "Prepare-se para o momento mais incrível da sua vida!"
+    ]
+  }
+}

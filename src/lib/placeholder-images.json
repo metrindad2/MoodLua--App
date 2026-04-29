@@ -2,69 +2,183 @@
   "placeholderImages": [
     {
       "id": "poppy-seed",
-      "description": "A poppy seed to represent baby size at week 4",
-      "imageUrl": "https://picsum.photos/seed/poppy/150/150",
+      "description": "Uma semente de papoula para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/poppy-seed/150/150",
       "imageHint": "poppy seed"
     },
     {
-      "id": "lentil-grain",
-      "description": "A lentil grain to represent baby size at week 6",
+      "id": "sesame-seed",
+      "description": "Uma semente de gergelim para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/sesame-seed/150/150",
+      "imageHint": "sesame seed"
+    },
+    {
+      "id": "lentil",
+      "description": "Um grão de lentilha para representar o tamanho do bebê",
       "imageUrl": "https://picsum.photos/seed/lentil/150/150",
-      "imageHint": "lentil grain"
+      "imageHint": "lentil"
+    },
+    {
+      "id": "blueberry",
+      "description": "Um mirtilo para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/blueberry/150/150",
+      "imageHint": "blueberry"
     },
     {
       "id": "bean",
-      "description": "A bean to represent baby size at week 8",
+      "description": "Um grão de feijão para representar o tamanho do bebê",
       "imageUrl": "https://picsum.photos/seed/bean/150/150",
       "imageHint": "bean"
     },
     {
+      "id": "grape",
+      "description": "Uma uva para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/grape/150/150",
+      "imageHint": "grape"
+    },
+    {
       "id": "olive",
-      "description": "An olive to represent baby size at week 10",
+      "description": "Uma azeitona para representar o tamanho do bebê",
       "imageUrl": "https://picsum.photos/seed/olive/150/150",
       "imageHint": "olive"
     },
     {
-      "id": "lemon",
-      "description": "A lemon to represent baby size at week 12",
-      "imageUrl": "https://picsum.photos/seed/lemon/150/150",
+      "id": "fig",
+      "description": "Um figo para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/fig/150/150",
+      "imageHint": "fig"
+    },
+    {
+      "id": "sicilian-lemon",
+      "description": "Um limão siciliano para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/sicilian-lemon/150/150",
       "imageHint": "lemon"
     },
     {
+      "id": "pea-pod",
+      "description": "Uma vagem de ervilha para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/pea-pod/150/150",
+      "imageHint": "pea pod"
+    },
+    {
+      "id": "peach",
+      "description": "Um pêssego para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/peach/150/150",
+      "imageHint": "peach"
+    },
+    {
+      "id": "apple",
+      "description": "Uma maçã para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/apple/150/150",
+      "imageHint": "apple"
+    },
+    {
       "id": "avocado",
-      "description": "An avocado to represent baby size at week 16",
+      "description": "Um abacate para representar o tamanho do bebê",
       "imageUrl": "https://picsum.photos/seed/avocado/150/150",
       "imageHint": "avocado"
     },
     {
+      "id": "pear",
+      "description": "Uma pera para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/pear/150/150",
+      "imageHint": "pear"
+    },
+    {
+      "id": "sweet-potato",
+      "description": "Uma batata-doce para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/sweet-potato/150/150",
+      "imageHint": "sweet potato"
+    },
+    {
+      "id": "mango",
+      "description": "Uma manga para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/mango/150/150",
+      "imageHint": "mango"
+    },
+    {
       "id": "banana",
-      "description": "A banana to represent baby size at week 20",
+      "description": "Uma banana para representar o tamanho do bebê",
       "imageUrl": "https://picsum.photos/seed/banana/150/150",
       "imageHint": "banana"
     },
     {
+      "id": "pomegranate",
+      "description": "Uma romã para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/pomegranate/150/150",
+      "imageHint": "pomegranate"
+    },
+    {
+      "id": "carrot",
+      "description": "Uma cenoura para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/carrot/150/150",
+      "imageHint": "carrot"
+    },
+    {
+      "id": "artichoke",
+      "description": "Uma alcachofra para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/artichoke/150/150",
+      "imageHint": "artichoke"
+    },
+    {
       "id": "corn-cob",
-      "description": "A corn cob to represent baby size at week 24",
-      "imageUrl": "https://picsum.photos/seed/corn/150/150",
+      "description": "Uma espiga de milho para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/corn-cob/150/150",
       "imageHint": "corn cob"
     },
     {
-      "id": "coconut",
-      "description": "A coconut to represent baby size at week 30",
-      "imageUrl": "https://picsum.photos/seed/coconut/150/150",
-      "imageHint": "coconut"
-    },
-    {
       "id": "papaya",
-      "description": "A papaya to represent baby size at week 36",
+      "description": "Um mamão papaya para representar o tamanho do bebê",
       "imageUrl": "https://picsum.photos/seed/papaya/150/150",
       "imageHint": "papaya"
     },
     {
+      "id": "eggplant",
+      "description": "Uma berinjela para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/eggplant/150/150",
+      "imageHint": "eggplant"
+    },
+    {
+      "id": "coconut",
+      "description": "Um coco para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/coconut/150/150",
+      "imageHint": "coconut"
+    },
+    {
+      "id": "cabbage",
+      "description": "Um repolho para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/cabbage/150/150",
+      "imageHint": "cabbage"
+    },
+    {
+      "id": "pineapple",
+      "description": "Um abacaxi para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/pineapple/150/150",
+      "imageHint": "pineapple"
+    },
+    {
+      "id": "honeydew-melon",
+      "description": "Um melão para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/honeydew-melon/150/150",
+      "imageHint": "melon"
+    },
+    {
+      "id": "celery",
+      "description": "Um aipo para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/celery/150/150",
+      "imageHint": "celery"
+    },
+    {
       "id": "pumpkin",
-      "description": "A small pumpkin to represent baby size at week 40",
+      "description": "Uma abóbora pequena para representar o tamanho do bebê",
       "imageUrl": "https://picsum.photos/seed/pumpkin/150/150",
       "imageHint": "small pumpkin"
+    },
+    {
+      "id": "watermelon",
+      "description": "Uma melancia para representar o tamanho do bebê",
+      "imageUrl": "https://picsum.photos/seed/watermelon/150/150",
+      "imageHint": "watermelon"
     }
   ]
 }
