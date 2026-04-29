@@ -58,14 +58,23 @@ export default function PregnancyPage() {
 
   // Função central para calcular e atualizar o estado da gravidez
   const calculatePregnancy = (dateStr: string) => {
-    const date = new Date(`${dateStr}T00:00:00`);
+    // Analisa a string da data para garantir que seja tratada no fuso horário local,
+    // o que evita erros de contagem de dias.
+    const parts = dateStr.split('-');
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1; // Mês é 0-indexado no JS
+    const day = parseInt(parts[2], 10);
+    const date = new Date(year, month, day);
+
     if (!dateStr || !isValid(date)) {
         setPregnancyInfo(null);
         return;
     }
 
     const today = new Date();
+    // A diferença em dias agora é consistente, pois ambas as datas estão no mesmo fuso horário.
     const totalDays = differenceInDays(today, date);
+    
     if (totalDays < 0) {
         setPregnancyInfo(null);
         return;
@@ -73,7 +82,7 @@ export default function PregnancyPage() {
 
     const weeks = Math.floor(totalDays / 7);
     const days = totalDays % 7;
-    const dueDate = addDays(date, 280);
+    const dueDate = addDays(date, 280); // 280 dias = 40 semanas
     const isComplete = weeks >= 40;
 
     setPregnancyInfo({
