@@ -3,67 +3,67 @@
     {
       "id": "poppy-seed",
       "description": "A poppy seed to represent baby size at week 4",
-      "imageUrl": "https://source.unsplash.com/150x150/?poppy,seed",
+      "imageUrl": "https://picsum.photos/seed/poppy/150/150",
       "imageHint": "poppy seed"
     },
     {
       "id": "lentil-grain",
       "description": "A lentil grain to represent baby size at week 6",
-      "imageUrl": "https://source.unsplash.com/150x150/?lentil",
+      "imageUrl": "https://picsum.photos/seed/lentil/150/150",
       "imageHint": "lentil grain"
     },
     {
       "id": "bean",
       "description": "A bean to represent baby size at week 8",
-      "imageUrl": "https://source.unsplash.com/150x150/?bean",
+      "imageUrl": "https://picsum.photos/seed/bean/150/150",
       "imageHint": "bean"
     },
     {
       "id": "olive",
       "description": "An olive to represent baby size at week 10",
-      "imageUrl": "https://source.unsplash.com/150x150/?olive",
+      "imageUrl": "https://picsum.photos/seed/olive/150/150",
       "imageHint": "olive"
     },
     {
       "id": "lemon",
       "description": "A lemon to represent baby size at week 12",
-      "imageUrl": "https://source.unsplash.com/150x150/?lemon",
+      "imageUrl": "https://picsum.photos/seed/lemon/150/150",
       "imageHint": "lemon"
     },
     {
       "id": "avocado",
       "description": "An avocado to represent baby size at week 16",
-      "imageUrl": "https://source.unsplash.com/150x150/?avocado",
+      "imageUrl": "https://picsum.photos/seed/avocado/150/150",
       "imageHint": "avocado"
     },
     {
       "id": "banana",
       "description": "A banana to represent baby size at week 20",
-      "imageUrl": "https://source.unsplash.com/150x150/?banana",
+      "imageUrl": "https://picsum.photos/seed/banana/150/150",
       "imageHint": "banana"
     },
     {
       "id": "corn-cob",
       "description": "A corn cob to represent baby size at week 24",
-      "imageUrl": "https://source.unsplash.com/150x150/?corn-cob",
+      "imageUrl": "https://picsum.photos/seed/corn/150/150",
       "imageHint": "corn cob"
     },
     {
       "id": "coconut",
       "description": "A coconut to represent baby size at week 30",
-      "imageUrl": "https://source.unsplash.com/150x150/?coconut",
+      "imageUrl": "https://picsum.photos/seed/coconut/150/150",
       "imageHint": "coconut"
     },
     {
       "id": "papaya",
       "description": "A papaya to represent baby size at week 36",
-      "imageUrl": "https://source.unsplash.com/150x150/?papaya",
+      "imageUrl": "https://picsum.photos/seed/papaya/150/150",
       "imageHint": "papaya"
     },
     {
       "id": "pumpkin",
       "description": "A small pumpkin to represent baby size at week 40",
-      "imageUrl": "https://source.unsplash.com/150x150/?small,pumpkin",
+      "imageUrl": "https://picsum.photos/seed/pumpkin/150/150",
       "imageHint": "small pumpkin"
     }
   ]
