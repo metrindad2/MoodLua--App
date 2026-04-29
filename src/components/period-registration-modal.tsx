@@ -45,7 +45,7 @@ export function PeriodRegistrationModal({
   onOpenChange,
   onSave,
 }: PeriodRegistrationModalProps) {
-  const { dailyLogs } = useCycleData();
+  const { dailyLogs, userProfile } = useCycleData();
   const { toast } = useToast();
 
   const [selectedDays, setSelectedDays] = useState<Date[]>([]);
@@ -53,8 +53,8 @@ export function PeriodRegistrationModal({
   const monthRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   const monthsToDisplay = React.useMemo(() => {
-    const start = startOfMonth(subMonths(new Date(), 6));
-    return Array.from({ length: 18 }).map((_, i) => addMonths(start, i));
+    const start = startOfMonth(subMonths(new Date(), 12));
+    return Array.from({ length: 25 }).map((_, i) => addMonths(start, i));
   }, []);
 
   useEffect(() => {
@@ -86,19 +86,38 @@ export function PeriodRegistrationModal({
 
   const handleDayClick = useCallback((day: Date) => {
     const dayStart = startOfDay(day);
+    const flowDuration = userProfile?.flowDurationDays || 5; // Default to 5
+    const today = startOfDay(new Date());
+
     setSelectedDays((currentSelection) => {
       const isAlreadySelected = currentSelection.some((d) =>
         isSameDay(d, dayStart)
       );
+
       if (isAlreadySelected) {
+        // If a day in a block is deselected, remove only that day for fine-tuning
         return currentSelection.filter((d) => !isSameDay(d, dayStart));
       } else {
-        return [...currentSelection, dayStart].sort(
-          (a, b) => a.getTime() - b.getTime()
-        );
+        // When a new day is selected, add a block of `flowDuration` days
+        const newBlock: Date[] = [];
+        for (let i = 0; i < flowDuration; i++) {
+          const dateInBlock = addDays(dayStart, i);
+          // Don't add days in the future
+          if (!isAfter(dateInBlock, today)) {
+            newBlock.push(dateInBlock);
+          }
+        }
+
+        // Merge the new block with the existing selection, avoiding duplicates.
+        const selectionTimeSet = new Set(currentSelection.map(d => d.getTime()));
+        newBlock.forEach(d => selectionTimeSet.add(d.getTime()));
+
+        const newSelection = Array.from(selectionTimeSet).map(time => new Date(time));
+        
+        return newSelection.sort((a, b) => a.getTime() - b.getTime());
       }
     });
-  }, []);
+  }, [userProfile?.flowDurationDays]);
 
   const handleSave = () => {
     onSave(selectedDays);

@@ -285,27 +285,29 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
       if (!currentProfile) return null;
   
       const previousLmpDate = startOfDay(new Date(currentProfile.lastMenstruationDate + 'T00:00:00'));
-  
-      if (isSameDay(newLmpDate, previousLmpDate)) {
-        return currentProfile;
+        
+      // Only create a new history entry if the start date has actually changed,
+      // preventing duplicates but allowing recalculation.
+      if (!isSameDay(newLmpDate, previousLmpDate)) {
+        const lastCycleLength = differenceInDays(newLmpDate, previousLmpDate);
+        if (lastCycleLength > 10) {
+          const newCycleLog: CycleLog = {
+            startDate: format(previousLmpDate, 'yyyy-MM-dd'),
+            cycleLength: lastCycleLength,
+          };
+    
+          setCycleHistory((currentHistory) => {
+            const alreadyExists = currentHistory.some(c => c.startDate === newCycleLog.startDate);
+            if (!alreadyExists) {
+              return [...currentHistory, newCycleLog];
+            }
+            return currentHistory;
+          });
+        }
       }
-  
-      const lastCycleLength = differenceInDays(newLmpDate, previousLmpDate);
-      if (lastCycleLength > 10) {
-        const newCycleLog: CycleLog = {
-          startDate: format(previousLmpDate, 'yyyy-MM-dd'),
-          cycleLength: lastCycleLength,
-        };
-  
-        setCycleHistory((currentHistory) => {
-          const alreadyExists = currentHistory.some(c => c.startDate === newCycleLog.startDate);
-          if (!alreadyExists) {
-            return [...currentHistory, newCycleLog];
-          }
-          return currentHistory;
-        });
-      }
-  
+      
+      // Always update the user profile to trigger a re-render with the new (or same) LMP.
+      // This ensures all components depending on cycle info are updated.
       return {
         ...currentProfile,
         lastMenstruationDate: format(newLmpDate, 'yyyy-MM-dd'),
