@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useCycleData } from '@/context/cycle-data-context';
-import { Moon, ShieldAlert, LockKeyhole } from 'lucide-react';
+import { Moon, ShieldAlert, LockKeyhole, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { UserProfile } from '@/lib/types';
 import { Card, CardContent } from './ui/card';
@@ -76,6 +76,7 @@ export default function OnboardingForm() {
   const { toast } = useToast();
   const [showLocationDialog, setShowLocationDialog] = useState(false);
   const [showProfileConfirmation, setShowProfileConfirmation] = useState(false);
+  const [isRequestingLocation, setIsRequestingLocation] = useState(false);
   const [formData, setFormData] = useState<z.infer<typeof formSchema> | null>(
     null
   );
@@ -99,42 +100,52 @@ export default function OnboardingForm() {
 
   // Step 2: User interacts with location dialog
   const handleLocationRequest = () => {
-    setShowLocationDialog(false); // Close location dialog
-
     if (!navigator.geolocation) {
       toast({
         variant: 'destructive',
         title: 'Geolocalização não suportada',
         description: 'Seu navegador não suporta este recurso.',
       });
-      // Proceed to next step even if not supported
+      setShowLocationDialog(false);
       setShowProfileConfirmation(true);
       return;
     }
 
-    // Request permission. The result doesn't block the next step.
+    setIsRequestingLocation(true);
+
+    // Definimos um timeout de segurança para não travar a UI se o navegador demorar
+    const safetyTimeout = setTimeout(() => {
+        setIsRequestingLocation(false);
+        setShowLocationDialog(false);
+        setShowProfileConfirmation(true);
+    }, 10000);
+
     navigator.geolocation.getCurrentPosition(
       () => {
-        // Success: permission granted
+        clearTimeout(safetyTimeout);
+        setIsRequestingLocation(false);
+        setShowLocationDialog(false);
         toast({
           title: 'Permissão concedida!',
           description: 'A localização para o SOS foi ativada.',
         });
-        setShowProfileConfirmation(true); // Show final confirmation
+        setShowProfileConfirmation(true); 
       },
       (error) => {
-        // Error: permission denied or other error
-        if (error.code === 1) {
-          // PERMISSION_DENIED
+        clearTimeout(safetyTimeout);
+        setIsRequestingLocation(false);
+        setShowLocationDialog(false);
+        
+        if (error.code === 1) { // PERMISSION_DENIED
           toast({
             variant: 'destructive',
             title: 'Permissão de localização negada',
-            description:
-              'Você pode ativá-la nas configurações do navegador para usar o SOS.',
+            description: 'Você pode ativá-la depois nas configurações se desejar usar o SOS.',
           });
         }
-        setShowProfileConfirmation(true); // Show final confirmation anyway
-      }
+        setShowProfileConfirmation(true);
+      },
+      { timeout: 8000 }
     );
   };
 
@@ -365,7 +376,7 @@ export default function OnboardingForm() {
       {/* Location Permission Dialog */}
       <AlertDialog
         open={showLocationDialog}
-        onOpenChange={setShowLocationDialog}
+        onOpenChange={isRequestingLocation ? () => {} : setShowLocationDialog}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -379,16 +390,20 @@ export default function OnboardingForm() {
               O MoodLua possui um botão de SOS para sua segurança. Para que ele
               funcione, precisamos da sua permissão para acessar a localização.
               Quando você acionar o SOS, um link do mapa com sua posição será
-              enviado para seus contatos de confiança. Seus dados são privados e
-              usados apenas em emergências.
+              enviado para seus contatos de confiança.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="sm:justify-center">
-            <AlertDialogCancel onClick={handleSkipLocation}>
+            <AlertDialogCancel onClick={handleSkipLocation} disabled={isRequestingLocation}>
               Pular por agora
             </AlertDialogCancel>
-            <AlertDialogAction onClick={handleLocationRequest}>
-              Permitir Localização
+            <AlertDialogAction onClick={handleLocationRequest} disabled={isRequestingLocation}>
+              {isRequestingLocation ? (
+                <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Solicitando...
+                </>
+              ) : 'Permitir Localização'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
