@@ -50,11 +50,11 @@ export function PeriodRegistrationModal({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const monthRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Gera uma lista de 6000 meses (500 anos) começando de Janeiro de 2024
-  // Isso cobre até o ano 2524, garantindo navegação de altíssimo longo prazo.
+  // Gera uma lista de 24.000 meses (2.000 anos) começando de Janeiro de 2024
+  // Isso cobre até o ano 4024, garantindo navegação para 2026 e muito além.
   const monthsToDisplay = React.useMemo(() => {
     const start = startOfMonth(new Date(2024, 0, 1));
-    return Array.from({ length: 6000 }).map((_, i) => addMonths(start, i));
+    return Array.from({ length: 24000 }).map((_, i) => addMonths(start, i));
   }, []);
 
   useEffect(() => {
