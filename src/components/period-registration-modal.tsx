@@ -21,7 +21,6 @@ import {
   startOfWeek,
   endOfWeek,
   format,
-  subMonths,
   isSameMonth,
   isToday,
 } from 'date-fns';
@@ -51,10 +50,11 @@ export function PeriodRegistrationModal({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const monthRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Gera uma lista de 120 meses (10 anos) começando de Janeiro de 2024
+  // Gera uma lista de 600 meses (50 anos) começando de Janeiro de 2024
+  // Isso cobre até meados de 2074, garantindo navegação de longo prazo.
   const monthsToDisplay = React.useMemo(() => {
     const start = startOfMonth(new Date(2024, 0, 1));
-    return Array.from({ length: 120 }).map((_, i) => addMonths(start, i));
+    return Array.from({ length: 600 }).map((_, i) => addMonths(start, i));
   }, []);
 
   useEffect(() => {
@@ -100,8 +100,10 @@ export function PeriodRegistrationModal({
         const newBlock: Date[] = [];
         for (let i = 0; i < flowDuration; i++) {
           const dateInBlock = addDays(dayStart, i);
+          // Permite registrar no futuro se necessário para ajustes de ciclo, 
+          // mas geralmente limitado a hoje para registros reais.
           if (!isAfter(dateInBlock, today)) {
-            newBlock.push(dateInBlock);
+             newBlock.push(dateInBlock);
           }
         }
 
@@ -146,10 +148,10 @@ export function PeriodRegistrationModal({
     (prevProps, nextProps) => {
       const month = prevProps.month;
       const prevInMonth = selectedDays.filter((d) =>
-        isSameDay(d, month)
+        isSameMonth(d, month)
       );
       const nextInMonth = selectedDays.filter((d) =>
-        isSameDay(d, nextProps.month)
+        isSameMonth(d, nextProps.month)
       );
       return prevInMonth.length === nextInMonth.length;
     }
