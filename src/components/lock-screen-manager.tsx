@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -33,13 +32,12 @@ import {
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Switch } from './ui/switch';
-import { LockKeyhole } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { LockKeyhole, Fingerprint } from 'lucide-react';
 
 const PIN_LENGTH = 4;
 
 export function LockScreenManager() {
-  const { userProfile, enableLock, disableLock } = useCycleData();
+  const { userProfile, enableLock, disableLock, enableBiometric } = useCycleData();
   const { toast } = useToast();
 
   const [isEnableDialogOpen, setIsEnableDialogOpen] = useState(false);
@@ -48,18 +46,23 @@ export function LockScreenManager() {
 
   const [newPin, setNewPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
-  const [currentPin, setCurrentPin] = useState('');
   const [error, setError] = useState('');
 
   const handleToggleSwitch = (checked: boolean) => {
     if (checked) {
-      // Trying to enable
       resetEnableForm();
       setIsEnableDialogOpen(true);
     } else {
-      // Trying to disable
       setIsDisableConfirmOpen(true);
     }
+  };
+
+  const handleToggleBiometric = (checked: boolean) => {
+    enableBiometric(checked);
+    toast({
+      title: checked ? 'Biometria ativada!' : 'Biometria desativada.',
+      description: checked ? 'Você poderá usar sua digital para desbloquear.' : 'Use apenas o PIN para acessar.',
+    });
   };
 
   const resetEnableForm = () => {
@@ -96,8 +99,6 @@ export function LockScreenManager() {
       setError('As senhas não correspondem.');
       return;
     }
-    // In a real app, you'd ask for the old PIN here.
-    // For simplicity, we just set the new one.
     enableLock(newPin);
     toast({ title: 'Senha alterada com sucesso!' });
     setIsChangeDialogOpen(false);
@@ -118,13 +119,13 @@ export function LockScreenManager() {
             Bloqueio de Tela
           </CardTitle>
           <CardDescription>
-            Proteja o acesso ao aplicativo com uma senha numérica.
+            Proteja o acesso ao aplicativo com senha e biometria.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
             <label htmlFor="lock-switch" className="font-medium">
-              Ativar senha
+              Ativar senha PIN
             </label>
             <Switch
               id="lock-switch"
@@ -132,8 +133,24 @@ export function LockScreenManager() {
               onCheckedChange={handleToggleSwitch}
             />
           </div>
+
           {userProfile?.isLockEnabled && (
-              <Button variant="outline" onClick={handleOpenChangeDialog}>Alterar Senha</Button>
+            <>
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Fingerprint className="w-4 h-4 text-primary" />
+                  <label htmlFor="biometric-switch" className="font-medium">
+                    Desbloqueio Digital
+                  </label>
+                </div>
+                <Switch
+                  id="biometric-switch"
+                  checked={userProfile?.isBiometricEnabled || false}
+                  onCheckedChange={handleToggleBiometric}
+                />
+              </div>
+              <Button variant="outline" className="w-full" onClick={handleOpenChangeDialog}>Alterar Senha PIN</Button>
+            </>
           )}
         </CardContent>
       </Card>
@@ -222,7 +239,7 @@ export function LockScreenManager() {
           <AlertDialogHeader>
             <AlertDialogTitle>Desativar o bloqueio de tela?</AlertDialogTitle>
             <AlertDialogDescription>
-              Se você desativar, o aplicativo não pedirá mais senha para abrir.
+              Se você desativar, o aplicativo não pedirá mais senha nem digital para abrir.
               Tem certeza que quer continuar?
             </AlertDialogDescription>
           </AlertDialogHeader>

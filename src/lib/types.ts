@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview Este arquivo define os tipos de dados centrais para o aplicativo MoodLua.
  * Usar tipos centralizados ajuda a manter a consistência e a prevenir erros em todo o código.
@@ -19,6 +18,7 @@ export type UserProfile = {
   cycleLengthDays: number;
   sosMessage?: string;
   isLockEnabled?: boolean;
+  isBiometricEnabled?: boolean;
   lockPin?: string;
 };
 

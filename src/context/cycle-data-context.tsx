@@ -55,7 +55,9 @@ interface CycleDataContextType {
   removeSosContact: (contactId: string) => void;
   enableLock: (pin: string) => void;
   disableLock: () => void;
+  enableBiometric: (enabled: boolean) => void;
   unlockApp: (pin: string) => boolean;
+  biometricUnlock: () => void;
 }
 
 const CycleDataContext = createContext<CycleDataContextType | undefined>(
@@ -79,7 +81,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
       const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (storedData) {
         const data: MoodLuaLocalData = JSON.parse(storedData);
-        // Data migration for 'energizada' to 'energetica' is handled in updateUserProfile now.
         setUserProfile(data.userProfile || null);
         setDailyLogs(data.dailyLogs || []);
         setCycleHistory(data.cycleHistory || []);
@@ -174,7 +175,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
                 flowIntensity: 'médio',
               });
             }
-            // Use functional update to ensure we're not overwriting other state changes
             setDailyLogs(currentLogs => [...currentLogs, ...newLogs]);
           }
           return newUserProfile;
@@ -286,8 +286,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
   
       const previousLmpDate = startOfDay(new Date(currentProfile.lastMenstruationDate + 'T00:00:00'));
         
-      // Only create a new history entry if the start date has actually changed,
-      // preventing duplicates but allowing recalculation.
       if (!isSameDay(newLmpDate, previousLmpDate)) {
         const lastCycleLength = differenceInDays(newLmpDate, previousLmpDate);
         if (lastCycleLength > 10) {
@@ -306,8 +304,6 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
         }
       }
       
-      // Always update the user profile to trigger a re-render with the new (or same) LMP.
-      // This ensures all components depending on cycle info are updated.
       return {
         ...currentProfile,
         lastMenstruationDate: format(newLmpDate, 'yyyy-MM-dd'),
@@ -402,11 +398,16 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
       setUserProfile((profile) => {
         if (!profile) return null;
         const { lockPin, ...rest } = profile;
-        return { ...rest, isLockEnabled: false, lockPin: undefined };
+        return { ...rest, isLockEnabled: false, lockPin: undefined, isBiometricEnabled: false };
       });
       setIsLocked(false);
     }, []);
 
+  const enableBiometric = useCallback((enabled: boolean) => {
+    setUserProfile((profile) =>
+      profile ? { ...profile, isBiometricEnabled: enabled } : null
+    );
+  }, []);
 
   const unlockApp = useCallback(
     (pin: string): boolean => {
@@ -418,6 +419,12 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     },
     [userProfile]
   );
+
+  const biometricUnlock = useCallback(() => {
+    if (userProfile?.isLockEnabled && userProfile?.isBiometricEnabled) {
+      setIsLocked(false);
+    }
+  }, [userProfile]);
 
   const value = {
     userProfile,
@@ -440,7 +447,9 @@ export function CycleDataProvider({ children }: { children: React.ReactNode }) {
     removeSosContact,
     enableLock,
     disableLock,
+    enableBiometric,
     unlockApp,
+    biometricUnlock,
   };
 
   return (
