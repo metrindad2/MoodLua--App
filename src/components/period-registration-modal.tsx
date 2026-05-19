@@ -9,7 +9,6 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import {
   isSameDay,
   startOfMonth,
@@ -50,10 +49,9 @@ export function PeriodRegistrationModal({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const monthRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Gera uma lista de 24.000 meses (2.000 anos) começando de Janeiro de 2024
-  // Isso cobre até o ano 4024, garantindo navegação para 2026 e muito além.
+  // Gera uma lista de 24.000 meses (2.000 anos) começando de Janeiro de 2026
   const monthsToDisplay = React.useMemo(() => {
-    const start = startOfMonth(new Date(2024, 0, 1));
+    const start = startOfMonth(new Date(2026, 0, 1));
     return Array.from({ length: 24000 }).map((_, i) => addMonths(start, i));
   }, []);
 
@@ -68,6 +66,8 @@ export function PeriodRegistrationModal({
 
   useEffect(() => {
     if (open) {
+      // Tenta rolar para o mês atual. Se o mês atual for anterior a 2026, 
+      // ele não estará na lista e nada acontecerá, o que é o comportamento esperado.
       const targetMonthKey = format(new Date(), 'yyyy-MM');
       const targetElement = monthRefs.current.get(targetMonthKey);
       setTimeout(() => {
@@ -101,9 +101,7 @@ export function PeriodRegistrationModal({
         for (let i = 0; i < flowDuration; i++) {
           const dateInBlock = addDays(dayStart, i);
           // Permite registrar no futuro se necessário para ajustes de ciclo.
-          if (!isAfter(dateInBlock, today)) {
-             newBlock.push(dateInBlock);
-          }
+          newBlock.push(dateInBlock);
         }
 
         const selectionTimeSet = new Set(currentSelection.map(d => d.getTime()));
@@ -256,7 +254,6 @@ const RegistrationCalendar = React.memo((props: CalendarProps) => {
           if (!isSameMonth(date, monthStart)) {
             return <div key={i} className="h-12" />;
           }
-          const isFuture = isAfter(startOfDay(date), startOfDay(new Date()));
           const isSelected = selectedDates?.some((d) => isSameDay(d, date));
           const dayIsToday = isToday(date);
 
@@ -267,9 +264,8 @@ const RegistrationCalendar = React.memo((props: CalendarProps) => {
             >
               <button
                 onClick={() => onDateClick && onDateClick(date)}
-                disabled={isFuture}
                 className={cn(
-                  'relative flex h-9 w-9 items-center justify-center rounded-full transition-colors text-sm font-medium disabled:cursor-not-allowed disabled:opacity-30',
+                  'relative flex h-9 w-9 items-center justify-center rounded-full transition-colors text-sm font-medium',
                    isSelected
                       ? 'bg-primary text-primary-foreground'
                       : 'border border-border hover:bg-accent',
