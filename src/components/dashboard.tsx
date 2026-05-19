@@ -98,7 +98,6 @@ function CycleSummary() {
 export default function Dashboard() {
   const { userProfile, dailyLogs, cycleHistory, savePeriodDays } = useCycleData();
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
-  // State to manage the currently displayed month
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
 
   if (!userProfile) return null;
@@ -116,7 +115,6 @@ export default function Dashboard() {
     ? 'Fase Lútea (TPM)'
     : 'Fase Folicular';
 
-  // Calculate predictions dynamically for the calendar based on the current month
   const predictions = useMemo(() => {
     if (!userProfile)
       return { previsionRanges: [], fertileWindows: [], ovulationDates: [] };
@@ -132,17 +130,17 @@ export default function Dashboard() {
     const fertileWindows: { from: Date; to: Date }[] = [];
     const ovulationDates: Date[] = [];
 
-    // Start projecting from a point before the displayed month to catch overlaps
+    // Ajusta o ponto de partida das projeções para o mês sendo visualizado
     let periodStart = lastPeriodDate;
-    while (
-      addDays(periodStart, cycleLengthDays) <
-      startOfMonth(subMonths(currentMonth, 1))
-    ) {
+    const targetStart = startOfMonth(subMonths(currentMonth, 1));
+    
+    // "Corre" o ciclo até chegar próximo ao mês atual para gerar previsões precisas
+    while (addDays(periodStart, cycleLengthDays) < targetStart) {
       periodStart = addDays(periodStart, cycleLengthDays);
     }
 
-    // Generate predictions for a few cycles to cover the screen
-    for (let i = 0; i < 4; i++) {
+    // Gera previsões para os próximos 6 ciclos para garantir cobertura total da visualização
+    for (let i = 0; i < 6; i++) {
       const nextPeriod = addDays(periodStart, cycleLengthDays * i);
 
       previsionRanges.push({
@@ -162,7 +160,7 @@ export default function Dashboard() {
   }, [currentMonth, userProfile]);
 
   const highlightedDays = dailyLogs
-    .filter((log) => log.isPeriodDay) // Alterado para usar a nova flag
+    .filter((log) => log.isPeriodDay)
     .map((log) => startOfDay(new Date(log.date + 'T00:00:00')));
 
   const sortedHistory = [...cycleHistory]
@@ -173,7 +171,6 @@ export default function Dashboard() {
     )
     .slice(0, 1);
 
-  // Functions to navigate between months
   const handlePrevMonth = () => {
     setCurrentMonth(subMonths(currentMonth, 1));
   };

@@ -31,7 +31,6 @@ import { X, Save } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { SimpleCalendar } from './simple-calendar';
 import { CalendarProps, calendarCompare } from './simple-calendar-logic';
 
 interface PeriodRegistrationModalProps {
@@ -52,9 +51,10 @@ export function PeriodRegistrationModal({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const monthRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
+  // Gera uma lista de 120 meses (10 anos) começando de Janeiro de 2024
   const monthsToDisplay = React.useMemo(() => {
-    const start = startOfMonth(subMonths(new Date(), 12));
-    return Array.from({ length: 25 }).map((_, i) => addMonths(start, i));
+    const start = startOfMonth(new Date(2024, 0, 1));
+    return Array.from({ length: 120 }).map((_, i) => addMonths(start, i));
   }, []);
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export function PeriodRegistrationModal({
 
   const handleDayClick = useCallback((day: Date) => {
     const dayStart = startOfDay(day);
-    const flowDuration = userProfile?.flowDurationDays || 5; // Default to 5
+    const flowDuration = userProfile?.flowDurationDays || 5;
     const today = startOfDay(new Date());
 
     setSelectedDays((currentSelection) => {
@@ -95,20 +95,16 @@ export function PeriodRegistrationModal({
       );
 
       if (isAlreadySelected) {
-        // If a day in a block is deselected, remove only that day for fine-tuning
         return currentSelection.filter((d) => !isSameDay(d, dayStart));
       } else {
-        // When a new day is selected, add a block of `flowDuration` days
         const newBlock: Date[] = [];
         for (let i = 0; i < flowDuration; i++) {
           const dateInBlock = addDays(dayStart, i);
-          // Don't add days in the future
           if (!isAfter(dateInBlock, today)) {
             newBlock.push(dateInBlock);
           }
         }
 
-        // Merge the new block with the existing selection, avoiding duplicates.
         const selectionTimeSet = new Set(currentSelection.map(d => d.getTime()));
         newBlock.forEach(d => selectionTimeSet.add(d.getTime()));
 
@@ -174,7 +170,7 @@ export function PeriodRegistrationModal({
               Registrar Menstruação
             </DialogTitle>
           </div>
-          <div className="w-10" /> {/* Spacer */}
+          <div className="w-10" />
         </DialogHeader>
 
         <ScrollArea ref={scrollContainerRef} className="flex-1">
