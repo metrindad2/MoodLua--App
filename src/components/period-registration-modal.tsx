@@ -30,6 +30,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { CalendarProps, calendarCompare } from './simple-calendar-logic';
+import { Button } from './ui/button';
 
 interface PeriodRegistrationModalProps {
   open: boolean;
@@ -49,10 +50,10 @@ export function PeriodRegistrationModal({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const monthRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Gera uma lista de 24.000 meses (2.000 anos) começando de Janeiro de 2026
+  // Gera uma lista de 1.200.000 meses (100.000 anos) começando de Janeiro de 2026
   const monthsToDisplay = React.useMemo(() => {
     const start = startOfMonth(new Date(2026, 0, 1));
-    return Array.from({ length: 24000 }).map((_, i) => addMonths(start, i));
+    return Array.from({ length: 1200000 }).map((_, i) => addMonths(start, i));
   }, []);
 
   useEffect(() => {
@@ -66,10 +67,12 @@ export function PeriodRegistrationModal({
 
   useEffect(() => {
     if (open) {
-      // Tenta rolar para o mês atual. Se o mês atual for anterior a 2026, 
-      // ele não estará na lista e nada acontecerá, o que é o comportamento esperado.
-      const targetMonthKey = format(new Date(), 'yyyy-MM');
+      // Tenta rolar para o mês atual ou o início de 2026.
+      const now = new Date();
+      const targetDate = isAfter(now, new Date(2026, 0, 1)) ? now : new Date(2026, 0, 1);
+      const targetMonthKey = format(targetDate, 'yyyy-MM');
       const targetElement = monthRefs.current.get(targetMonthKey);
+      
       setTimeout(() => {
         if (targetElement && scrollContainerRef.current) {
           const viewport = scrollContainerRef.current.querySelector(
@@ -87,7 +90,6 @@ export function PeriodRegistrationModal({
   const handleDayClick = useCallback((day: Date) => {
     const dayStart = startOfDay(day);
     const flowDuration = userProfile?.flowDurationDays || 5;
-    const today = startOfDay(new Date());
 
     setSelectedDays((currentSelection) => {
       const isAlreadySelected = currentSelection.some((d) =>
@@ -100,7 +102,6 @@ export function PeriodRegistrationModal({
         const newBlock: Date[] = [];
         for (let i = 0; i < flowDuration; i++) {
           const dateInBlock = addDays(dayStart, i);
-          // Permite registrar no futuro se necessário para ajustes de ciclo.
           newBlock.push(dateInBlock);
         }
 
