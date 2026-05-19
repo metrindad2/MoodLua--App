@@ -14,7 +14,6 @@ import {
   startOfMonth,
   startOfDay,
   addMonths,
-  isAfter,
   addDays,
   endOfMonth,
   startOfWeek,
@@ -50,9 +49,9 @@ export function PeriodRegistrationModal({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const monthRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Gera uma lista de 1.200.000 meses (100.000 anos) começando de Janeiro de 2026
+  // Gera uma lista de 1.200.000 meses (100.000 anos) começando do mês atual
   const monthsToDisplay = React.useMemo(() => {
-    const start = startOfMonth(new Date(2026, 0, 1));
+    const start = startOfMonth(new Date());
     return Array.from({ length: 1200000 }).map((_, i) => addMonths(start, i));
   }, []);
 
@@ -67,10 +66,9 @@ export function PeriodRegistrationModal({
 
   useEffect(() => {
     if (open) {
-      // Tenta rolar para o mês atual ou o início de 2026.
+      // Rola para o mês atual
       const now = new Date();
-      const targetDate = isAfter(now, new Date(2026, 0, 1)) ? now : new Date(2026, 0, 1);
-      const targetMonthKey = format(targetDate, 'yyyy-MM');
+      const targetMonthKey = format(now, 'yyyy-MM');
       const targetElement = monthRefs.current.get(targetMonthKey);
       
       setTimeout(() => {
@@ -79,11 +77,12 @@ export function PeriodRegistrationModal({
             '[data-radix-scroll-area-viewport]'
           );
           if (viewport) {
-            viewport.scrollTop =
-              targetElement.offsetTop - viewport.clientHeight / 2;
+            // Centraliza o mês atual na tela
+            (viewport as HTMLDivElement).scrollTop =
+              targetElement.offsetTop - (viewport as HTMLDivElement).clientHeight / 4;
           }
         }
-      }, 150);
+      }, 200);
     }
   }, [open]);
 
