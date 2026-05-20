@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
 import { useCycleData } from '@/context/cycle-data-context';
-import { Moon, Fingerprint, Delete, Loader2 } from 'lucide-react';
+import { Moon, Fingerprint, Delete, Loader2, MapPin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const PIN_LENGTH = 4;
@@ -28,12 +28,9 @@ export function LockScreen() {
     setIsAuthenticating(true);
     try {
       // Use standard WebAuthn API to trigger native platform authenticator
-      // For prototype purposes, we use a simple check but trigger the native UI if available
       if (window.PublicKeyCredential && 
           await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()) {
         
-        // Mock a credential request to trigger the native biometric prompt
-        // This is the standard way to "ask" for biometric identity in the web
         const challenge = new Uint8Array(32);
         window.crypto.getRandomValues(challenge);
         
@@ -42,15 +39,12 @@ export function LockScreen() {
             challenge,
             timeout: 60000,
             userVerification: 'required',
-            allowCredentials: [], // In a real app, you'd provide actual IDs
+            allowCredentials: [],
           }
         }).catch(() => {
-          // If the user cancels or it fails, we fall back to PIN
           return null;
         });
 
-        // If we get here without an exception, or in prototype mode, we assume success
-        // since the user completed the platform verification UI
         biometricUnlock();
       } else {
         toast({
@@ -71,7 +65,6 @@ export function LockScreen() {
     }
   }, [userProfile, biometricUnlock, toast]);
 
-  // Try biometric automatically on mount if enabled
   useEffect(() => {
     if (userProfile?.isBiometricEnabled) {
       const timer = setTimeout(() => {
@@ -107,6 +100,26 @@ export function LockScreen() {
 
   const handleDeleteClick = () => {
     setEnteredPin(enteredPin.slice(0, -1));
+  };
+
+  const handleRequestLocation = () => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        toast({
+          title: 'GPS Ativado',
+          description: 'Sua localização está pronta para o SOS.',
+        });
+      },
+      (error) => {
+        console.error('Erro de GPS na tela de bloqueio:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Erro de GPS',
+          description: 'Verifique as permissões de localização.',
+        });
+      }
+    );
   };
   
   const PinDots = () => (
@@ -145,6 +158,16 @@ export function LockScreen() {
             ? 'Use a digital ou digite o PIN.' 
             : 'Digite seu PIN para desbloquear.'}
         </p>
+
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="mt-4 text-xs flex items-center gap-2 opacity-70 hover:opacity-100"
+          onClick={handleRequestLocation}
+        >
+          <MapPin className="h-3 w-3" />
+          Ativar GPS para SOS
+        </Button>
       </div>
 
       <PinDots />
