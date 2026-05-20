@@ -29,6 +29,7 @@ import {
 import Link from 'next/link';
 import { CycleProgress } from './cycle-progress';
 import { CalendarLegend } from './calendar-legend';
+import { LocationManager } from './location-manager';
 
 function CycleSummary() {
   const { userProfile, dailyLogs } = useCycleData();
@@ -189,6 +190,8 @@ export default function Dashboard() {
           daysUntilNext={cycleInfo.daysUntilNextPeriod}
         />
         
+        <LocationManager />
+
         <CycleSummary />
 
         <Card>

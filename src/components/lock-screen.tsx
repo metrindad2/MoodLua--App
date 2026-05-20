@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
 import { useCycleData } from '@/context/cycle-data-context';
-import { Moon, Fingerprint, Delete, Loader2, MapPin } from 'lucide-react';
+import { Moon, Fingerprint, Delete, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const PIN_LENGTH = 4;
@@ -102,26 +102,6 @@ export function LockScreen() {
     setEnteredPin(enteredPin.slice(0, -1));
   };
 
-  const handleRequestLocation = () => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      () => {
-        toast({
-          title: 'GPS Ativado',
-          description: 'Sua localização está pronta para o SOS.',
-        });
-      },
-      (error) => {
-        console.error('Erro de GPS na tela de bloqueio:', error);
-        toast({
-          variant: 'destructive',
-          title: 'Erro de GPS',
-          description: 'Verifique as permissões de localização.',
-        });
-      }
-    );
-  };
-  
   const PinDots = () => (
     <div
       className={cn(
@@ -158,16 +138,6 @@ export function LockScreen() {
             ? 'Use a digital ou digite o PIN.' 
             : 'Digite seu PIN para desbloquear.'}
         </p>
-
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="mt-4 text-xs flex items-center gap-2 opacity-70 hover:opacity-100"
-          onClick={handleRequestLocation}
-        >
-          <MapPin className="h-3 w-3" />
-          Ativar GPS para SOS
-        </Button>
       </div>
 
       <PinDots />
