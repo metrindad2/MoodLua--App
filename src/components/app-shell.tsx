@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -18,9 +17,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { userProfile, loading: isDataLoading, isLocked } = useCycleData();
 
   useEffect(() => {
+    // Optimized splash time for better perceived speed
     const splashTimer = setTimeout(() => {
       setIsSplashing(false);
-    }, 1800);
+    }, 1000);
     return () => clearTimeout(splashTimer);
   }, []);
 
@@ -40,13 +40,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // If lock is enabled and the app is locked, show the lock screen.
-  // This takes precedence over onboarding and the main app.
   if (userProfile && userProfile.isLockEnabled && isLocked) {
     return <LockScreen />;
   }
 
-  // Onboarding view without the main app shell.
   if (!userProfile) {
     return (
       <div className="relative flex min-h-dvh w-full flex-col items-center justify-center bg-moodlua-gradient p-4">
@@ -62,7 +59,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
 
-  // Full app shell for logged-in users.
   return (
     <div className="relative flex min-h-dvh w-full flex-col bg-moodlua-gradient">
       <div className="mx-auto w-full max-w-md flex-1 flex flex-col">
@@ -79,7 +75,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
-      {/* SOS Button, globally available */}
       <SosModal />
 
       <footer className="fixed bottom-0 z-50 w-full shrink-0 bg-card/70 backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
