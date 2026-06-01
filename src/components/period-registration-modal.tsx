@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -49,12 +50,11 @@ export function PeriodRegistrationModal({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const monthRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Optimized month generation. 1.2M is huge, but we memoize it to avoid re-calculating.
-  // We cap it to a slightly more realistic but still massive 120,000 months (10,000 years)
-  // for actual stability in the DOM.
+  // Optimized month generation. 
+  // Capping at 12,000 months (1,000 years) to ensure high performance while feeling "infinite".
   const monthsToDisplay = useMemo(() => {
     const start = startOfMonth(new Date());
-    return Array.from({ length: 120000 }).map((_, i) => addMonths(start, i));
+    return Array.from({ length: 12000 }).map((_, i) => addMonths(start, i));
   }, []);
 
   useEffect(() => {
@@ -132,8 +132,8 @@ export function PeriodRegistrationModal({
             if (el) monthRefs.current.set(monthKey, el);
             else monthRefs.current.delete(monthKey);
           }}
-          className="content-visibility-auto" // Hint for browser to skip rendering off-screen months
-          style={{ containIntrinsicSize: '0 300px' }}
+          className="content-visibility-auto"
+          style={{ containIntrinsicSize: '300px' }}
         >
           <RegistrationCalendar
             initialDate={month}
@@ -144,11 +144,8 @@ export function PeriodRegistrationModal({
       );
     },
     (prev, next) => {
-      // Deep comparison optimization: only re-render if a day in THIS month was toggled
-      const m = prev.month;
-      const prevInMonth = selectedDays.some(d => isSameMonth(d, m));
-      // This is a simplified check, ideally we'd compare the specific set of selected days for this month
-      return false; // Force re-render for simplicity, but content-visibility helps
+      // Logic for memoization could be more complex, but content-visibility handles most performance.
+      return prev.month.getTime() === next.month.getTime();
     }
   );
   MemoizedCalendar.displayName = 'MemoizedCalendar';

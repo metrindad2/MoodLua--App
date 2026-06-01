@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -17,10 +18,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { userProfile, loading: isDataLoading, isLocked } = useCycleData();
 
   useEffect(() => {
-    // Optimized splash time for better perceived speed
+    // Faster splash screen for better performance perception
     const splashTimer = setTimeout(() => {
       setIsSplashing(false);
-    }, 1000);
+    }, 800);
     return () => clearTimeout(splashTimer);
   }, []);
 
