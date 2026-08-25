@@ -1,8 +1,7 @@
-
 'use client';
 
 import Link from 'next/link';
-import { Droplet, Baby, Settings, History, Moon } from 'lucide-react';
+import { Droplet, Baby, Settings, History, Moon, ShieldCheck } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useCycleData } from '@/context/cycle-data-context';
@@ -21,7 +20,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     // Faster splash screen for better performance perception
     const splashTimer = setTimeout(() => {
       setIsSplashing(false);
-    }, 800);
+    }, 1000);
     return () => clearTimeout(splashTimer);
   }, []);
 
@@ -56,6 +55,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: '/', label: 'Ciclo', icon: Droplet },
     { href: '/history', label: 'Histórico', icon: History },
+    { href: '/protecao', label: 'Proteção', icon: ShieldCheck },
     { href: '/pregnancy', label: 'Gravidez', icon: Baby },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
@@ -79,19 +79,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <SosModal />
 
       <footer className="fixed bottom-0 z-50 w-full shrink-0 bg-card/70 backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
-        <nav className="mx-auto grid grid-cols-4 max-w-md items-center justify-around px-2 pt-1">
+        <nav className="mx-auto grid grid-cols-5 max-w-md items-center justify-around px-2 pt-1">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                'flex h-16 w-full flex-col items-center justify-center gap-1 rounded-xl p-2 text-center text-xs font-medium transition-colors relative',
+                'flex h-16 w-full flex-col items-center justify-center gap-1 rounded-xl p-2 text-center text-[10px] font-medium transition-colors relative',
                 pathname === item.href
                   ? 'text-primary'
                   : 'text-muted-foreground hover:bg-accent'
               )}
             >
-              <item.icon className="h-5 w-5 mb-0.5" />
+              <item.icon className={cn("h-5 w-5 mb-0.5", pathname === item.href && "text-primary")} />
               <span>{item.label}</span>
               {pathname === item.href && <div className="absolute bottom-1.5 h-1 w-8 rounded-full bg-primary" />}
             </Link>

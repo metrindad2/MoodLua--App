@@ -31,3 +31,12 @@ export const PREDEFINED_CONTACTS = [
     isPredefined: true,
   },
 ];
+
+export const OFFICIAL_LINKS = {
+  SP_MULHER_SEGURA: 'https://www.saopaulo.sp.gov.br/spmulhersegura/',
+  DDM_ONLINE: 'https://www.delegaciaeletronica.policiacivil.sp.gov.br/ssp-de-cidadao/pages/elucidacao/mulher',
+  DEFENSORIA: 'https://www.defensoria.sp.def.br/',
+  MP_SP: 'https://www.mpsp.mp.br/',
+  SAUDE_SP: 'https://www.saude.sp.gov.br/',
+  ASSISTENCIA_SOCIAL: 'https://www.desenvolvimentosocial.sp.gov.br/'
+};
