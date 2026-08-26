@@ -12,20 +12,21 @@ import {
   Building2, 
   HeartPulse, 
   HandHelping,
-  PhoneCall,
   AlertTriangle,
-  ShieldAlert
+  ShieldAlert,
+  Smartphone,
+  AppWindow,
+  Users
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { OFFICIAL_LINKS, PREDEFINED_CONTACTS } from '@/lib/config';
-import { cn } from '@/lib/utils';
 
 export default function ProtecaoPage() {
   return (
     <div className="p-4 space-y-8 pb-10">
-      {/* 3. HERO / CABEÇALHO */}
+      {/* HERO / CABEÇALHO */}
       <section className="text-center space-y-4 py-6">
         <div className="flex justify-center mb-2">
           <div className="relative">
@@ -49,7 +50,7 @@ export default function ProtecaoPage() {
         </Button>
       </section>
 
-      {/* 4. CARD SP MULHER SEGURA */}
+      {/* CARD SP MULHER SEGURA */}
       <Card className="border-primary/20 shadow-xl overflow-hidden relative">
         <div className="absolute top-0 right-0 p-4">
            <Badge variant="secondary" className="bg-primary/10 text-primary border-none">Oficial</Badge>
@@ -84,17 +85,28 @@ export default function ProtecaoPage() {
             ))}
           </div>
 
-          <div className="bg-muted/50 p-4 rounded-lg text-xs text-muted-foreground">
-            <p>
-              * Algumas funcionalidades dependem da situação da usuária e dos requisitos definidos pelo serviço oficial do Governo de SP.
-            </p>
+          <div className="bg-primary/5 p-4 rounded-xl space-y-3 border border-primary/10">
+            <h4 className="text-sm font-bold flex items-center gap-2">
+              <Smartphone className="w-4 h-4" /> Baixe o Aplicativo Oficial
+            </h4>
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" size="sm" className="h-10 text-xs gap-2" asChild>
+                <a href={OFFICIAL_LINKS.SP_MULHER_IOS} target="_blank" rel="noopener noreferrer">
+                  <AppWindow className="w-4 h-4" /> iOS
+                </a>
+              </Button>
+              <Button variant="outline" size="sm" className="h-10 text-xs gap-2" asChild>
+                <a href={OFFICIAL_LINKS.SP_MULHER_ANDROID} target="_blank" rel="noopener noreferrer">
+                  <AppWindow className="w-4 h-4" /> Android
+                </a>
+              </Button>
+            </div>
           </div>
 
-          {/* 5. BOTÃO DE ACESSO */}
           <div className="space-y-3">
             <Button asChild size="lg" className="w-full bg-primary hover:bg-primary/90 text-lg py-7 rounded-xl shadow-md">
               <a href={OFFICIAL_LINKS.SP_MULHER_SEGURA} target="_blank" rel="noopener noreferrer">
-                Acessar SP Mulher Segura
+                Site SP Mulher Segura
               </a>
             </Button>
             <p className="text-[10px] text-center text-muted-foreground italic">
@@ -104,11 +116,17 @@ export default function ProtecaoPage() {
         </CardContent>
       </Card>
 
-      {/* 6. SEÇÃO REDE DE PROTEÇÃO */}
+      {/* SEÇÃO REDE DE PROTEÇÃO */}
       <section className="space-y-4">
-        <h2 className="text-xl font-bold px-1">Você também pode encontrar ajuda na rede de proteção</h2>
+        <h2 className="text-xl font-bold px-1 text-primary">Rede de Proteção e Apoio</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
+            { 
+              name: 'As Justiceiras', 
+              icon: Users, 
+              desc: 'Rede de apoio multidisciplinar com advogadas, psicólogas e assistentes sociais voluntárias.',
+              link: OFFICIAL_LINKS.JUSTICEIRAS
+            },
             { 
               name: 'Delegacia da Mulher — DDM', 
               icon: Building2, 
@@ -116,37 +134,31 @@ export default function ProtecaoPage() {
               link: OFFICIAL_LINKS.DDM_ONLINE
             },
             { 
-              name: 'Delegacia de Polícia', 
-              icon: ShieldAlert, 
-              desc: 'Qualquer unidade policial pode realizar o atendimento inicial.',
-              link: 'https://www.policiacivil.sp.gov.br/'
-            },
-            { 
               name: 'Defensoria Pública', 
               icon: Scale, 
-              desc: 'Orientação e assistência jurídica gratuita para quem precisa.',
+              desc: 'Orientação e assistência jurídica gratuita para mulheres que não podem pagar.',
               link: OFFICIAL_LINKS.DEFENSORIA
             },
             { 
               name: 'Ministério Público', 
               icon: FileText, 
-              desc: 'Atua na fiscalização da lei e garantia dos seus direitos.',
+              desc: 'Fiscalização da lei e promoção de medidas de proteção à vida.',
               link: OFFICIAL_LINKS.MP_SP
             },
             { 
-              name: 'Saúde', 
+              name: 'Unidades de Saúde', 
               icon: HeartPulse, 
-              desc: 'Acolhimento médico e psicológico em unidades do SUS.',
+              desc: 'Acolhimento médico e psicológico em unidades do SUS e hospitais.',
               link: OFFICIAL_LINKS.SAUDE_SP
             },
             { 
               name: 'Assistência Social', 
               icon: HandHelping, 
-              desc: 'Apoio social e acompanhamento especializado (CRAS/CREAS).',
+              desc: 'Apoio social através dos CRAS e CREAS em todo o estado.',
               link: OFFICIAL_LINKS.ASSISTENCIA_SOCIAL
             }
           ].map((item, i) => (
-            <Card key={i} className="hover:border-primary/40 transition-colors">
+            <Card key={i} className="hover:border-primary/40 transition-colors border-primary/10 shadow-sm">
               <CardHeader className="p-4 pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
                   <item.icon className="w-5 h-5 text-primary" />
@@ -154,7 +166,7 @@ export default function ProtecaoPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0 space-y-3">
-                <p className="text-xs text-muted-foreground">{item.desc}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
                 <Button variant="ghost" size="sm" className="h-8 text-xs p-0 text-primary hover:bg-transparent" asChild>
                   <a href={item.link} target="_blank" rel="noopener noreferrer">
                     Saiba mais <ExternalLink className="ml-1 w-3 h-3" />
@@ -166,18 +178,18 @@ export default function ProtecaoPage() {
         </div>
       </section>
 
-      {/* 7. SEÇÃO SE VOCÊ ESTÁ EM PERIGO */}
-      <section className="bg-destructive/10 border-l-4 border-destructive p-6 rounded-r-xl space-y-4">
+      {/* SEÇÃO SE VOCÊ ESTÁ EM PERIGO */}
+      <section className="bg-destructive/10 border-l-4 border-destructive p-6 rounded-r-xl space-y-4 shadow-sm">
         <div className="flex items-center gap-3">
           <AlertTriangle className="w-8 h-8 text-destructive" />
           <h2 className="text-lg font-bold text-destructive">Se você está em perigo</h2>
         </div>
         <p className="text-sm font-medium">
-          Se você estiver em perigo imediato, procure ajuda de emergência através dos canais oficiais:
+          Procure ajuda de emergência através dos canais oficiais:
         </p>
         <div className="grid grid-cols-2 gap-3">
           {PREDEFINED_CONTACTS.map((contact) => (
-            <Button key={contact.id} variant="outline" className="border-destructive/30 hover:bg-destructive/5" asChild>
+            <Button key={contact.id} variant="outline" className="border-destructive/30 hover:bg-destructive/5 bg-background" asChild>
               <a href={`tel:${contact.phone}`} className="flex flex-col items-center justify-center gap-1 h-auto py-3">
                 <span className="text-xl font-bold text-destructive">{contact.phone}</span>
                 <span className="text-[10px] uppercase font-bold text-muted-foreground">{contact.name}</span>
@@ -187,14 +199,14 @@ export default function ProtecaoPage() {
         </div>
       </section>
 
-      {/* 8. SEÇÃO INFORMATIVA */}
-      <footer className="bg-muted/30 p-6 rounded-xl space-y-3 text-center">
+      {/* FOOTER INFORMATIVO */}
+      <footer className="bg-muted/30 p-6 rounded-xl space-y-3 text-center border border-muted">
         <h3 className="text-sm font-bold flex items-center justify-center gap-2">
           <Info className="w-4 h-4 text-primary" />
           O Mood Lua não substitui os serviços oficiais
         </h3>
         <p className="text-xs text-muted-foreground leading-relaxed">
-          O Mood Lua oferece informação, orientação e acesso a conteúdos de apoio. Em situações que exigem atendimento policial, médico, jurídico ou assistencial, procure sempre os serviços oficiais responsáveis citados nesta página.
+          O Mood Lua oferece informação e apoio. Em situações que exigem atendimento policial, médico, jurídico ou assistencial, procure sempre os serviços oficiais citados nesta página.
         </p>
       </footer>
     </div>

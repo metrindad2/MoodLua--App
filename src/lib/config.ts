@@ -13,6 +13,12 @@ export const PREDEFINED_CONTACTS = [
     isPredefined: true,
   },
   {
+    id: 'predefined-153',
+    name: 'GCM (Guarda Municipal)',
+    phone: '153',
+    isPredefined: true,
+  },
+  {
     id: 'predefined-192',
     name: 'SAMU (Emergência Médica)',
     phone: '192',
@@ -26,7 +32,7 @@ export const PREDEFINED_CONTACTS = [
   },
   {
     id: 'predefined-180',
-    name: 'Central de Atendimento à Mulher',
+    name: 'Central da Mulher',
     phone: '180',
     isPredefined: true,
   },
@@ -34,6 +40,9 @@ export const PREDEFINED_CONTACTS = [
 
 export const OFFICIAL_LINKS = {
   SP_MULHER_SEGURA: 'https://www.saopaulo.sp.gov.br/spmulhersegura/',
+  SP_MULHER_IOS: 'https://apps.apple.com/br/app/sp-mulher-segura/id6475302636',
+  SP_MULHER_ANDROID: 'https://play.google.com/store/apps/details?id=br.gov.sp.seguranca.spmulher',
+  JUSTICEIRAS: 'https://justiceiras.org.br/',
   DDM_ONLINE: 'https://www.delegaciaeletronica.policiacivil.sp.gov.br/ssp-de-cidadao/pages/elucidacao/mulher',
   DEFENSORIA: 'https://www.defensoria.sp.def.br/',
   MP_SP: 'https://www.mpsp.mp.br/',
