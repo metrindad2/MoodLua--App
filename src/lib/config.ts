@@ -41,7 +41,7 @@ export const PREDEFINED_CONTACTS = [
 export const OFFICIAL_LINKS = {
   SP_MULHER_SEGURA: 'https://www.saopaulo.sp.gov.br/spmulhersegura/',
   SP_MULHER_IOS: 'https://apps.apple.com/br/app/sp-mulher-segura/id6475302636',
-  SP_MULHER_ANDROID: 'https://play.google.com/store/apps/details?id=br.gov.sp.seguranca.spmulher',
+  SP_MULHER_ANDROID: 'https://play.google.com/store/apps/details?id=br.gov.sp.ssp.spmulher',
   JUSTICEIRAS: 'https://justiceiras.org.br/',
   DDM_ONLINE: 'https://www.delegaciaeletronica.policiacivil.sp.gov.br/ssp-de-cidadao/pages/elucidacao/mulher',
   DEFENSORIA: 'https://www.defensoria.sp.def.br/',
