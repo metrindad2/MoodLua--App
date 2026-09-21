@@ -17,10 +17,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { userProfile, loading: isDataLoading, isLocked } = useCycleData();
 
   useEffect(() => {
-    // Faster splash screen for better performance perception
+    // Ultra fast splash screen for instant performance perception
     const splashTimer = setTimeout(() => {
       setIsSplashing(false);
-    }, 1000);
+    }, 500);
     return () => clearTimeout(splashTimer);
   }, []);
 

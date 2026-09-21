@@ -50,10 +50,10 @@ export function PeriodRegistrationModal({
   const monthRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   // Optimized month generation. 
-  // Capping at 12,000 months (1,000 years) to ensure high performance while feeling "infinite".
+  // Capping at 1,200 months (100 years) to ensure high performance and fluid experience.
   const monthsToDisplay = useMemo(() => {
     const start = startOfMonth(new Date());
-    return Array.from({ length: 12000 }).map((_, i) => addMonths(start, i));
+    return Array.from({ length: 1200 }).map((_, i) => addMonths(start, i));
   }, []);
 
   useEffect(() => {
@@ -143,7 +143,6 @@ export function PeriodRegistrationModal({
       );
     },
     (prev, next) => {
-      // Logic for memoization could be more complex, but content-visibility handles most performance.
       return prev.month.getTime() === next.month.getTime();
     }
   );
