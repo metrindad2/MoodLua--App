@@ -1,4 +1,4 @@
-// Este arquivo pode ser usado para futuras configurações do aplicativo.
+// Este arquivo centraliza as configurações e links oficiais do aplicativo.
 export const DEFAULT_SOS_MESSAGE = `🚨 SOS – Preciso de ajuda agora!
 Estou em uma situação de risco e enviei este alerta pelo aplicativo.
 📍 Minha localização atual é: {{localizacao}}
