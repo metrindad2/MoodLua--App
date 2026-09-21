@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
 import { useCycleData } from '@/context/cycle-data-context';
 import { Moon, Fingerprint, Delete, Loader2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
 const PIN_LENGTH = 4;
 
@@ -14,20 +13,12 @@ export function LockScreen() {
   const [isShaking, setIsShaking] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const { unlockApp, userProfile, biometricUnlock } = useCycleData();
-  const { toast } = useToast();
 
   const handleBiometricClick = useCallback(async () => {
-    if (!userProfile?.isBiometricEnabled) {
-      toast({
-        title: 'Biometria não configurada',
-        description: 'Ative o desbloqueio por digital nos ajustes.',
-      });
-      return;
-    }
+    if (!userProfile?.isBiometricEnabled) return;
 
     setIsAuthenticating(true);
     try {
-      // Use standard WebAuthn API to trigger native platform authenticator
       if (window.PublicKeyCredential && 
           await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()) {
         
@@ -41,29 +32,16 @@ export function LockScreen() {
             userVerification: 'required',
             allowCredentials: [],
           }
-        }).catch(() => {
-          return null;
-        });
+        }).catch(() => null);
 
         biometricUnlock();
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Erro de biometria',
-          description: 'Seu dispositivo não suporta autenticação biométrica web.',
-        });
       }
     } catch (err) {
       console.error('Biometric error:', err);
-      toast({
-        variant: 'destructive',
-        title: 'Falha na autenticação',
-        description: 'Não foi possível verificar sua identidade.',
-      });
     } finally {
       setIsAuthenticating(false);
     }
-  }, [userProfile, biometricUnlock, toast]);
+  }, [userProfile, biometricUnlock]);
 
   useEffect(() => {
     if (userProfile?.isBiometricEnabled) {
@@ -79,18 +57,13 @@ export function LockScreen() {
       const isSuccess = unlockApp(enteredPin);
       if (!isSuccess) {
         setIsShaking(true);
-        toast({
-          variant: 'destructive',
-          title: 'Senha incorreta',
-          description: 'Por favor, tente novamente.',
-        });
         setTimeout(() => {
           setIsShaking(false);
           setEnteredPin('');
         }, 820);
       }
     }
-  }, [enteredPin, unlockApp, toast]);
+  }, [enteredPin, unlockApp]);
 
   const handleNumberClick = (num: string) => {
     if (enteredPin.length < PIN_LENGTH) {
@@ -105,7 +78,7 @@ export function LockScreen() {
   const PinDots = () => (
     <div
       className={cn(
-        'flex items-center justify-center gap-4 my-8',
+        'flex items-center justify-center gap-6 my-12',
         isShaking && 'animate-shake'
       )}
     >
@@ -113,8 +86,8 @@ export function LockScreen() {
         <div
           key={i}
           className={cn(
-            'h-4 w-4 rounded-full border-2 border-primary transition-colors',
-            i < enteredPin.length ? 'bg-primary' : 'bg-transparent'
+            'h-3 w-3 rounded-full border-2 border-primary transition-all duration-200',
+            i < enteredPin.length ? 'bg-primary scale-125' : 'bg-transparent'
           )}
         />
       ))}
@@ -129,34 +102,42 @@ export function LockScreen() {
   ];
 
   return (
-    <div className="relative flex h-dvh w-full flex-col items-center justify-center overflow-hidden bg-moodlua-gradient text-foreground p-4">
-      <div className="flex flex-col items-center justify-center text-center">
-        <Moon className="h-12 w-12 text-primary" />
-        <h1 className="text-2xl font-bold mt-4">Bem-vinda de volta!</h1>
-        <p className="text-muted-foreground mt-1">
-          {userProfile?.isBiometricEnabled 
-            ? 'Use a digital ou digite o PIN.' 
-            : 'Digite seu PIN para desbloquear.'}
-        </p>
+    <div className="relative flex h-dvh w-full flex-col items-center justify-center bg-moodlua-gradient text-foreground px-6 py-12 select-none overflow-hidden">
+      <div className="flex flex-col items-center justify-center text-center space-y-4 mb-4">
+        <div className="relative">
+          <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
+          <Moon className="h-14 w-14 text-primary relative z-10 drop-shadow-sm" />
+        </div>
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">Bem-vinda de volta!</h1>
+          <p className="text-muted-foreground font-medium">
+            {userProfile?.isBiometricEnabled 
+              ? 'Use a digital ou digite o PIN.' 
+              : 'Digite seu PIN para desbloquear.'}
+          </p>
+        </div>
       </div>
 
       <PinDots />
 
-      <div className="grid grid-cols-3 gap-4 w-full max-w-xs">
+      <div className="grid grid-cols-3 gap-6 w-full max-w-[280px]">
         {numpadKeys.map((key) => {
           if (key === 'fingerprint') {
             return (
               <Button
                 key="fingerprint"
                 variant="ghost"
-                className="h-20 w-20 text-2xl font-light rounded-full text-primary"
+                className={cn(
+                  "h-16 w-16 text-primary rounded-full transition-opacity",
+                  !userProfile?.isBiometricEnabled && "opacity-0 pointer-events-none"
+                )}
                 onClick={handleBiometricClick}
                 disabled={isAuthenticating}
               >
                 {isAuthenticating ? (
-                  <Loader2 className="h-8 w-8 animate-spin" />
+                  <Loader2 className="h-7 w-7 animate-spin" />
                 ) : (
-                  <Fingerprint className="h-8 w-8" />
+                  <Fingerprint className="h-7 w-7" />
                 )}
               </Button>
             );
@@ -166,11 +147,11 @@ export function LockScreen() {
               <Button
                 key="delete"
                 variant="ghost"
-                className="h-20 w-20 text-2xl font-light rounded-full text-muted-foreground"
+                className="h-16 w-16 text-muted-foreground rounded-full"
                 onClick={handleDeleteClick}
                 disabled={enteredPin.length === 0}
               >
-                <Delete />
+                <Delete className="h-7 w-7" />
               </Button>
             );
           }
@@ -178,7 +159,7 @@ export function LockScreen() {
             <Button
               key={key}
               variant="ghost"
-              className="h-20 w-20 text-3xl font-light rounded-full"
+              className="h-16 w-16 text-3xl font-light rounded-full hover:bg-primary/10 active:bg-primary/20"
               onClick={() => handleNumberClick(key)}
             >
               {key}
