@@ -47,5 +47,6 @@ export const OFFICIAL_LINKS = {
   DEFENSORIA: 'https://www.defensoria.sp.def.br/',
   MP_SP: 'https://www.mpsp.mp.br/',
   SAUDE_SP: 'https://www.saude.sp.gov.br/',
-  ASSISTENCIA_SOCIAL: 'https://www.desenvolvimentosocial.sp.gov.br/'
+  ASSISTENCIA_SOCIAL: 'https://www.desenvolvimentosocial.sp.gov.br/',
+  GITHUB_REPO: 'https://github.com/seu-usuario/mood-lua' // Link para você atualizar conforme necessário
 };
